@@ -22,15 +22,38 @@ def setup_logging(env: Union[Env, str]) -> None:
     normalized_env = _normalize_env(env)
     log_level = logging.DEBUG if normalized_env == Env.DEV else logging.INFO
 
+    # 1. Формат логов
+    log_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+
+    # 2. Настройка корневого (root) логгера
     logging.basicConfig(
         level=log_level,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        handlers=[
-            logging.StreamHandler(sys.stdout)  # Явно говорим выводить в поток
-        ],
+        format=log_format,
+        handlers=[logging.StreamHandler(sys.stdout)],
         force=True,
     )
 
-    # Можно сразу приглушить слишком болтливые библиотеки
-    access_level = logging.INFO if normalized_env == Env.DEV else logging.WARNING
-    logging.getLogger("uvicorn.access").setLevel(access_level)
+    # 3. Список логгеров, которые нужно "приручить"
+    # Uvicorn по умолчанию имеет свои настройки, которые затирают basicConfig
+    intercept_loggers = (
+        "uvicorn",
+        "uvicorn.error",
+        "uvicorn.access",
+        "fastapi",
+    )
+
+    for logger_name in intercept_loggers:
+        logger = logging.getLogger(logger_name)
+        # Удаляем все старые обработчики, которые мог воткнуть uvicorn
+        logger.handlers = []
+        # Настраиваем уровень
+        if logger_name == "uvicorn.access":
+            # В PROD скрываем лишний шум посещений, в DEV — оставляем INFO
+            logger.setLevel(logging.INFO if normalized_env == Env.DEV else logging.WARNING)
+        else:
+            logger.setLevel(log_level)
+
+        # Указываем, что логи должны уходить в родительский (root) логгер
+        logger.propagate = True
+
+    logging.info(f"Logging initialized in {normalized_env} mode with level {logging.getLevelName(log_level)}")
