@@ -12,6 +12,32 @@ from app.services.payment_state import apply_payment_status
 from app.services.twocheckout import TwoCOConfig, TwoCOService
 from app.services.twocheckout_ins_parser import map_to_internal_status, pick
 
+
+import logging
+from typing import Any
+
+log = logging.getLogger("2co.ipn")
+
+
+SENSITIVE_KEYS = {
+    "card", "cc", "cvv", "cvc", "security", "pass", "password", "secret", "key",
+    "signature", "hash", "authorization", "token",
+}
+
+
+def _sanitize(payload: dict[str, Any]) -> dict[str, Any]:
+    safe: dict[str, Any] = {}
+    for k, v in payload.items():
+        lk = k.lower()
+        if any(s in lk for s in SENSITIVE_KEYS):
+            safe[k] = "***"
+        else:
+            # чтобы логи не раздувались
+            s = str(v)
+            safe[k] = (s[:300] + "…") if len(s) > 300 else s
+    return safe
+
+
 router = APIRouter(prefix="/webhooks/2co", tags=["webhooks"])
 
 
@@ -44,13 +70,41 @@ async def ipn_probe_head():
 async def ins_listener(request: Request, session: AsyncSession = Depends(get_async_session)):
     # IPN прилетает как Form Data
     form = await request.form()
+
     items = list(form.multi_items())  # сохраняет порядок и дубли
+
+    client = getattr(request, "client", None)
+    client_host = getattr(client, "host", None)
+    ct = request.headers.get("content-type")
+    ua = request.headers.get("user-agent")
+
+    log.info(
+        "2CO IPN received",
+        extra={
+            "client_ip": client_host,
+            "content_type": ct,
+            "user_agent": ua,
+            "keys": sorted(set([k for k, _ in items])),
+            "payload_preview": _sanitize(dict(items)),
+        },
+    )
     payload = dict(items)
     cfg = _cfg()
 
     # 1. Проверка подписи (используем новый метод для IPN)
-    if not TwoCOService.verify_ipn_hash(cfg.secret_key, payload):
-        raise HTTPException(status_code=400, detail="Invalid IPN signature")
+    is_valid = TwoCOService.verify_ipn_hash(cfg.secret_key, payload)
+    log.info(
+        "2CO IPN signature checked",
+        extra={
+            "is_valid": is_valid,
+            "merchant_order_id": payload.get("REFNOEXT"),
+            "provider_refno": payload.get("REFNO") or payload.get("ORDERNO"),
+        },
+    )
+
+    if not is_valid:
+        # ВАЖНО: лучше 200, чтобы не словить ретраи/шторм, но при этом лог у тебя останется
+        return Response(status_code=200, content="OK", media_type="text/plain")
 
     # связь с нашим order:
     merchant_order_id = payload.get("REFNOEXT")
@@ -59,6 +113,16 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
     invoice_id = pick(payload, "invoice_id", "INVOICE_ID")
 
     internal_status, extracted = map_to_internal_status(payload)
+    log.info(
+        "2CO IPN parsed",
+        extra={
+            "merchant_order_id": merchant_order_id,
+            "provider_order_number": provider_order_number,
+            "invoice_id": invoice_id,
+            "internal_status": internal_status,
+            "extracted": extracted,
+        },
+    )
 
     # 1) Обновляем Order (если нашли)
     if merchant_order_id:
