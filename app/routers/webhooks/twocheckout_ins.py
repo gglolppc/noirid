@@ -90,7 +90,7 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
     cfg = _cfg()
 
     # 1. Проверка подписи (используем новый метод для IPN)
-    is_valid = TwoCOService.verify_ipn_hash_items(cfg.secret_key, items)
+    is_valid = TwoCOService.verify_ipn_signature_sha2_256(cfg.secret_key, items)
     log.info("2CO IPN summary: %s", {
         "is_valid": is_valid,
         "keys": sorted(payload.keys()),

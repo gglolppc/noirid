@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 
+
 def pick(d: dict, *keys: str) -> str | None:
     for k in keys:
         v = d.get(k)
@@ -31,7 +32,10 @@ def map_to_internal_status(payload: dict) -> tuple[str | None, dict]:
     is_pending_review = fr_norm in {"UNDER_REVIEW", "PENDING"}
     is_refund = "REFUND" in message_type or os_norm == "REFUND" or is_norm == "REFUNDED"
     is_canceled = os_norm in {"CANCELED", "CANCELLED"}
-    paid_words = {"PAID", "DEPOSITED", "COMPLETE", "COMPLETED", "PAYMENT_RECEIVED"}
+    paid_words = {
+        "PAID", "DEPOSITED", "COMPLETE", "COMPLETED", "PAYMENT_RECEIVED",
+        "PAYMENT_AUTHORIZED",
+    }
     is_paid = os_norm in paid_words or is_norm in paid_words
 
     internal = None
