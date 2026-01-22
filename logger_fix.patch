@@ -1,0 +1,51 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/app/core/logger_setup.py b/app/core/logger_setup.py
+index 807f5e3d305fbdde576a68acbf76d38d9c86cf84..34eb610dd30aa0185f258f4903a8aa6089f3f18c 100644
+--- a/app/core/logger_setup.py
++++ b/app/core/logger_setup.py
+@@ -1,24 +1,36 @@
+ import logging
+ import sys
+ from enum import Enum
++from typing import Union
+ 
+ 
+ class Env(str, Enum):
+     DEV = "dev"
+     PROD = "prod"
+ 
+ 
+-def setup_logging(env: Env) -> None:
+-    # Используем dictConfig для полного контроля
+-    log_level = logging.DEBUG if env == Env.DEV else logging.INFO
++def _normalize_env(env: Union[Env, str]) -> Env:
++    if isinstance(env, Env):
++        return env
++    try:
++        return Env(env)
++    except ValueError:
++        return Env.PROD
++
++
++def setup_logging(env: Union[Env, str]) -> None:
++    normalized_env = _normalize_env(env)
++    log_level = logging.DEBUG if normalized_env == Env.DEV else logging.INFO
+ 
+     logging.basicConfig(
+         level=log_level,
+         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+         handlers=[
+             logging.StreamHandler(sys.stdout)  # Явно говорим выводить в поток
+-        ]
++        ],
++        force=True,
+     )
+ 
+     # Можно сразу приглушить слишком болтливые библиотеки
+-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+\ No newline at end of file
++    access_level = logging.INFO if normalized_env == Env.DEV else logging.WARNING
++    logging.getLogger("uvicorn.access").setLevel(access_level)
+ 
+EOF
+)
