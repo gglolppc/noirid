@@ -78,31 +78,26 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
     ct = request.headers.get("content-type")
     ua = request.headers.get("user-agent")
 
-    log.info(
-        "2CO IPN received",
-        extra={
-            "client_ip": client_host,
-            "content_type": ct,
-            "user_agent": ua,
-            "keys": sorted(set([k for k, _ in items])),
-            "payload_preview": _sanitize(dict(items)),
-        },
-    )
+    log.info("2CO IPN received: %s", {
+        "client_ip": client_host,
+        "content_type": ct,
+        "user_agent": ua,
+        "keys": sorted(set([k for k, _ in items])),
+        "payload_preview": _sanitize(dict(items)),
+    })
+
     payload = dict(items)
     cfg = _cfg()
 
     # 1. Проверка подписи (используем новый метод для IPN)
     is_valid = TwoCOService.verify_ipn_hash_items(cfg.secret_key, items)
-    log.info(
-        "2CO IPN summary",
-        extra={
-            "is_valid": is_valid,
-            "keys": sorted(payload.keys()),
-            "refnoext": payload.get("REFNOEXT") or payload.get("merchant_order_id"),
-            "orderno": payload.get("ORDERNO") or payload.get("REFNO") or payload.get("sale_id"),
-            "status": payload.get("ORDERSTATUS") or payload.get("STATUS") or payload.get("INVOICE_STATUS"),
-        },
-    )
+    log.info("2CO IPN summary: %s", {
+        "is_valid": is_valid,
+        "keys": sorted(payload.keys()),
+        "refnoext": payload.get("REFNOEXT") or payload.get("merchant_order_id"),
+        "orderno": payload.get("ORDERNO") or payload.get("REFNO") or payload.get("sale_id"),
+        "status": payload.get("ORDERSTATUS") or payload.get("STATUS") or payload.get("INVOICE_STATUS"),
+    })
 
     if not is_valid:
         # ВАЖНО: лучше 200, чтобы не словить ретраи/шторм, но при этом лог у тебя останется
