@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}NOIRID{% endblock %}</title>
+
+  <!-- Tailwind CDN для старта (потом соберёшь нормально) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-full bg-zinc-950 text-zinc-100">
+  <header class="border-b border-white/10">
+    <div class="mx-auto max-w-6xl px-5 py-5 flex items-center justify-between">
+      <a href="/" class="font-black tracking-wide">NOIRID</a>
+      <nav class="flex gap-5 text-sm text-zinc-300">
+        <a class="hover:text-white" href="/catalog">Catalog</a>
+        <a class="hover:text-white" href="/cart">Cart</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-5 py-10">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="border-t border-white/10">
+    <div class="mx-auto max-w-6xl px-5 py-8 text-xs text-zinc-500">
+      © {{ request.url.hostname or "NOIRID" }} — dark, discreet, clean.
+    </div>
+  </footer>
+</body>
+</html>

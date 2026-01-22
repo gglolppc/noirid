@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Users — NOIRID{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black">Users</h1>
+      <p class="text-sm text-zinc-400">Showing {{ users|length }} of {{ total }} users</p>
+    </div>
+  </div>
+
+  <div class="mt-6 overflow-hidden rounded-xl border border-white/10">
+    <table class="w-full text-sm">
+      <thead class="bg-white/5 text-zinc-400">
+        <tr>
+          <th class="text-left px-4 py-3">ID</th>
+          <th class="text-left px-4 py-3">Username</th>
+          <th class="text-left px-4 py-3">Role</th>
+          <th class="text-left px-4 py-3">Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr class="border-t border-white/5">
+            <td class="px-4 py-3">{{ user.id }}</td>
+            <td class="px-4 py-3">{{ user.username }}</td>
+            <td class="px-4 py-3">{{ user.role }}</td>
+            <td class="px-4 py-3">{{ user.created_at }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td class="px-4 py-6 text-zinc-400" colspan="4">No users found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-6 flex items-center justify-between text-sm">
+    <div class="text-zinc-400">Page {{ page }} of {{ total_pages }}</div>
+    <div class="flex gap-2">
+      {% if page > 1 %}
+        <a class="px-3 py-1 rounded border border-white/10 hover:bg-white/10" href="/admin/users?page={{ page - 1 }}">Prev</a>
+      {% endif %}
+      {% if page < total_pages %}
+        <a class="px-3 py-1 rounded border border-white/10 hover:bg-white/10" href="/admin/users?page={{ page + 1 }}">Next</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin login — NOIRID</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-full bg-zinc-950 text-zinc-100 flex items-center justify-center px-5">
+  <div class="w-full max-w-md bg-zinc-900/60 border border-white/10 rounded-2xl p-8">
+    <h1 class="text-2xl font-black">Admin login</h1>
+    <p class="text-sm text-zinc-400 mt-1">Use your admin credentials.</p>
+    {% if error %}
+      <div class="mt-4 text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+        {{ error }}
+      </div>
+    {% endif %}
+    <form class="mt-6 space-y-4" method="post" action="/admin/login">
+      <div>
+        <label class="text-xs uppercase tracking-wider text-zinc-400">Username</label>
+        <input name="username" class="mt-1 w-full rounded-lg bg-zinc-950/60 border border-white/10 px-3 py-2" required />
+      </div>
+      <div>
+        <label class="text-xs uppercase tracking-wider text-zinc-400">Password</label>
+        <input type="password" name="password" class="mt-1 w-full rounded-lg bg-zinc-950/60 border border-white/10 px-3 py-2" required />
+      </div>
+      <button class="w-full rounded-lg bg-white text-zinc-900 font-semibold py-2 hover:bg-zinc-200" type="submit">
+        Sign in
+      </button>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Admin — NOIRID{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-full bg-zinc-950 text-zinc-100">
+  <div class="min-h-screen flex">
+    <aside class="w-64 bg-zinc-900/60 border-r border-white/10 p-6">
+      <div class="text-lg font-black tracking-wide">NOIRID Admin</div>
+      <nav class="mt-8 flex flex-col gap-2 text-sm">
+        <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path == '/admin' %}bg-white/10{% endif %}" href="/admin">
+          Dashboard
+        </a>
+        <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/orders') %}bg-white/10{% endif %}" href="/admin/orders">
+          Orders
+        </a>
+        <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/users') %}bg-white/10{% endif %}" href="/admin/users">
+          Users
+        </a>
+        <a class="px-3 py-2 rounded hover:bg-white/10" href="/admin/logout">
+          Logout
+        </a>
+      </nav>
+    </aside>
+    <main class="flex-1 p-10">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>
