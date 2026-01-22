@@ -57,3 +57,6 @@ def setup_logging(env: Union[Env, str]) -> None:
         logger.propagate = True
 
     logging.info(f"Logging initialized in {normalized_env} mode with level {logging.getLevelName(log_level)}")
+    logging.getLogger("python_multipart").setLevel(logging.INFO)
+    logging.getLogger("python_multipart.multipart").setLevel(logging.INFO)
+    logging.getLogger("uvicorn.access").setLevel(logging.INFO)

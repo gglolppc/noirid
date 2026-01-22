@@ -94,11 +94,13 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
     # 1. Проверка подписи (используем новый метод для IPN)
     is_valid = TwoCOService.verify_ipn_hash_items(cfg.secret_key, items)
     log.info(
-        "2CO IPN signature checked",
+        "2CO IPN summary",
         extra={
             "is_valid": is_valid,
-            "merchant_order_id": payload.get("REFNOEXT"),
-            "provider_refno": payload.get("REFNO") or payload.get("ORDERNO"),
+            "keys": sorted(payload.keys()),
+            "refnoext": payload.get("REFNOEXT") or payload.get("merchant_order_id"),
+            "orderno": payload.get("ORDERNO") or payload.get("REFNO") or payload.get("sale_id"),
+            "status": payload.get("ORDERSTATUS") or payload.get("STATUS") or payload.get("INVOICE_STATUS"),
         },
     )
 
