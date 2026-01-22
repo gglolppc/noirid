@@ -31,6 +31,15 @@ def _cfg() -> TwoCOConfig:
     )
 
 
+@router.get("/ipn", include_in_schema=False)
+async def ipn_probe():
+    # 2Checkout часто делает GET/HEAD, чтобы проверить доступность URL
+    return Response(content="OK", media_type="text/plain")
+
+@router.head("/ipn", include_in_schema=False)
+async def ipn_probe_head():
+    return Response(status_code=200)
+
 @router.post("/ipn", include_in_schema=False)
 async def ins_listener(request: Request, session: AsyncSession = Depends(get_async_session)):
     # IPN прилетает как Form Data
