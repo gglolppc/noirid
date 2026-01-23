@@ -79,30 +79,6 @@ class TwoCOService:
         calc = hmac.new(cfg.secret_key.encode("utf-8"), msg, algo).hexdigest().upper()
 
         return calc == received.upper()
-    #
-    # @staticmethod
-    # def verify_ipn_hash_items(secret_key: str, items: list[tuple[str, object]]) -> bool:
-    #     received_hash = None
-    #     hash_src = ""
-    #
-    #     for key, value in items:
-    #         if key == "HASH":
-    #             received_hash = str(value or "")
-    #             continue
-    #
-    #         val_str = "" if value is None else str(value)
-    #         hash_src += f"{len(val_str.encode('utf-8'))}{val_str}"
-    #
-    #     if not received_hash:
-    #         return False
-    #
-    #     calc = hmac.new(
-    #         secret_key.encode("utf-8"),
-    #         hash_src.encode("utf-8"),
-    #         hashlib.sha256
-    #     ).hexdigest()
-    #
-    #     return calc.lower() == received_hash.lower()
 
     @staticmethod
     def verify_ipn_signature_sha2_256(secret_key: str, items: list[tuple[str, object]]) -> bool:

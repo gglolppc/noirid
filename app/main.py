@@ -17,7 +17,7 @@ from app.routers.pages.checkout import router as checkout_page_router
 from app.routers.api.checkout import router as checkout_api_router
 from app.routers.api.payments_2co import router as payments_2co_router
 from app.routers.pages.payment_return import router as payment_return_router
-from app.routers.webhooks.twocheckout_ins import router as twocheckout_ins_router
+from app.routers.webhooks.twocheckout_ipn import router as twocheckout_ins_router
 from app.routers.api.orders import router as orders_api_router
 from app.routers.pages.order_status import router as order_status_page_router
 from app.routers.pages.admin import router as admin_router
