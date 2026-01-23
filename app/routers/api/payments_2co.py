@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from decimal import Decimal
 
@@ -18,6 +19,7 @@ router = APIRouter(prefix="/api/payments/2co", tags=["payments"])
 
 SESSION_ORDER_KEY = "order_id"
 load_dotenv()
+log = logging.getLogger("payments")
 
 def _two_co_cfg(request: Request) -> TwoCOConfig:
     merchant_code = os.getenv("TCO_MERCHANT_CODE", "")
@@ -66,6 +68,12 @@ async def start_2co_payment(
         currency=order.currency,
     )
     await PaymentRepo.create(session, payment)
+    log.info(
+        "Payment created | order_id=%s | amount=%s | provider=%s",
+        order.id,
+        payment.amount,
+        payment.provider,
+    )
 
     url = TwoCOService.build_hosted_checkout_url(
         cfg,
@@ -75,7 +83,16 @@ async def start_2co_payment(
         title="NOIRID order",
     )
 
+    previous_status = payment.status
     payment.status = "redirected"
     await session.commit()
+    if previous_status != payment.status:
+        log.info(
+            "Payment status changed | order_id=%s | payment_id=%s | from=%s | to=%s",
+            order.id,
+            payment.id,
+            previous_status,
+            payment.status,
+        )
 
     return {"redirect_url": url}

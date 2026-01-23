@@ -26,10 +26,12 @@ def setup_logging(env: Union[Env, str]) -> None:
     log_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 
     # 2. Настройка корневого (root) логгера
+    file_handler = logging.FileHandler("app.log", encoding="utf-8")
+    stream_handler = logging.StreamHandler(sys.stdout)
     logging.basicConfig(
         level=log_level,
         format=log_format,
-        handlers=[logging.StreamHandler(sys.stdout)],
+        handlers=[stream_handler, file_handler],
         force=True,
     )
 

@@ -110,6 +110,12 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
     invoice_id = pick(payload, "invoice_id", "INVOICE_ID")
 
     internal_status, extracted = map_to_internal_status(payload)
+    raw_status = payload.get("ORDERSTATUS") or payload.get("STATUS") or payload.get("INVOICE_STATUS")
+    log.info(
+        "IPN received | order_id=%s | status=%s",
+        merchant_order_id or "-",
+        raw_status or "-",
+    )
     log.info(
         "2CO IPN parsed",
         extra={
@@ -125,6 +131,8 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
     if merchant_order_id:
         order = await CheckoutRepo.get_order_any(session, str(merchant_order_id))
         if order:
+            previous_order_status = order.status
+            previous_payment_status = order.payment_status
             if internal_status:
                 order.payment_status = apply_payment_status(order.payment_status, internal_status)
 
@@ -135,6 +143,22 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
                     order.status = "refunded"
                 if order.payment_status == "canceled" and order.status != "canceled":
                     order.status = "canceled"
+            if previous_order_status != order.status:
+                log.info(
+                    "Order status changed | order_id=%s | from=%s | to=%s",
+                    order.id,
+                    previous_order_status,
+                    order.status,
+                )
+            if previous_payment_status != order.payment_status:
+                log.info(
+                    "Order payment status changed | order_id=%s | from=%s | to=%s",
+                    order.id,
+                    previous_payment_status,
+                    order.payment_status,
+                )
+                if order.payment_status == "paid":
+                    log.info("Payment completed | order_id=%s", order.id)
 
     # 2) Обновляем Payment (если найдём)
     payment = None
@@ -143,6 +167,7 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
     if not payment and merchant_order_id:
         payment = await PaymentRepo.get_latest_for_order(session, str(merchant_order_id))
     if payment:
+        previous_payment_status = payment.status
         if internal_status:
             payment.status = internal_status
         if provider_order_number:
@@ -153,6 +178,14 @@ async def ins_listener(request: Request, session: AsyncSession = Depends(get_asy
         payment.provider_invoice_status = extracted.get("invoice_status")
         payment.provider_approve_status = extracted.get("approve_status")
         payment.raw_payload = payload
+        if previous_payment_status != payment.status:
+            log.info(
+                "Payment status changed | order_id=%s | payment_id=%s | from=%s | to=%s",
+                payment.order_id,
+                payment.id,
+                previous_payment_status,
+                payment.status,
+            )
 
     await session.commit()
     response_content = TwoCOService.calculate_ipn_response(cfg.secret_key, payload)

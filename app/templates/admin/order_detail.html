@@ -55,6 +55,10 @@
           <dt class="text-zinc-400">Created at</dt>
           <dd class="font-semibold">{{ order.created_at }}</dd>
         </div>
+        <div>
+          <dt class="text-zinc-400">Updated at</dt>
+          <dd class="font-semibold">{{ order.updated_at }}</dd>
+        </div>
       </dl>
     </div>
 
@@ -72,6 +76,72 @@
           <div class="text-sm text-zinc-400">No items.</div>
         {% endfor %}
       </div>
+    </div>
+  </div>
+
+  <div class="mt-6 rounded-xl border border-white/10 p-5">
+    <h2 class="text-sm uppercase tracking-wider text-zinc-400">Payments</h2>
+    <div class="mt-4 space-y-3 text-sm">
+      {% for payment in payments %}
+        <div class="rounded-lg border border-white/5 p-4">
+          <div class="grid gap-2 md:grid-cols-2">
+            <div>
+              <div class="text-zinc-400">ID</div>
+              <div class="font-semibold">{{ payment.id }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Order ID</div>
+              <div class="font-semibold">{{ payment.order_id }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Provider</div>
+              <div class="font-semibold">{{ payment.provider }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Status</div>
+              <div class="font-semibold">{{ payment.status }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Amount</div>
+              <div class="font-semibold">{{ payment.amount }} {{ payment.currency }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Provider order #</div>
+              <div class="font-semibold">{{ payment.provider_order_number or "—" }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Provider invoice ID</div>
+              <div class="font-semibold">{{ payment.provider_invoice_id or "—" }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Created at</div>
+              <div class="font-semibold">{{ payment.created_at }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Message type</div>
+              <div class="font-semibold">{{ payment.provider_message_type or "—" }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Order status</div>
+              <div class="font-semibold">{{ payment.provider_order_status or "—" }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Invoice status</div>
+              <div class="font-semibold">{{ payment.provider_invoice_status or "—" }}</div>
+            </div>
+            <div>
+              <div class="text-zinc-400">Approve status</div>
+              <div class="font-semibold">{{ payment.provider_approve_status or "—" }}</div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="text-zinc-400">Raw payload</div>
+            <pre class="mt-1 whitespace-pre-wrap text-xs text-zinc-300">{{ payment.raw_payload or {} }}</pre>
+          </div>
+        </div>
+      {% else %}
+        <div class="text-sm text-zinc-400">No payments yet.</div>
+      {% endfor %}
     </div>
   </div>
 {% endblock %}

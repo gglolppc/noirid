@@ -39,13 +39,10 @@ document.getElementById("checkoutForm")?.addEventListener("submit", async (e) =>
   };
 
   try {
-    const res = await postJSON("/api/checkout/create-order", payload);
+    await postJSON("/api/checkout/create-order", payload);
     const pay = await postJSON("/api/payments/2co/start", {});
-    window.location.href = pay.redirect_url;
-
-    // День 5: тут будет create-payment и редирект на провайдера
-    alert(`Order locked for payment: ${res.order_id} (status=${res.status})`);
-    window.location.href = "/cart"; // временно
+    window.location.assign(pay.redirect_url);
+    return;
   } catch (err) {
     showError(err.message || "Failed");
   } finally {

@@ -17,6 +17,9 @@
         <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/orders') %}bg-white/10{% endif %}" href="/admin/orders">
           Orders
         </a>
+        <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/payments') %}bg-white/10{% endif %}" href="/admin/payments">
+          Payments
+        </a>
         <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/users') %}bg-white/10{% endif %}" href="/admin/users">
           Users
         </a>

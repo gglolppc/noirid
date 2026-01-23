@@ -10,6 +10,7 @@ from app.core.templates import templates
 from app.db.models.user import User
 from app.db.session import get_async_session
 from app.repos.orders import OrdersRepo
+from app.repos.payments import PaymentRepo
 from app.repos.users import UsersRepo
 from app.services.auth import verify_password
 
@@ -112,9 +113,10 @@ async def admin_order_detail(
     order = await OrdersRepo.get_by_id(session, order_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+    payments = await PaymentRepo.list_for_order(session, order_id)
     return templates.TemplateResponse(
         "admin/order_detail.html",
-        {"request": request, "order": order, "admin_user": admin_user},
+        {"request": request, "order": order, "payments": payments, "admin_user": admin_user},
     )
 
 
@@ -135,6 +137,31 @@ async def admin_users(
         {
             "request": request,
             "users": users,
+            "page": page,
+            "total_pages": total_pages,
+            "total": total,
+            "admin_user": admin_user,
+        },
+    )
+
+
+@router.get("/payments", include_in_schema=False)
+async def admin_payments(
+    request: Request,
+    page: int = 1,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    page = max(page, 1)
+    total = await PaymentRepo.count(session)
+    total_pages = max(ceil(total / PER_PAGE), 1)
+    page = min(page, total_pages)
+    payments = await PaymentRepo.list_paginated(session, offset=(page - 1) * PER_PAGE, limit=PER_PAGE)
+    return templates.TemplateResponse(
+        "admin/payments.html",
+        {
+            "request": request,
+            "payments": payments,
             "page": page,
             "total_pages": total_pages,
             "total": total,

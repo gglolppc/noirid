@@ -39,6 +39,11 @@ class Order(Base):
     total: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
     items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order",
