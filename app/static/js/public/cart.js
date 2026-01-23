@@ -28,7 +28,12 @@ function renderCart(cart) {
   wrap.classList.remove("hidden");
 
   document.getElementById("subtotal").textContent = fmt(cart.subtotal);
+  document.getElementById("shippingFee").textContent = fmt(cart.shipping_fee || 0);
+  document.getElementById("total").textContent = fmt(cart.total || 0);
   document.getElementById("currency").textContent = cart.currency || "USD";
+  document.querySelectorAll(".currency").forEach((el) => {
+    el.textContent = cart.currency || "USD";
+  });
 
   itemsEl.innerHTML = "";
   cart.items.forEach((it) => {
@@ -39,6 +44,7 @@ function renderCart(cart) {
       <div class="min-w-0">
         <div class="font-semibold truncate">${it.title}</div>
         <div class="text-xs text-zinc-500">Item #${it.id}</div>
+        ${it.personalization && it.personalization.text ? `<div class="text-xs text-zinc-500">Personalization: ${it.personalization.text}</div>` : ""}
         <div class="mt-2 text-sm text-zinc-300">${fmt(it.unit_price)} × ${it.qty} = <span class="text-zinc-100 font-semibold">${fmt(it.line_total)}</span></div>
       </div>
 

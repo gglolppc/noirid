@@ -16,11 +16,24 @@ async def product_detail(slug: str, request: Request, session: AsyncSession = De
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    # дефолтный вариант: первый активный
     variants = [v for v in product.variants if v.is_active]
     default_variant = variants[0] if variants else None
+    variants_payload = [
+        {
+            "id": v.id,
+            "brand": v.device_brand,
+            "model": v.device_model,
+            "price_delta": float(v.price_delta or 0),
+        }
+        for v in variants
+    ]
 
     return templates.TemplateResponse(
         "pages/product.html",
-        {"request": request, "product": product, "default_variant": default_variant},
+        {
+            "request": request,
+            "product": product,
+            "default_variant": default_variant,
+            "variants_payload": variants_payload,
+        },
     )

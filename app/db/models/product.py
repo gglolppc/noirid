@@ -78,7 +78,7 @@ class Variant(Base):
     product_id: Mapped[int] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE"),
         index=True,
-        nullable=False,
+        nullable=True,
     )
 
     sku: Mapped[str] = mapped_column(String(64), unique=True, index=True)

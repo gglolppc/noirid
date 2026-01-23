@@ -16,5 +16,6 @@ class Settings(BaseSettings):
     tco_secret_word: str
     tco_secret_key: str
     tco_demo: str = "1"
+    standard_shipping_fee_usd: str = "4.99"
 
 settings = Settings()

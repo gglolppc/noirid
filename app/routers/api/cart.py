@@ -10,6 +10,7 @@ from app.repos.cart import CartRepo
 from app.repos.checkout import CheckoutRepo
 from app.schemas.cart import CartAddIn, CartOut, CartRemoveIn, CartUpdateQtyIn
 from app.services.cart import CartService
+from app.core.config import settings
 from app.services.pricing import PricingService
 
 router = APIRouter(prefix="/api/cart", tags=["cart"])
@@ -74,10 +75,12 @@ def _cart_to_out(order) -> CartOut:
                 "personalization": it.personalization_json or {},
             }
         )
+    shipping_fee = Decimal(str(settings.standard_shipping_fee_usd or "0.00"))
     return CartOut(
         order_id=order.id,
         currency=order.currency,
         subtotal=order.subtotal,
+        shipping_fee=shipping_fee,
         total=order.total,
         items=items_out,
     )
@@ -113,11 +116,16 @@ async def add_to_cart(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    variant = None
-    if payload.variant_id is not None:
-        variant = await CartRepo.load_variant(session, payload.variant_id)
-        if not variant:
-            raise HTTPException(status_code=404, detail="Variant not found")
+    if payload.variant_id is None:
+        raise HTTPException(status_code=400, detail="Variant is required")
+
+    variant = await CartRepo.load_variant(session, payload.variant_id)
+    if not variant:
+        raise HTTPException(status_code=404, detail="Variant not found")
+
+    personalization_text = (payload.personalization or {}).get("text", "")
+    if not str(personalization_text).strip():
+        raise HTTPException(status_code=400, detail="Personalization is required")
 
     unit_price = PricingService.calc_unit_price(product, variant)
 
@@ -127,7 +135,7 @@ async def add_to_cart(
         product=product,
         variant=variant,
         qty=payload.qty,
-        personalization=payload.personalization,
+        personalization={"text": str(personalization_text).strip()},
         unit_price=unit_price,
     )
 

@@ -36,5 +36,6 @@ class CartOut(BaseModel):
     order_id: str
     currency: str
     subtotal: Decimal
+    shipping_fee: Decimal
     total: Decimal
     items: list[CartItemOut]

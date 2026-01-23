@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Support · NOIRID{% endblock %}
+
+{% block content %}
+  <div class="max-w-2xl">
+    <h1 class="text-2xl font-black">Support</h1>
+    <p class="mt-2 text-sm text-zinc-400">Leave a question and we will reply within 24 hours.</p>
+
+    {% if success %}
+      <div class="mt-4 rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-4 text-sm text-emerald-200">
+        Thanks! Your question has been received.
+      </div>
+    {% endif %}
+
+    <form method="post" class="mt-6 space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6">
+      <div>
+        <label class="text-sm text-zinc-400">Name</label>
+        <input name="name" type="text" required
+               class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+               placeholder="Your name">
+      </div>
+      <div>
+        <label class="text-sm text-zinc-400">Email</label>
+        <input name="email" type="email" required
+               class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+               placeholder="you@email.com">
+      </div>
+      <div>
+        <label class="text-sm text-zinc-400">Order ID (optional)</label>
+        <input name="order_id" type="text"
+               class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+               placeholder="Order ID">
+      </div>
+      <div>
+        <label class="text-sm text-zinc-400">Question</label>
+        <textarea name="question" rows="4" required
+                  class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+                  placeholder="How can we help?"></textarea>
+      </div>
+      <button type="submit" class="rounded-2xl bg-white text-zinc-950 px-5 py-3 font-semibold">
+        Send question
+      </button>
+    </form>
+  </div>
+{% endblock %}

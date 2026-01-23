@@ -54,20 +54,24 @@ class CartRepo:
         personalization: dict[str, Any],
         unit_price: Decimal,
     ) -> None:
+        variant_label = None
+        if variant:
+            variant_label = f"{variant.device_brand} {variant.device_model}"
+        title_snapshot = product.title if not variant_label else f"{product.title} — {variant_label}"
         # если item с таким product+variant+personalization уже есть — увеличим qty
         for it in order.items:
             if it.product_id == product.id and it.variant_id == (variant.id if variant else None) and (
                     it.personalization_json or {}) == (personalization or {}):
                 it.qty += qty
                 it.unit_price = unit_price
-                it.title_snapshot = product.title
+                it.title_snapshot = title_snapshot
                 return
 
         item = OrderItem(
             order_id=order.id,
             product_id=product.id,
             variant_id=(variant.id if variant else None),
-            title_snapshot=product.title,
+            title_snapshot=title_snapshot,
             unit_price=unit_price,
             qty=qty,
             personalization_json=personalization or {},

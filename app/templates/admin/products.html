@@ -1,0 +1,156 @@
+{% extends "admin/base.html" %}
+{% block title %}Products · Admin — NOIRID{% endblock %}
+
+{% block content %}
+  <div class="flex items-end justify-between">
+    <div>
+      <h1 class="text-2xl font-black">Catalog management</h1>
+      <p class="mt-1 text-sm text-zinc-400">Add products, variants, and product images.</p>
+    </div>
+  </div>
+
+  <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+      <h2 class="font-bold">Add product</h2>
+      <form method="post" action="/admin/products/create-product" class="mt-4 space-y-3 text-sm">
+        <div>
+          <label class="text-xs text-zinc-400">Title</label>
+          <input name="title" required class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400">Slug</label>
+          <input name="slug" required class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400">Description</label>
+          <textarea name="description" rows="3" class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-zinc-400">Base price</label>
+            <input name="base_price" required value="0.00" class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+          </div>
+          <div>
+            <label class="text-xs text-zinc-400">Currency</label>
+            <input name="currency" required value="USD" class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400">Assign images</label>
+          <select name="image_ids" multiple class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2">
+            {% for image in images %}
+              <option value="{{ image.id }}">{{ image.url }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <label class="flex items-center gap-2 text-xs text-zinc-300">
+          <input type="checkbox" name="is_active" value="true" class="rounded border-white/20 bg-zinc-950" />
+          Active
+        </label>
+        <button type="submit" class="rounded-xl bg-white text-zinc-950 px-4 py-2 font-semibold">Create product</button>
+      </form>
+    </div>
+
+    <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+      <h2 class="font-bold">Add variant</h2>
+      <form method="post" action="/admin/products/create-variant" class="mt-4 space-y-3 text-sm">
+        <div>
+          <label class="text-xs text-zinc-400">Product</label>
+          <select name="product_id" required class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2">
+            {% for product in products %}
+              <option value="{{ product.id }}">{{ product.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400">SKU</label>
+          <input name="sku" required class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-zinc-400">Brand</label>
+            <input name="device_brand" required class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+          </div>
+          <div>
+            <label class="text-xs text-zinc-400">Model</label>
+            <input name="device_model" required class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-zinc-400">Price delta</label>
+            <input name="price_delta" value="0.00" class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+          </div>
+          <div>
+            <label class="text-xs text-zinc-400">Stock qty</label>
+            <input name="stock_qty" type="number" class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+          </div>
+        </div>
+        <label class="flex items-center gap-2 text-xs text-zinc-300">
+          <input type="checkbox" name="is_active" value="true" class="rounded border-white/20 bg-zinc-950" />
+          Active
+        </label>
+        <button type="submit" class="rounded-xl bg-white text-zinc-950 px-4 py-2 font-semibold">Create variant</button>
+      </form>
+    </div>
+
+    <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+      <h2 class="font-bold">Add product image</h2>
+      <form method="post" action="/admin/products/create-image" class="mt-4 space-y-3 text-sm">
+        <div>
+          <label class="text-xs text-zinc-400">Image URL</label>
+          <input name="url" required class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400">Sort</label>
+          <input name="sort" type="number" value="0" class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400">Assign to product (optional)</label>
+          <select name="product_id" class="mt-1 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2">
+            <option value="">Unassigned</option>
+            {% for product in products %}
+              <option value="{{ product.id }}">{{ product.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="rounded-xl bg-white text-zinc-950 px-4 py-2 font-semibold">Create image</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+      <h2 class="font-bold">Recent products</h2>
+      <div class="mt-4 space-y-3 text-sm">
+        {% for product in products[:5] %}
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-semibold">{{ product.title }}</div>
+              <div class="text-xs text-zinc-500">Slug: {{ product.slug }}</div>
+            </div>
+            <div class="text-xs text-zinc-400">{{ product.currency }} {{ "%.2f"|format(product.base_price) }}</div>
+          </div>
+        {% else %}
+          <div class="text-sm text-zinc-400">No products yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+      <h2 class="font-bold">Recent variants</h2>
+      <div class="mt-4 space-y-3 text-sm">
+        {% for variant in variants[:5] %}
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-semibold">{{ variant.device_brand }} {{ variant.device_model }}</div>
+              <div class="text-xs text-zinc-500">SKU: {{ variant.sku }}</div>
+            </div>
+            <div class="text-xs text-zinc-400">Product #{{ variant.product_id }}</div>
+          </div>
+        {% else %}
+          <div class="text-sm text-zinc-400">No variants yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -2,15 +2,20 @@ from __future__ import annotations
 
 from math import ceil
 
+from decimal import Decimal
+
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.templates import templates
+from app.db.models.product import Product, ProductImage, Variant
 from app.db.models.user import User
 from app.db.session import get_async_session
 from app.repos.orders import OrdersRepo
 from app.repos.payments import PaymentRepo
+from app.repos.support import SupportRepo
 from app.repos.users import UsersRepo
 from app.services.auth import verify_password
 
@@ -168,3 +173,131 @@ async def admin_payments(
             "admin_user": admin_user,
         },
     )
+
+
+@router.get("/questions", include_in_schema=False)
+async def admin_questions(
+    request: Request,
+    page: int = 1,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    page = max(page, 1)
+    total = await SupportRepo.count(session)
+    total_pages = max(ceil(total / PER_PAGE), 1)
+    page = min(page, total_pages)
+    questions = await SupportRepo.list_paginated(session, offset=(page - 1) * PER_PAGE, limit=PER_PAGE)
+    return templates.TemplateResponse(
+        "admin/questions.html",
+        {
+            "request": request,
+            "questions": questions,
+            "page": page,
+            "total_pages": total_pages,
+            "total": total,
+            "admin_user": admin_user,
+        },
+    )
+
+
+@router.get("/products", include_in_schema=False)
+async def admin_products(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    products = (await session.execute(select(Product).order_by(Product.id.desc()))).scalars().all()
+    images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
+    variants = (await session.execute(select(Variant).order_by(Variant.id.desc()))).scalars().all()
+    return templates.TemplateResponse(
+        "admin/products.html",
+        {
+            "request": request,
+            "products": products,
+            "images": images,
+            "variants": variants,
+            "admin_user": admin_user,
+        },
+    )
+
+
+@router.post("/products/create-product", include_in_schema=False)
+async def admin_create_product(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    title: str = Form(...),
+    slug: str = Form(...),
+    description: str | None = Form(default=None),
+    base_price: str = Form(...),
+    currency: str = Form(default="USD"),
+    is_active: bool = Form(default=False),
+    image_ids: list[int] = Form(default=[]),
+):
+    product = Product(
+        title=title.strip(),
+        slug=slug.strip(),
+        description=description.strip() if description else None,
+        base_price=Decimal(base_price),
+        currency=currency.strip().upper(),
+        is_active=is_active,
+    )
+    session.add(product)
+    await session.flush()
+
+    if image_ids:
+        stmt = select(ProductImage).where(ProductImage.id.in_(image_ids))
+        images = (await session.execute(stmt)).scalars().all()
+        for image in images:
+            image.product_id = product.id
+
+    await session.commit()
+    return RedirectResponse("/admin/products", status_code=303)
+
+
+@router.post("/products/create-variant", include_in_schema=False)
+async def admin_create_variant(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    product_id: int = Form(...),
+    sku: str = Form(...),
+    device_brand: str = Form(...),
+    device_model: str = Form(...),
+    price_delta: str = Form(default="0.00"),
+    stock_qty: str | None = Form(default=None),
+    is_active: bool = Form(default=False),
+):
+    stock_value = int(stock_qty) if stock_qty not in (None, "") else None
+    variant = Variant(
+        product_id=product_id,
+        sku=sku.strip(),
+        device_brand=device_brand.strip(),
+        device_model=device_model.strip(),
+        price_delta=Decimal(price_delta),
+        stock_qty=stock_value,
+        is_active=is_active,
+    )
+    session.add(variant)
+    await session.commit()
+    return RedirectResponse("/admin/products", status_code=303)
+
+
+@router.post("/products/create-image", include_in_schema=False)
+async def admin_create_image(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    url: str = Form(...),
+    sort: int = Form(default=0),
+    product_id: str | None = Form(default=None),
+):
+    product_value = int(product_id) if product_id not in (None, "") else None
+    image = ProductImage(
+        url=url.strip(),
+        sort=sort,
+        product_id=product_value,
+    )
+    session.add(image)
+    await session.commit()
+    return RedirectResponse("/admin/products", status_code=303)

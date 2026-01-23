@@ -20,6 +20,7 @@ from app.routers.pages.payment_return import router as payment_return_router
 from app.routers.webhooks.twocheckout_ipn import router as twocheckout_ins_router
 from app.routers.api.orders import router as orders_api_router
 from app.routers.pages.order_status import router as order_status_page_router
+from app.routers.pages.info import router as info_page_router
 from app.routers.pages.admin import router as admin_router
 
 
@@ -53,6 +54,7 @@ app.include_router(payment_return_router)
 app.include_router(twocheckout_ins_router)
 app.include_router(orders_api_router)
 app.include_router(order_status_page_router)
+app.include_router(info_page_router)
 app.include_router(admin_router)
 
 @app.get("/health", include_in_schema=False)
