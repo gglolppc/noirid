@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.templates import templates
 from app.db.session import get_async_session
 from app.repos.products import ProductsRepo
+from app.repos.variants import VariantsRepo
 
 router = APIRouter(prefix="/p", tags=["pages"])
 
@@ -16,8 +17,7 @@ async def product_detail(slug: str, request: Request, session: AsyncSession = De
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    variants = [v for v in product.variants if v.is_active]
-    default_variant = variants[0] if variants else None
+    variants = await VariantsRepo.list_active(session)
     variants_payload = [
         {
             "id": v.id,
@@ -33,7 +33,6 @@ async def product_detail(slug: str, request: Request, session: AsyncSession = De
         {
             "request": request,
             "product": product,
-            "default_variant": default_variant,
             "variants_payload": variants_payload,
         },
     )

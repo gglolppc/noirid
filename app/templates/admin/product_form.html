@@ -1,0 +1,67 @@
+{% extends "admin/base.html" %}
+{% block title %}{% if product %}Edit product{% else %}New product{% endif %} · Admin — NOIRID{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black">{% if product %}Edit product{% else %}New product{% endif %}</h1>
+      <p class="mt-1 text-sm text-zinc-400">Variants apply to all products automatically.</p>
+    </div>
+    <a href="/admin/products" class="text-sm text-zinc-300 hover:text-white">Back to products</a>
+  </div>
+
+  <form method="post" action="{{ action_url }}" class="mt-6 max-w-3xl space-y-5 rounded-3xl border border-white/10 bg-white/5 p-6">
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+      <div>
+        <label class="text-xs text-zinc-400">Title</label>
+        <input name="title" required value="{{ product.title if product else '' }}"
+               class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="text-xs text-zinc-400">Slug</label>
+        <input name="slug" required value="{{ product.slug if product else '' }}"
+               class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2 text-sm" />
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs text-zinc-400">Description</label>
+      <textarea name="description" rows="4"
+                class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2 text-sm">{{ product.description if product else '' }}</textarea>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+      <div>
+        <label class="text-xs text-zinc-400">Base price</label>
+        <input name="base_price" required value="{{ '%.2f'|format(product.base_price) if product else '0.00' }}"
+               class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="text-xs text-zinc-400">Currency</label>
+        <input name="currency" required value="{{ product.currency if product else 'USD' }}"
+               class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2 text-sm" />
+      </div>
+      <div class="flex items-center gap-2 pt-6 text-sm text-zinc-300">
+        <input type="checkbox" name="is_active" value="true" class="rounded border-white/20 bg-zinc-950"
+               {% if product and product.is_active %}checked{% endif %} />
+        Active
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs text-zinc-400">Images</label>
+      <select name="image_ids" multiple class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2 text-sm">
+        {% for image in images %}
+          <option value="{{ image.id }}" {% if product and image.product_id == product.id %}selected{% endif %}>
+            {{ image.url }}
+          </option>
+        {% endfor %}
+      </select>
+      <p class="mt-2 text-xs text-zinc-500">Select any uploaded images to attach to this product.</p>
+    </div>
+
+    <button type="submit" class="rounded-xl bg-white text-zinc-950 px-4 py-2 text-sm font-semibold">
+      {% if product %}Save changes{% else %}Create product{% endif %}
+    </button>
+  </form>
+{% endblock %}

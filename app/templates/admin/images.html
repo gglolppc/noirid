@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+{% block title %}Images · Admin — NOIRID{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black">Product images</h1>
+      <p class="mt-1 text-sm text-zinc-400">Upload images and attach them to products.</p>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
+    <form method="post" action="/admin/images" class="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-5 text-sm">
+      <div>
+        <label class="text-xs text-zinc-400">Image URL</label>
+        <input name="url" required class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+      </div>
+      <div>
+        <label class="text-xs text-zinc-400">Sort</label>
+        <input name="sort" type="number" value="0" class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+      </div>
+      <div>
+        <label class="text-xs text-zinc-400">Assign to product</label>
+        <select name="product_id" class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2">
+          <option value="">Unassigned</option>
+          {% for product in products %}
+            <option value="{{ product.id }}">{{ product.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="rounded-xl bg-white text-zinc-950 px-4 py-2 font-semibold">Add image</button>
+    </form>
+
+    <div class="overflow-hidden rounded-3xl border border-white/10">
+      <table class="min-w-full text-sm">
+        <thead class="bg-white/5 text-zinc-400">
+          <tr>
+            <th class="px-5 py-3 text-left font-semibold">Image</th>
+            <th class="px-5 py-3 text-left font-semibold">Sort</th>
+            <th class="px-5 py-3 text-left font-semibold">Assigned product</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for image in images %}
+            <tr class="border-t border-white/10">
+              <td class="px-5 py-3 text-zinc-300">{{ image.url }}</td>
+              <td class="px-5 py-3 text-zinc-400">{{ image.sort }}</td>
+              <td class="px-5 py-3 text-zinc-400">
+                {% set product = (products | selectattr("id", "equalto", image.product_id) | list | first) %}
+                {{ product.title if product else "Unassigned" }}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3" class="px-5 py-6 text-center text-sm text-zinc-400">No images yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

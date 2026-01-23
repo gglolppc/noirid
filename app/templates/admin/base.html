@@ -26,8 +26,15 @@
         <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/questions') %}bg-white/10{% endif %}" href="/admin/questions">
           Questions
         </a>
+        <div class="mt-4 text-xs uppercase tracking-[0.2em] text-zinc-500">Catalog</div>
         <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/products') %}bg-white/10{% endif %}" href="/admin/products">
           Products
+        </a>
+        <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/variants') %}bg-white/10{% endif %}" href="/admin/variants">
+          Variants
+        </a>
+        <a class="px-3 py-2 rounded hover:bg-white/10 {% if request.url.path.startswith('/admin/images') %}bg-white/10{% endif %}" href="/admin/images">
+          Images
         </a>
         <a class="px-3 py-2 rounded hover:bg-white/10" href="/admin/logout">
           Logout

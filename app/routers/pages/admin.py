@@ -201,28 +201,39 @@ async def admin_questions(
 
 
 @router.get("/products", include_in_schema=False)
-async def admin_products(
+async def admin_products_list(
     request: Request,
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
 ):
     products = (await session.execute(select(Product).order_by(Product.id.desc()))).scalars().all()
-    images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
-    variants = (await session.execute(select(Variant).order_by(Variant.id.desc()))).scalars().all()
     return templates.TemplateResponse(
-        "admin/products.html",
+        "admin/products_list.html",
+        {"request": request, "products": products, "admin_user": admin_user},
+    )
+
+
+@router.get("/products/new", include_in_schema=False)
+async def admin_product_new(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
+    return templates.TemplateResponse(
+        "admin/product_form.html",
         {
             "request": request,
-            "products": products,
+            "product": None,
             "images": images,
-            "variants": variants,
+            "action_url": "/admin/products/new",
             "admin_user": admin_user,
         },
     )
 
 
-@router.post("/products/create-product", include_in_schema=False)
-async def admin_create_product(
+@router.post("/products/new", include_in_schema=False)
+async def admin_product_create(
     request: Request,
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
@@ -255,12 +266,88 @@ async def admin_create_product(
     return RedirectResponse("/admin/products", status_code=303)
 
 
-@router.post("/products/create-variant", include_in_schema=False)
+@router.get("/products/{product_id}/edit", include_in_schema=False)
+async def admin_product_edit(
+    request: Request,
+    product_id: int,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    product = (await session.execute(select(Product).where(Product.id == product_id))).scalars().first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
+    return templates.TemplateResponse(
+        "admin/product_form.html",
+        {
+            "request": request,
+            "product": product,
+            "images": images,
+            "action_url": f"/admin/products/{product_id}/edit",
+            "admin_user": admin_user,
+        },
+    )
+
+
+@router.post("/products/{product_id}/edit", include_in_schema=False)
+async def admin_product_update(
+    request: Request,
+    product_id: int,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    title: str = Form(...),
+    slug: str = Form(...),
+    description: str | None = Form(default=None),
+    base_price: str = Form(...),
+    currency: str = Form(default="USD"),
+    is_active: bool = Form(default=False),
+    image_ids: list[int] = Form(default=[]),
+):
+    product = (await session.execute(select(Product).where(Product.id == product_id))).scalars().first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    product.title = title.strip()
+    product.slug = slug.strip()
+    product.description = description.strip() if description else None
+    product.base_price = Decimal(base_price)
+    product.currency = currency.strip().upper()
+    product.is_active = is_active
+
+    existing_images = (
+        await session.execute(select(ProductImage).where(ProductImage.product_id == product.id))
+    ).scalars().all()
+    for image in existing_images:
+        image.product_id = None
+
+    if image_ids:
+        stmt = select(ProductImage).where(ProductImage.id.in_(image_ids))
+        images = (await session.execute(stmt)).scalars().all()
+        for image in images:
+            image.product_id = product.id
+
+    await session.commit()
+    return RedirectResponse("/admin/products", status_code=303)
+
+
+@router.get("/variants", include_in_schema=False)
+async def admin_variants(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    variants = (await session.execute(select(Variant).order_by(Variant.id.desc()))).scalars().all()
+    return templates.TemplateResponse(
+        "admin/variants.html",
+        {"request": request, "variants": variants, "admin_user": admin_user},
+    )
+
+
+@router.post("/variants", include_in_schema=False)
 async def admin_create_variant(
     request: Request,
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
-    product_id: int = Form(...),
     sku: str = Form(...),
     device_brand: str = Form(...),
     device_model: str = Form(...),
@@ -270,7 +357,7 @@ async def admin_create_variant(
 ):
     stock_value = int(stock_qty) if stock_qty not in (None, "") else None
     variant = Variant(
-        product_id=product_id,
+        product_id=None,
         sku=sku.strip(),
         device_brand=device_brand.strip(),
         device_model=device_model.strip(),
@@ -280,10 +367,24 @@ async def admin_create_variant(
     )
     session.add(variant)
     await session.commit()
-    return RedirectResponse("/admin/products", status_code=303)
+    return RedirectResponse("/admin/variants", status_code=303)
 
 
-@router.post("/products/create-image", include_in_schema=False)
+@router.get("/images", include_in_schema=False)
+async def admin_images(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
+    products = (await session.execute(select(Product).order_by(Product.title.asc()))).scalars().all()
+    return templates.TemplateResponse(
+        "admin/images.html",
+        {"request": request, "images": images, "products": products, "admin_user": admin_user},
+    )
+
+
+@router.post("/images", include_in_schema=False)
 async def admin_create_image(
     request: Request,
     admin_user=Depends(require_admin),
@@ -300,4 +401,4 @@ async def admin_create_image(
     )
     session.add(image)
     await session.commit()
-    return RedirectResponse("/admin/products", status_code=303)
+    return RedirectResponse("/admin/images", status_code=303)

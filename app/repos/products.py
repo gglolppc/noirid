@@ -13,7 +13,7 @@ class ProductsRepo:
         stmt = (
             select(Product)
             .where(Product.is_active.is_(True))
-            .options(selectinload(Product.images), selectinload(Product.variants))
+            .options(selectinload(Product.images))
             .order_by(Product.id.desc())
         )
         res = await session.execute(stmt)
@@ -24,7 +24,7 @@ class ProductsRepo:
         stmt = (
             select(Product)
             .where(Product.slug == slug, Product.is_active.is_(True))
-            .options(selectinload(Product.images), selectinload(Product.variants))
+            .options(selectinload(Product.images))
         )
         res = await session.execute(stmt)
         return res.scalars().unique().first()
@@ -36,7 +36,7 @@ class ProductsRepo:
         stmt = (
             select(Product)
             .where(Product.slug.in_(slugs), Product.is_active.is_(True))
-            .options(selectinload(Product.images), selectinload(Product.variants))
+            .options(selectinload(Product.images))
         )
         res = await session.execute(stmt)
         items = list(res.scalars().unique().all())

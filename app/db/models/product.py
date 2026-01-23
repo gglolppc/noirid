@@ -64,18 +64,16 @@ class Variant(Base):
     __tablename__ = "variants"
     __table_args__ = (
         UniqueConstraint(
-            "product_id",
             "device_brand",
             "device_model",
-            name="uq_variant_product_device",
+            name="uq_variant_device",
         ),
-        Index("ix_variant_product_active", "product_id", "is_active"),
-        Index("ix_variant_product_brand", "product_id", "device_brand", "is_active"),
+        Index("ix_variant_brand_active", "device_brand", "is_active"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    product_id: Mapped[int] = mapped_column(
+    product_id: Mapped[int | None] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE"),
         index=True,
         nullable=True,
@@ -100,10 +98,10 @@ class ProductImage(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    product_id: Mapped[int] = mapped_column(
+    product_id: Mapped[int | None] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE"),
         index=True,
-        nullable=False,
+        nullable=True,
     )
 
     url: Mapped[str] = mapped_column(String(500), nullable=False)

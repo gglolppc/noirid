@@ -1,0 +1,78 @@
+{% extends "admin/base.html" %}
+{% block title %}Variants · Admin — NOIRID{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black">Variants</h1>
+      <p class="mt-1 text-sm text-zinc-400">All variants apply to every product automatically.</p>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
+    <form method="post" action="/admin/variants" class="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-5 text-sm">
+      <div>
+        <label class="text-xs text-zinc-400">SKU</label>
+        <input name="sku" required class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+      </div>
+      <div>
+        <label class="text-xs text-zinc-400">Brand</label>
+        <input name="device_brand" required class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+      </div>
+      <div>
+        <label class="text-xs text-zinc-400">Model</label>
+        <input name="device_model" required class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-zinc-400">Price delta</label>
+          <input name="price_delta" value="0.00" class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400">Stock qty</label>
+          <input name="stock_qty" type="number" class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-xs text-zinc-300">
+        <input type="checkbox" name="is_active" value="true" class="rounded border-white/20 bg-zinc-950" />
+        Active
+      </label>
+      <button type="submit" class="rounded-xl bg-white text-zinc-950 px-4 py-2 font-semibold">Add variant</button>
+    </form>
+
+    <div class="overflow-hidden rounded-3xl border border-white/10">
+      <table class="min-w-full text-sm">
+        <thead class="bg-white/5 text-zinc-400">
+          <tr>
+            <th class="px-5 py-3 text-left font-semibold">Brand</th>
+            <th class="px-5 py-3 text-left font-semibold">Model</th>
+            <th class="px-5 py-3 text-left font-semibold">SKU</th>
+            <th class="px-5 py-3 text-left font-semibold">Stock</th>
+            <th class="px-5 py-3 text-left font-semibold">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for variant in variants %}
+            <tr class="border-t border-white/10">
+              <td class="px-5 py-3 font-semibold">{{ variant.device_brand }}</td>
+              <td class="px-5 py-3 text-zinc-300">{{ variant.device_model }}</td>
+              <td class="px-5 py-3 text-zinc-500">{{ variant.sku }}</td>
+              <td class="px-5 py-3 text-zinc-400">{{ variant.stock_qty if variant.stock_qty is not none else "—" }}</td>
+              <td class="px-5 py-3">
+                {% if variant.is_active %}
+                  <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-200">Active</span>
+                {% else %}
+                  <span class="rounded-full bg-white/10 px-2 py-1 text-xs text-zinc-300">Inactive</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="5" class="px-5 py-6 text-center text-sm text-zinc-400">No variants yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

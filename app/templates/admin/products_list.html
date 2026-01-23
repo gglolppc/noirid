@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block title %}Products · Admin — NOIRID{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black">Products</h1>
+      <p class="mt-1 text-sm text-zinc-400">Manage storefront products and prices.</p>
+    </div>
+    <a href="/admin/products/new" class="rounded-xl bg-white text-zinc-950 px-4 py-2 text-sm font-semibold">
+      New product
+    </a>
+  </div>
+
+  <div class="mt-6 overflow-hidden rounded-3xl border border-white/10">
+    <table class="min-w-full text-sm">
+      <thead class="bg-white/5 text-zinc-400">
+        <tr>
+          <th class="px-5 py-3 text-left font-semibold">Title</th>
+          <th class="px-5 py-3 text-left font-semibold">Slug</th>
+          <th class="px-5 py-3 text-left font-semibold">Status</th>
+          <th class="px-5 py-3 text-left font-semibold">Price</th>
+          <th class="px-5 py-3 text-left font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          <tr class="border-t border-white/10">
+            <td class="px-5 py-3 font-semibold">{{ product.title }}</td>
+            <td class="px-5 py-3 text-zinc-400">{{ product.slug }}</td>
+            <td class="px-5 py-3">
+              {% if product.is_active %}
+                <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-200">Active</span>
+              {% else %}
+                <span class="rounded-full bg-white/10 px-2 py-1 text-xs text-zinc-300">Draft</span>
+              {% endif %}
+            </td>
+            <td class="px-5 py-3 text-zinc-200">{{ product.currency }} {{ "%.2f"|format(product.base_price) }}</td>
+            <td class="px-5 py-3">
+              <a href="/admin/products/{{ product.id }}/edit" class="text-xs text-zinc-300 hover:text-white">Edit</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="5" class="px-5 py-6 text-center text-sm text-zinc-400">No products yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
