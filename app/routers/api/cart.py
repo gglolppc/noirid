@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_async_session
 from app.repos.cart import CartRepo
+from app.repos.checkout import CheckoutRepo
 from app.schemas.cart import CartAddIn, CartOut, CartRemoveIn, CartUpdateQtyIn
 from app.services.cart import CartService
 from app.services.pricing import PricingService
@@ -14,6 +15,47 @@ from app.services.pricing import PricingService
 router = APIRouter(prefix="/api/cart", tags=["cart"])
 
 SESSION_ORDER_KEY = "order_id"
+
+
+async def _load_order_any(request: Request, session: AsyncSession):
+    order_id = request.session.get(SESSION_ORDER_KEY)
+    if not order_id:
+        return None
+    order = await CheckoutRepo.get_order_any(session, order_id)
+    if not order:
+        request.session.pop(SESSION_ORDER_KEY, None)
+        return None
+    return order
+
+
+async def _ensure_draft_order(
+    request: Request,
+    session: AsyncSession,
+    *,
+    create_if_missing: bool = False,
+):
+    order = await _load_order_any(request, session)
+    if not order:
+        if create_if_missing:
+            order = await CartRepo.create_order(session, currency="USD")
+            request.session[SESSION_ORDER_KEY] = order.id
+        return order
+
+    if order.payment_status == "paid":
+        request.session.pop(SESSION_ORDER_KEY, None)
+        if create_if_missing:
+            order = await CartRepo.create_order(session, currency=order.currency or "USD")
+            request.session[SESSION_ORDER_KEY] = order.id
+            return order
+        return None
+
+    if order.status != "draft":
+        draft = await CartRepo.create_order(session, currency=order.currency or "USD")
+        await CartRepo.clone_items(session, order, draft)
+        request.session[SESSION_ORDER_KEY] = draft.id
+        return draft
+
+    return order
 
 
 def _cart_to_out(order) -> CartOut:
@@ -46,13 +88,8 @@ async def get_cart(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
 ):
-    order_id = request.session.get(SESSION_ORDER_KEY)
-    if not order_id:
-        raise HTTPException(status_code=404, detail="Cart is empty")
-
-    order = await CartRepo.get_order(session, order_id)
-    if not order:
-        request.session.pop(SESSION_ORDER_KEY, None)
+    order = await _ensure_draft_order(request, session)
+    if not order or not order.items:
         raise HTTPException(status_code=404, detail="Cart is empty")
 
     # на всякий пересчёт (если кто-то руками менял qty)
@@ -68,15 +105,9 @@ async def add_to_cart(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
 ):
-    order_id = request.session.get(SESSION_ORDER_KEY)
-    order = await CartRepo.get_order(session, order_id) if order_id else None
-
-    if order and order.status != "draft":
-        raise HTTPException(400, "Order is locked for payment")
-
+    order = await _ensure_draft_order(request, session, create_if_missing=True)
     if not order:
-        order = await CartRepo.create_order(session, currency="USD")
-        request.session[SESSION_ORDER_KEY] = order.id
+        raise HTTPException(status_code=400, detail="Cart is empty")
 
     product = await CartRepo.load_product(session, payload.product_id)
     if not product:
@@ -113,23 +144,42 @@ async def update_qty(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
 ):
-    order_id = request.session.get(SESSION_ORDER_KEY)
-    if not order_id:
+    order = await _load_order_any(request, session)
+    if not order:
         raise HTTPException(status_code=404, detail="Cart is empty")
 
-    order = await CartRepo.get_order(session, order_id)
-
-    if order and order.status != "draft":
-        raise HTTPException(400, "Order is locked for payment")
-
-    if not order:
+    if order.payment_status == "paid":
         request.session.pop(SESSION_ORDER_KEY, None)
         raise HTTPException(status_code=404, detail="Cart is empty")
 
-    try:
-        await CartRepo.update_qty(session, order, payload.item_id, payload.qty)
-    except KeyError:
-        raise HTTPException(status_code=404, detail="Item not found")
+    if order.status != "draft":
+        source_order = order
+        source_item = next((x for x in source_order.items if x.id == payload.item_id), None)
+        order = await CartRepo.create_order(session, currency=source_order.currency or "USD")
+        await CartRepo.clone_items(session, source_order, order)
+        request.session[SESSION_ORDER_KEY] = order.id
+
+        if not source_item:
+            raise HTTPException(status_code=404, detail="Item not found")
+
+        target = next(
+            (
+                x
+                for x in order.items
+                if x.product_id == source_item.product_id
+                and x.variant_id == source_item.variant_id
+                and (x.personalization_json or {}) == (source_item.personalization_json or {})
+            ),
+            None,
+        )
+        if not target:
+            raise HTTPException(status_code=404, detail="Item not found")
+        await CartRepo.update_qty(session, order, target.id, payload.qty)
+    else:
+        try:
+            await CartRepo.update_qty(session, order, payload.item_id, payload.qty)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Item not found")
 
     CartService.recalc(order)
     await session.commit()
@@ -143,24 +193,41 @@ async def remove_item(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
 ):
-    order_id = request.session.get(SESSION_ORDER_KEY)
-    if not order_id:
+    order = await _load_order_any(request, session)
+    if not order:
         raise HTTPException(status_code=404, detail="Cart is empty")
 
-    order = await CartRepo.get_order(session, order_id)
-
-    if order and order.status != "draft":
-        raise HTTPException(400, "Order is locked for payment")
-
-    if not order:
+    if order.payment_status == "paid":
         request.session.pop(SESSION_ORDER_KEY, None)
         raise HTTPException(status_code=404, detail="Cart is empty")
 
-    await CartRepo.remove_item(session, order, payload.item_id)
+    if order.status != "draft":
+        source_order = order
+        source_item = next((x for x in source_order.items if x.id == payload.item_id), None)
+        order = await CartRepo.create_order(session, currency=source_order.currency or "USD")
+        await CartRepo.clone_items(session, source_order, order)
+        request.session[SESSION_ORDER_KEY] = order.id
 
-    # перезагрузим актуальный order (items могли поменяться)
-    order = await CartRepo.get_order(session, order_id)
-    if not order or not order.items:
+        if not source_item:
+            raise HTTPException(status_code=404, detail="Item not found")
+
+        target = next(
+            (
+                x
+                for x in order.items
+                if x.product_id == source_item.product_id
+                and x.variant_id == source_item.variant_id
+                and (x.personalization_json or {}) == (source_item.personalization_json or {})
+            ),
+            None,
+        )
+        if not target:
+            raise HTTPException(status_code=404, detail="Item not found")
+        await CartRepo.remove_item(session, order, target.id)
+    else:
+        await CartRepo.remove_item(session, order, payload.item_id)
+
+    if not order.items:
         # корзина пустая — можно снести из session
         request.session.pop(SESSION_ORDER_KEY, None)
         raise HTTPException(status_code=404, detail="Cart is empty")
@@ -174,4 +241,3 @@ async def remove_item(
 async def clear_cart(request: Request):
     request.session.pop(SESSION_ORDER_KEY, None)
     return {"ok": True}
-

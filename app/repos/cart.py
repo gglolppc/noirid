@@ -31,6 +31,20 @@ class CartRepo:
         return order
 
     @staticmethod
+    async def clone_items(session: AsyncSession, source: Order, target: Order) -> None:
+        for it in source.items:
+            item = OrderItem(
+                order_id=target.id,
+                product_id=it.product_id,
+                variant_id=it.variant_id,
+                title_snapshot=it.title_snapshot,
+                unit_price=it.unit_price,
+                qty=it.qty,
+                personalization_json=it.personalization_json or {},
+            )
+            target.items.append(item)
+
+    @staticmethod
     async def add_item(
         session: AsyncSession,
         order: Order,

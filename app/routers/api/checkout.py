@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_async_session
+from app.repos.cart import CartRepo
 from app.repos.checkout import CheckoutRepo
 from app.schemas.checkout import CheckoutCreateOrderIn
 from app.services.checkout import CheckoutService
@@ -27,10 +28,20 @@ async def create_order(
     if not order_id:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    order = await CheckoutRepo.get_draft_order(session, order_id)
+    order = await CheckoutRepo.get_order_any(session, order_id)
     if not order:
         request.session.pop(SESSION_ORDER_KEY, None)
         raise HTTPException(status_code=400, detail="Cart is empty")
+
+    if order.payment_status == "paid":
+        request.session.pop(SESSION_ORDER_KEY, None)
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    if order.status != "draft":
+        draft = await CartRepo.create_order(session, currency=order.currency or "USD")
+        await CartRepo.clone_items(session, order, draft)
+        request.session[SESSION_ORDER_KEY] = draft.id
+        order = draft
 
     if not order.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
