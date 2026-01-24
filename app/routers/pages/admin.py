@@ -8,7 +8,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -263,9 +263,10 @@ async def admin_product_create(
     await session.flush()
 
     if image_ids:
-        stmt = select(ProductImage).where(ProductImage.id.in_(image_ids))
-        images = (await session.execute(stmt)).scalars().all()
-        product.images = images
+        await session.execute(
+            product_image_links.insert(),
+            [{"product_id": product.id, "image_id": image_id} for image_id in image_ids],
+        )
 
     await session.commit()
     return RedirectResponse("/admin/products", status_code=303)
@@ -328,12 +329,12 @@ async def admin_product_update(
     product.currency = currency.strip().upper()
     product.is_active = is_active
 
+    await session.execute(delete(product_image_links).where(product_image_links.c.product_id == product.id))
     if image_ids:
-        stmt = select(ProductImage).where(ProductImage.id.in_(image_ids))
-        images = (await session.execute(stmt)).scalars().all()
-    else:
-        images = []
-    product.images = images
+        await session.execute(
+            product_image_links.insert(),
+            [{"product_id": product.id, "image_id": image_id} for image_id in image_ids],
+        )
 
     await session.commit()
     return RedirectResponse("/admin/products", status_code=303)
