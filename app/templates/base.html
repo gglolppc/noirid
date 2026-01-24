@@ -1,45 +1,81 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}NOIRID{% endblock %}</title>
-
-  <!-- Tailwind CDN для старта (потом соберёшь нормально) -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;900&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #050505; color: #f4f4f5; }
+
+    /* Эффект контурного текста */
+    .text-outline { -webkit-text-stroke: 1px rgba(255,255,255,0.15); color: transparent; }
+
+    /* Плавное появление при скролле */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.2s; }
+    .reveal-delay-2 { transition-delay: 0.4s; }
+
+    html { scroll-behavior: smooth; }
+  </style>
 </head>
 
-<body class="min-h-full bg-zinc-950 text-zinc-100">
-  <header class="border-b border-white/10">
-    <div class="mx-auto max-w-6xl px-5 py-6 flex flex-col gap-4">
-      <a href="/" class="text-2xl tracking-[0.4em] font-light text-white">NOIRID</a>
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <nav class="flex flex-wrap gap-6 text-xs uppercase tracking-[0.25em] text-zinc-300">
-          <a class="hover:text-white" href="/">Home</a>
-          <a class="hover:text-white" href="/catalog">Designs</a>
-          <a class="hover:text-white" href="/delivery">Delivery</a>
-        </nav>
-        <nav class="flex flex-wrap gap-6 text-xs uppercase tracking-[0.25em] text-zinc-300">
-          <a class="hover:text-white" href="/cart">Cart</a>
-          <a class="hover:text-white" href="/check-order">Check order</a>
-        </nav>
-      </div>
+<body class="antialiased selection:bg-white selection:text-black">
+  <div class="pointer-events-none fixed inset-0 z-[100] opacity-[0.1]"
+     style="background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');">
+  </div>
+
+  {% block header %}
+  <header class="relative z-50 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+    <div class="mx-auto max-w-7xl px-8 h-20 flex items-center justify-between">
+      <a href="/" class="text-lg tracking-[0.4em] font-light">NOIRID</a>
+      <nav class="flex gap-8 text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-medium">
+        <a class="hover:text-white transition" href="/catalog">Designs</a>
+        <a class="hover:text-white transition" href="/delivery">Shipping</a>
+        <a class="hover:text-white transition" href="/cart">Cart</a>
+      </nav>
     </div>
   </header>
+  {% endblock %}
 
-  <main class="mx-auto max-w-6xl px-5 py-10">
+  <main>
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="border-t border-white/10">
-    <div class="mx-auto max-w-6xl px-5 py-8 flex flex-col gap-4 text-xs text-zinc-500 md:flex-row md:items-center md:justify-between">
-      <div>© {{ request.url.hostname or "NOIRID" }} — dark, discreet, clean.</div>
-      <nav class="flex gap-6 text-xs uppercase tracking-[0.25em] text-zinc-300">
-        <a class="hover:text-white" href="/about">About</a>
-        <a class="hover:text-white" href="/delivery">Delivery</a>
-        <a class="hover:text-white" href="/support">Support</a>
+  {% block footer %}
+  <footer class="border-t border-white/5 py-20 bg-[#050505]">
+    <div class="mx-auto max-w-7xl px-8 flex flex-col md:flex-row justify-between items-center gap-10">
+      <div class="text-[10px] uppercase tracking-[0.4em] text-zinc-600">
+        © NOIRID — Discreet Identity
+      </div>
+      <nav class="flex gap-10 text-[9px] uppercase tracking-[0.3em] text-zinc-500">
+        <a href="/about" class="hover:text-white transition">Philosophy</a>
+        <a href="/support" class="hover:text-white transition">Support</a>
       </nav>
     </div>
   </footer>
+  {% endblock %}
+
+  <script>
+    // Инициализация анимаций появления
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  </script>
 </body>
 </html>

@@ -30,26 +30,32 @@ def upgrade() -> None:
     )
     op.execute(
         """
-        UPDATE products
+        UPDATE products p
         SET images = COALESCE(
-            (
-                SELECT jsonb_agg(
-                    jsonb_build_object(
-                        'id',
-                        row_number() OVER (ORDER BY pil.sort, pi.id) - 1,
-                        'url',
-                        pi.url
-                    )
-                    ORDER BY pil.sort, pi.id
-                )
-                FROM product_image_links pil
-                JOIN product_images pi ON pi.id = pil.image_id
-                WHERE pil.product_id = products.id
-            ),
-            '[]'::jsonb
-        )
+          (
+            SELECT jsonb_agg(
+                     jsonb_build_object(
+                       'id', t.rn - 1,
+                       'url', t.url
+                     )
+                     ORDER BY t.sort, t.image_id
+                   )
+            FROM (
+              SELECT
+                pil.sort,
+                pi.id AS image_id,
+                pi.url,
+                row_number() OVER (ORDER BY pil.sort, pi.id) AS rn
+              FROM product_image_links pil
+              JOIN product_images pi ON pi.id = pil.image_id
+              WHERE pil.product_id = p.id
+            ) t
+          ),
+          '[]'::jsonb
+        );
         """
     )
+
     op.alter_column("products", "images", server_default=None)
 
 

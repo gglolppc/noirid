@@ -1361,3 +1361,324 @@ WHERE orders.id = $1::UUID]
 2026-01-24 13:17:40,513 [INFO] uvicorn.error: Waiting for application shutdown.
 2026-01-24 13:17:40,514 [INFO] uvicorn.error: Application shutdown complete.
 2026-01-24 13:17:40,514 [INFO] uvicorn.error: Finished server process [2880]
+2026-01-24 13:21:30,425 [INFO] root: Logging initialized (prod)
+2026-01-24 13:21:30,462 [INFO] uvicorn.error: Started server process [19244]
+2026-01-24 13:21:30,462 [INFO] uvicorn.error: Waiting for application startup.
+2026-01-24 13:21:30,463 [INFO] uvicorn.error: Application startup complete.
+2026-01-24 13:21:30,463 [INFO] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-01-24 13:48:40,841 [INFO] uvicorn.error: Shutting down
+2026-01-24 13:48:40,947 [INFO] uvicorn.error: Waiting for application shutdown.
+2026-01-24 13:48:40,948 [INFO] uvicorn.error: Application shutdown complete.
+2026-01-24 13:48:40,948 [INFO] uvicorn.error: Finished server process [19244]
+2026-01-24 13:53:05,954 [INFO] root: Logging initialized (prod)
+2026-01-24 13:53:05,992 [INFO] uvicorn.error: Started server process [35240]
+2026-01-24 13:53:05,992 [INFO] uvicorn.error: Waiting for application startup.
+2026-01-24 13:53:05,993 [INFO] uvicorn.error: Application startup complete.
+2026-01-24 13:53:05,993 [INFO] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-01-24 13:55:36,685 [ERROR] uvicorn.error: Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\app\routers\api\cart.py", line 241, in remove_item
+    raise HTTPException(status_code=404, detail="Cart is empty")
+fastapi.exceptions.HTTPException: 404: Cart is empty
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\sessions.py", line 85, in __call__
+    await self.app(scope, receive, send_wrapper)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 59, in wrapped_app
+    response = await handler(conn, exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\app\main.py", line 64, in not_found_handler
+    return templates.TemplateResponse("pages/404.html", {"request": request}, status_code=404)
+           ^^^^^^^^^
+NameError: name 'templates' is not defined
+2026-01-24 13:56:01,039 [ERROR] uvicorn.error: Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\app\routers\api\cart.py", line 241, in remove_item
+    raise HTTPException(status_code=404, detail="Cart is empty")
+fastapi.exceptions.HTTPException: 404: Cart is empty
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\sessions.py", line 85, in __call__
+    await self.app(scope, receive, send_wrapper)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 59, in wrapped_app
+    response = await handler(conn, exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\app\main.py", line 64, in not_found_handler
+    return templates.TemplateResponse("pages/404.html", {"request": request}, status_code=404)
+           ^^^^^^^^^
+NameError: name 'templates' is not defined
+2026-01-24 13:56:15,202 [ERROR] uvicorn.error: Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\app\routers\api\cart.py", line 241, in remove_item
+    raise HTTPException(status_code=404, detail="Cart is empty")
+fastapi.exceptions.HTTPException: 404: Cart is empty
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\sessions.py", line 85, in __call__
+    await self.app(scope, receive, send_wrapper)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 59, in wrapped_app
+    response = await handler(conn, exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\app\main.py", line 64, in not_found_handler
+    return templates.TemplateResponse("pages/404.html", {"request": request}, status_code=404)
+           ^^^^^^^^^
+NameError: name 'templates' is not defined
+2026-01-24 13:56:23,914 [ERROR] uvicorn.error: Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 243, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\app\routers\api\cart.py", line 241, in remove_item
+    raise HTTPException(status_code=404, detail="Cart is empty")
+fastapi.exceptions.HTTPException: 404: Cart is empty
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\sessions.py", line 85, in __call__
+    await self.app(scope, receive, send_wrapper)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\fastapi\routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\hkari\PycharmProjects\Noirid\.venv\Lib\site-packages\starlette\_exception_handler.py", line 59, in wrapped_app
+    response = await handler(conn, exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hkari\PycharmProjects\Noirid\app\main.py", line 64, in not_found_handler
+    return templates.TemplateResponse("pages/404.html", {"request": request}, status_code=404)
+           ^^^^^^^^^
+NameError: name 'templates' is not defined
+2026-01-24 13:57:11,323 [INFO] uvicorn.error: Shutting down
+2026-01-24 13:57:11,433 [INFO] uvicorn.error: Waiting for application shutdown.
+2026-01-24 13:57:11,433 [INFO] uvicorn.error: Application shutdown complete.
+2026-01-24 13:57:11,433 [INFO] uvicorn.error: Finished server process [35240]
+2026-01-24 13:57:13,374 [INFO] root: Logging initialized (prod)
+2026-01-24 13:57:13,411 [INFO] uvicorn.error: Started server process [13656]
+2026-01-24 13:57:13,411 [INFO] uvicorn.error: Waiting for application startup.
+2026-01-24 13:57:13,411 [INFO] uvicorn.error: Application startup complete.
+2026-01-24 13:57:13,412 [INFO] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-01-24 13:58:09,074 [INFO] orders: Order status changed | order_id=a43d5664-6baf-4aeb-be71-4a0c749ea3ae | from=draft | to=pending_payment
+2026-01-24 13:58:09,096 [INFO] payments: Payment created | order_id=a43d5664-6baf-4aeb-be71-4a0c749ea3ae | amount=26.99 | provider=2checkout
+2026-01-24 13:58:09,098 [INFO] payments: Payment status changed | order_id=a43d5664-6baf-4aeb-be71-4a0c749ea3ae | payment_id=16 | from=created | to=redirected
+2026-01-24 14:00:03,736 [INFO] uvicorn.error: Shutting down
+2026-01-24 14:00:03,842 [INFO] uvicorn.error: Waiting for application shutdown.
+2026-01-24 14:00:03,843 [INFO] uvicorn.error: Application shutdown complete.
+2026-01-24 14:00:03,843 [INFO] uvicorn.error: Finished server process [13656]
+2026-01-24 14:15:31,184 [INFO] root: Logging initialized (prod)
+2026-01-24 14:15:31,226 [INFO] uvicorn.error: Started server process [4108]
+2026-01-24 14:15:31,226 [INFO] uvicorn.error: Waiting for application startup.
+2026-01-24 14:15:31,226 [INFO] uvicorn.error: Application startup complete.
+2026-01-24 14:15:31,227 [INFO] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-01-24 14:19:55,833 [INFO] uvicorn.error: Shutting down
+2026-01-24 14:19:55,941 [INFO] uvicorn.error: Waiting for application shutdown.
+2026-01-24 14:19:55,941 [INFO] uvicorn.error: Application shutdown complete.
+2026-01-24 14:19:55,942 [INFO] uvicorn.error: Finished server process [4108]
+2026-01-24 14:20:55,727 [INFO] root: Logging initialized (prod)
+2026-01-24 14:20:55,767 [INFO] uvicorn.error: Started server process [18780]
+2026-01-24 14:20:55,767 [INFO] uvicorn.error: Waiting for application startup.
+2026-01-24 14:20:55,767 [INFO] uvicorn.error: Application startup complete.
+2026-01-24 14:20:55,768 [INFO] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-01-24 14:22:07,661 [INFO] uvicorn.error: Shutting down
+2026-01-24 14:22:07,771 [INFO] uvicorn.error: Waiting for application shutdown.
+2026-01-24 14:22:07,772 [INFO] uvicorn.error: Application shutdown complete.
+2026-01-24 14:22:07,772 [INFO] uvicorn.error: Finished server process [18780]
+2026-01-24 14:22:09,666 [INFO] root: Logging initialized (prod)
+2026-01-24 14:22:09,702 [INFO] uvicorn.error: Started server process [8252]
+2026-01-24 14:22:09,702 [INFO] uvicorn.error: Waiting for application startup.
+2026-01-24 14:22:09,703 [INFO] uvicorn.error: Application startup complete.
+2026-01-24 14:22:09,703 [INFO] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-01-24 15:55:01,903 [INFO] uvicorn.error: Shutting down
+2026-01-24 15:55:02,011 [INFO] uvicorn.error: Waiting for application shutdown.
+2026-01-24 15:55:02,012 [INFO] uvicorn.error: Application shutdown complete.
+2026-01-24 15:55:02,012 [INFO] uvicorn.error: Finished server process [8252]

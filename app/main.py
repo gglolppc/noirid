@@ -8,6 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.logger_setup import setup_logging
+from app.core.templates import templates
 
 from app.routers.pages.home import router as home_router
 from app.routers.pages.catalog import router as catalog_router
