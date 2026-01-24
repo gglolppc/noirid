@@ -2,16 +2,35 @@
 {% block title %}About · NOIRID{% endblock %}
 
 {% block content %}
-  <div class="max-w-2xl">
-    <h1 class="text-2xl font-black">About NOIRID</h1>
-    <p class="mt-3 text-zinc-300">
-      NOIRID builds discreet, minimal accessories designed for everyday essentials. Each design focuses on
-      precision fit, matte finishes, and a clean tactile feel. We keep our catalog small and intentional,
-      so every release meets our quality standard.
-    </p>
-    <p class="mt-4 text-zinc-300">
-      From concept to shipment, we handle every step in-house with international delivery and responsive
-      support when you need it.
-    </p>
-  </div>
+<div class="relative bg-[#050505]">
+  <section class="min-h-screen pt-36 pb-24 px-8">
+    <div class="mx-auto max-w-5xl">
+      <div class="reveal">
+        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-600">Philosophy</div>
+        <h1 class="mt-6 text-5xl md:text-7xl font-black uppercase tracking-tight text-white">About Noirid</h1>
+        <p class="mt-4 text-sm md:text-base text-zinc-400 max-w-2xl">
+          NOIRID builds discreet, minimal accessories designed for everyday essentials. Each design focuses on
+          precision fit, matte finishes, and a clean tactile feel.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-1 mt-14 grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div class="text-[11px] uppercase tracking-[0.4em] text-zinc-500">Process</div>
+          <p class="mt-4 text-sm md:text-base text-zinc-300">
+            We keep our catalog small and intentional, so every release meets our quality standard. From concept
+            to shipment, we handle every step in-house with careful attention to surface texture and fit.
+          </p>
+        </div>
+        <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div class="text-[11px] uppercase tracking-[0.4em] text-zinc-500">Support</div>
+          <p class="mt-4 text-sm md:text-base text-zinc-300">
+            International delivery, responsive support, and a strict quality check for every unit ensure the
+            Noirid experience stays consistent from order to doorstep.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 {% endblock %}

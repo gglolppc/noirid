@@ -2,44 +2,53 @@
 {% block title %}Support · NOIRID{% endblock %}
 
 {% block content %}
-  <div class="max-w-2xl">
-    <h1 class="text-2xl font-black">Support</h1>
-    <p class="mt-2 text-sm text-zinc-400">Leave a question and we will reply within 24 hours.</p>
+<div class="relative bg-[#050505]">
+  <section class="min-h-screen pt-36 pb-24 px-8">
+    <div class="mx-auto max-w-5xl">
+      <div class="reveal">
+        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-600">Support</div>
+        <h1 class="mt-6 text-5xl md:text-7xl font-black uppercase tracking-tight text-white">We listen</h1>
+        <p class="mt-4 text-sm md:text-base text-zinc-400 max-w-2xl">
+          Leave a question and we will reply within 24 hours.
+        </p>
+      </div>
 
-    {% if success %}
-      <div class="mt-4 rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-4 text-sm text-emerald-200">
-        Thanks! Your question has been received.
-      </div>
-    {% endif %}
+      {% if success %}
+        <div class="reveal reveal-delay-1 mt-10 rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-4 text-sm text-emerald-200">
+          Thanks! Your question has been received.
+        </div>
+      {% endif %}
 
-    <form method="post" class="mt-6 space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6">
-      <div>
-        <label class="text-sm text-zinc-400">Name</label>
-        <input name="name" type="text" required
-               class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-               placeholder="Your name">
-      </div>
-      <div>
-        <label class="text-sm text-zinc-400">Email</label>
-        <input name="email" type="email" required
-               class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-               placeholder="you@email.com">
-      </div>
-      <div>
-        <label class="text-sm text-zinc-400">Order ID (optional)</label>
-        <input name="order_id" type="text"
-               class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-               placeholder="Order ID">
-      </div>
-      <div>
-        <label class="text-sm text-zinc-400">Question</label>
-        <textarea name="question" rows="4" required
-                  class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                  placeholder="How can we help?"></textarea>
-      </div>
-      <button type="submit" class="rounded-2xl bg-white text-zinc-950 px-5 py-3 font-semibold">
-        Send question
-      </button>
-    </form>
-  </div>
+      <form method="post" class="reveal reveal-delay-1 mt-12 space-y-5 rounded-3xl border border-white/10 bg-white/5 p-8">
+        <div>
+          <label class="text-sm text-zinc-400">Name</label>
+          <input name="name" type="text" required
+                 class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+                 placeholder="Your name">
+        </div>
+        <div>
+          <label class="text-sm text-zinc-400">Email</label>
+          <input name="email" type="email" required
+                 class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+                 placeholder="you@email.com">
+        </div>
+        <div>
+          <label class="text-sm text-zinc-400">Order ID (optional)</label>
+          <input name="order_id" type="text"
+                 class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+                 placeholder="Order ID">
+        </div>
+        <div>
+          <label class="text-sm text-zinc-400">Question</label>
+          <textarea name="question" rows="4" required
+                    class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+                    placeholder="How can we help?"></textarea>
+        </div>
+        <button type="submit" class="rounded-2xl bg-white text-zinc-950 px-6 py-3 text-[11px] uppercase tracking-[0.4em] font-semibold">
+          Send question
+        </button>
+      </form>
+    </div>
+  </section>
+</div>
 {% endblock %}

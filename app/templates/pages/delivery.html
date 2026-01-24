@@ -2,19 +2,36 @@
 {% block title %}Delivery · NOIRID{% endblock %}
 
 {% block content %}
-  <div class="max-w-2xl">
-    <h1 class="text-2xl font-black">Delivery</h1>
-    <p class="mt-3 text-zinc-300">
-      We ship internationally with tracked delivery and secure packaging. Orders are prepared within
-      1–2 business days and handed to our courier with a tracking number.
-    </p>
-    <ul class="mt-4 space-y-2 text-sm text-zinc-300">
-      <li><span class="text-zinc-500">Standard shipping:</span> 5–12 business days (international).</li>
-      <li><span class="text-zinc-500">Express shipping:</span> 3–6 business days (select destinations).</li>
-      <li><span class="text-zinc-500">Tracking:</span> emailed automatically once dispatched.</li>
-    </ul>
-    <p class="mt-4 text-sm text-zinc-400">
-      Customs duties or local taxes (if any) are paid by the recipient according to local regulations.
-    </p>
-  </div>
+<div class="relative bg-[#050505]">
+  <section class="min-h-screen pt-36 pb-24 px-8">
+    <div class="mx-auto max-w-5xl">
+      <div class="reveal">
+        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-600">Delivery</div>
+        <h1 class="mt-6 text-5xl md:text-7xl font-black uppercase tracking-tight text-white">Shipping flow</h1>
+        <p class="mt-4 text-sm md:text-base text-zinc-400 max-w-2xl">
+          We ship internationally with tracked delivery and secure packaging. Orders are prepared within
+          1–2 business days and handed to our courier with a tracking number.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-1 mt-14 grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div class="text-[11px] uppercase tracking-[0.4em] text-zinc-500">Timelines</div>
+          <ul class="mt-4 space-y-3 text-sm md:text-base text-zinc-300">
+            <li><span class="text-zinc-500">Standard shipping:</span> 5–12 business days (international).</li>
+            <li><span class="text-zinc-500">Express shipping:</span> 3–6 business days (select destinations).</li>
+            <li><span class="text-zinc-500">Tracking:</span> emailed automatically once dispatched.</li>
+          </ul>
+        </div>
+        <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div class="text-[11px] uppercase tracking-[0.4em] text-zinc-500">Customs</div>
+          <p class="mt-4 text-sm md:text-base text-zinc-300">
+            Customs duties or local taxes (if any) are paid by the recipient according to local regulations.
+            We include all required documentation with every shipment.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 {% endblock %}

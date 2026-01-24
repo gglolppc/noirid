@@ -28,7 +28,6 @@ function renderCart(cart) {
   wrap.classList.remove("hidden");
 
   document.getElementById("subtotal").textContent = fmt(cart.subtotal);
-  document.getElementById("shippingFee").textContent = fmt(cart.shipping_fee || 0);
   document.getElementById("total").textContent = fmt(cart.total || 0);
   document.getElementById("currency").textContent = cart.currency || "USD";
   document.querySelectorAll(".currency").forEach((el) => {

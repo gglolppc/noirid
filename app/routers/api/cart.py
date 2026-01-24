@@ -10,7 +10,6 @@ from app.repos.cart import CartRepo
 from app.repos.checkout import CheckoutRepo
 from app.schemas.cart import CartAddIn, CartOut, CartRemoveIn, CartUpdateQtyIn
 from app.services.cart import CartService
-from app.core.config import settings
 from app.services.pricing import PricingService
 
 router = APIRouter(prefix="/api/cart", tags=["cart"])
@@ -75,12 +74,10 @@ def _cart_to_out(order) -> CartOut:
                 "personalization": it.personalization_json or {},
             }
         )
-    shipping_fee = Decimal(str(settings.standard_shipping_fee_usd or "0.00"))
     return CartOut(
         order_id=order.id,
         currency=order.currency,
         subtotal=order.subtotal,
-        shipping_fee=shipping_fee,
         total=order.total,
         items=items_out,
     )
