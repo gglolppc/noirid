@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block title %}Edit variant · Admin — NOIRID{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black">Edit variant</h1>
+      <p class="mt-1 text-sm text-zinc-400">Changes apply to all products that use this variant.</p>
+    </div>
+    <a href="/admin/variants" class="text-sm text-zinc-300 hover:text-white">Back to variants</a>
+  </div>
+
+  <form method="post" action="/admin/variants/{{ variant.id }}/edit" class="mt-6 max-w-xl space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm">
+    <div>
+      <label class="text-xs text-zinc-400">SKU</label>
+      <input name="sku" required value="{{ variant.sku }}"
+             class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+    </div>
+    <div>
+      <label class="text-xs text-zinc-400">Brand</label>
+      <input name="device_brand" required value="{{ variant.device_brand }}"
+             class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+    </div>
+    <div>
+      <label class="text-xs text-zinc-400">Model</label>
+      <input name="device_model" required value="{{ variant.device_model }}"
+             class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-xs text-zinc-400">Price delta</label>
+        <input name="price_delta" value="{{ '%.2f'|format(variant.price_delta) }}"
+               class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+      </div>
+      <div>
+        <label class="text-xs text-zinc-400">Stock qty</label>
+        <input name="stock_qty" type="number" value="{{ variant.stock_qty if variant.stock_qty is not none else '' }}"
+               class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2" />
+      </div>
+    </div>
+    <label class="flex items-center gap-2 text-xs text-zinc-300">
+      <input type="checkbox" name="is_active" value="true" class="rounded border-white/20 bg-zinc-950"
+             {% if variant.is_active %}checked{% endif %} />
+      Active
+    </label>
+    <button type="submit" class="rounded-xl bg-white text-zinc-950 px-4 py-2 font-semibold">Save changes</button>
+  </form>
+{% endblock %}

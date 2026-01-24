@@ -49,6 +49,7 @@
             <th class="px-5 py-3 text-left font-semibold">SKU</th>
             <th class="px-5 py-3 text-left font-semibold">Stock</th>
             <th class="px-5 py-3 text-left font-semibold">Status</th>
+            <th class="px-5 py-3 text-left font-semibold">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -65,10 +66,18 @@
                   <span class="rounded-full bg-white/10 px-2 py-1 text-xs text-zinc-300">Inactive</span>
                 {% endif %}
               </td>
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-3">
+                  <a href="/admin/variants/{{ variant.id }}/edit" class="text-xs text-zinc-300 hover:text-white">Edit</a>
+                  <form method="post" action="/admin/variants/{{ variant.id }}/delete" onsubmit="return confirm('Delete this variant?');">
+                    <button type="submit" class="text-xs text-red-300 hover:text-red-200">Delete</button>
+                  </form>
+                </div>
+              </td>
             </tr>
           {% else %}
             <tr>
-              <td colspan="5" class="px-5 py-6 text-center text-sm text-zinc-400">No variants yet.</td>
+              <td colspan="6" class="px-5 py-6 text-center text-sm text-zinc-400">No variants yet.</td>
             </tr>
           {% endfor %}
         </tbody>

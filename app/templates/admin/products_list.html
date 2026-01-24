@@ -37,7 +37,12 @@
             </td>
             <td class="px-5 py-3 text-zinc-200">{{ product.currency }} {{ "%.2f"|format(product.base_price) }}</td>
             <td class="px-5 py-3">
-              <a href="/admin/products/{{ product.id }}/edit" class="text-xs text-zinc-300 hover:text-white">Edit</a>
+              <div class="flex items-center gap-3">
+                <a href="/admin/products/{{ product.id }}/edit" class="text-xs text-zinc-300 hover:text-white">Edit</a>
+                <form method="post" action="/admin/products/{{ product.id }}/delete" onsubmit="return confirm('Delete this product?');">
+                  <button type="submit" class="text-xs text-red-300 hover:text-red-200">Delete</button>
+                </form>
+              </div>
             </td>
           </tr>
         {% else %}

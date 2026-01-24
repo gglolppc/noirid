@@ -4,13 +4,16 @@ from math import ceil
 
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.templates import templates
-from app.db.models.product import Product, ProductImage, Variant
+from app.db.models.product import Product, ProductImage, Variant, product_image_links
 from app.db.models.user import User
 from app.db.session import get_async_session
 from app.repos.orders import OrdersRepo
@@ -23,6 +26,8 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 ADMIN_SESSION_KEY = "admin_user_id"
 PER_PAGE = 20
+MEDIA_ROOT = Path(__file__).resolve().parents[2] / "static" / "images"
+ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
 
 async def require_admin(
@@ -226,6 +231,7 @@ async def admin_product_new(
             "request": request,
             "product": None,
             "images": images,
+            "media_folders": _list_media_folders(),
             "action_url": "/admin/products/new",
             "admin_user": admin_user,
         },
@@ -259,8 +265,7 @@ async def admin_product_create(
     if image_ids:
         stmt = select(ProductImage).where(ProductImage.id.in_(image_ids))
         images = (await session.execute(stmt)).scalars().all()
-        for image in images:
-            image.product_id = product.id
+        product.images = images
 
     await session.commit()
     return RedirectResponse("/admin/products", status_code=303)
@@ -273,7 +278,11 @@ async def admin_product_edit(
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
 ):
-    product = (await session.execute(select(Product).where(Product.id == product_id))).scalars().first()
+    product = (
+        await session.execute(
+            select(Product).where(Product.id == product_id).options(selectinload(Product.images))
+        )
+    ).scalars().first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
@@ -283,6 +292,7 @@ async def admin_product_edit(
             "request": request,
             "product": product,
             "images": images,
+            "media_folders": _list_media_folders(),
             "action_url": f"/admin/products/{product_id}/edit",
             "admin_user": admin_user,
         },
@@ -303,7 +313,11 @@ async def admin_product_update(
     is_active: bool = Form(default=False),
     image_ids: list[int] = Form(default=[]),
 ):
-    product = (await session.execute(select(Product).where(Product.id == product_id))).scalars().first()
+    product = (
+        await session.execute(
+            select(Product).where(Product.id == product_id).options(selectinload(Product.images))
+        )
+    ).scalars().first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
@@ -314,18 +328,28 @@ async def admin_product_update(
     product.currency = currency.strip().upper()
     product.is_active = is_active
 
-    existing_images = (
-        await session.execute(select(ProductImage).where(ProductImage.product_id == product.id))
-    ).scalars().all()
-    for image in existing_images:
-        image.product_id = None
-
     if image_ids:
         stmt = select(ProductImage).where(ProductImage.id.in_(image_ids))
         images = (await session.execute(stmt)).scalars().all()
-        for image in images:
-            image.product_id = product.id
+    else:
+        images = []
+    product.images = images
 
+    await session.commit()
+    return RedirectResponse("/admin/products", status_code=303)
+
+
+@router.post("/products/{product_id}/delete", include_in_schema=False)
+async def admin_product_delete(
+    request: Request,
+    product_id: int,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    product = (await session.execute(select(Product).where(Product.id == product_id))).scalars().first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    await session.delete(product)
     await session.commit()
     return RedirectResponse("/admin/products", status_code=303)
 
@@ -370,35 +394,230 @@ async def admin_create_variant(
     return RedirectResponse("/admin/variants", status_code=303)
 
 
-@router.get("/images", include_in_schema=False)
-async def admin_images(
+@router.get("/variants/{variant_id}/edit", include_in_schema=False)
+async def admin_variant_edit(
     request: Request,
+    variant_id: int,
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
 ):
-    images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
-    products = (await session.execute(select(Product).order_by(Product.title.asc()))).scalars().all()
+    variant = (await session.execute(select(Variant).where(Variant.id == variant_id))).scalars().first()
+    if not variant:
+        raise HTTPException(status_code=404, detail="Variant not found")
     return templates.TemplateResponse(
-        "admin/images.html",
-        {"request": request, "images": images, "products": products, "admin_user": admin_user},
+        "admin/variant_form.html",
+        {"request": request, "variant": variant, "admin_user": admin_user},
     )
 
 
-@router.post("/images", include_in_schema=False)
-async def admin_create_image(
+@router.post("/variants/{variant_id}/edit", include_in_schema=False)
+async def admin_variant_update(
+    request: Request,
+    variant_id: int,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    sku: str = Form(...),
+    device_brand: str = Form(...),
+    device_model: str = Form(...),
+    price_delta: str = Form(default="0.00"),
+    stock_qty: str | None = Form(default=None),
+    is_active: bool = Form(default=False),
+):
+    variant = (await session.execute(select(Variant).where(Variant.id == variant_id))).scalars().first()
+    if not variant:
+        raise HTTPException(status_code=404, detail="Variant not found")
+    variant.sku = sku.strip()
+    variant.device_brand = device_brand.strip()
+    variant.device_model = device_model.strip()
+    variant.price_delta = Decimal(price_delta)
+    variant.stock_qty = int(stock_qty) if stock_qty not in (None, "") else None
+    variant.is_active = is_active
+    await session.commit()
+    return RedirectResponse("/admin/variants", status_code=303)
+
+
+@router.post("/variants/{variant_id}/delete", include_in_schema=False)
+async def admin_variant_delete(
+    request: Request,
+    variant_id: int,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    variant = (await session.execute(select(Variant).where(Variant.id == variant_id))).scalars().first()
+    if not variant:
+        raise HTTPException(status_code=404, detail="Variant not found")
+    await session.delete(variant)
+    await session.commit()
+    return RedirectResponse("/admin/variants", status_code=303)
+
+
+def _safe_media_path(relative_path: str) -> Path:
+    if not relative_path:
+        return MEDIA_ROOT
+    safe_path = (MEDIA_ROOT / relative_path).resolve()
+    if not str(safe_path).startswith(str(MEDIA_ROOT.resolve())):
+        raise HTTPException(status_code=400, detail="Invalid path")
+    return safe_path
+
+
+def _url_for_media(path: Path) -> str:
+    rel = path.relative_to(MEDIA_ROOT).as_posix()
+    return f"/static/images/{rel}"
+
+
+def _list_media_folders() -> list[str]:
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+    folders = []
+    for path in MEDIA_ROOT.rglob("*"):
+        if path.is_dir():
+            rel = path.relative_to(MEDIA_ROOT).as_posix()
+            if rel:
+                folders.append(rel)
+    return sorted(folders)
+
+
+@router.get("/media", include_in_schema=False)
+async def admin_media_library(
     request: Request,
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
-    url: str = Form(...),
-    sort: int = Form(default=0),
-    product_id: str | None = Form(default=None),
+    path: str | None = None,
+    q: str | None = None,
 ):
-    product_value = int(product_id) if product_id not in (None, "") else None
-    image = ProductImage(
-        url=url.strip(),
-        sort=sort,
-        product_id=product_value,
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+    current_path = _safe_media_path(path or "")
+    if not current_path.exists():
+        raise HTTPException(status_code=404, detail="Folder not found")
+    folders = sorted([p for p in current_path.iterdir() if p.is_dir()], key=lambda p: p.name.lower())
+
+    query = (q or "").strip().lower()
+    images_query = select(ProductImage).order_by(ProductImage.id.desc())
+    if path:
+        prefix = f"/static/images/{path.strip('/')}/"
+        images_query = images_query.where(ProductImage.url.like(f"{prefix}%"))
+    if query:
+        images_query = images_query.where(ProductImage.url.ilike(f"%{query}%"))
+    images = (await session.execute(images_query)).scalars().all()
+    products = (await session.execute(select(Product).order_by(Product.title.asc()))).scalars().all()
+
+    folder_parts = [part for part in (path or "").split("/") if part]
+    return templates.TemplateResponse(
+        "admin/media_library.html",
+        {
+            "request": request,
+            "images": images,
+            "products": products,
+            "admin_user": admin_user,
+            "folders": folders,
+            "current_path": path or "",
+            "folder_parts": folder_parts,
+            "query": q or "",
+            "MEDIA_ROOT": MEDIA_ROOT,
+        },
     )
-    session.add(image)
+
+
+@router.post("/media/upload", include_in_schema=False)
+async def admin_media_upload(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    image: UploadFile = File(...),
+    folder: str | None = Form(default=None),
+):
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+    if not image.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    ext = Path(image.filename).suffix.lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Only image files are allowed")
+    if image.content_type and not image.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Only image files are allowed")
+
+    target_dir = _safe_media_path(folder or "")
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_path = target_dir / image.filename
+    counter = 1
+    while target_path.exists():
+        target_path = target_dir / f"{target_path.stem}-{counter}{ext}"
+        counter += 1
+
+    contents = await image.read()
+    target_path.write_bytes(contents)
+
+    url = _url_for_media(target_path)
+    existing = (await session.execute(select(ProductImage).where(ProductImage.url == url))).scalars().first()
+    if not existing:
+        session.add(ProductImage(url=url, sort=0))
     await session.commit()
-    return RedirectResponse("/admin/images", status_code=303)
+    redirect_path = folder.strip("/") if folder else ""
+    return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)
+
+
+@router.post("/media/folder", include_in_schema=False)
+async def admin_media_create_folder(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    folder: str = Form(...),
+):
+    target_dir = _safe_media_path(folder.strip("/"))
+    target_dir.mkdir(parents=True, exist_ok=True)
+    await session.commit()
+    redirect_path = folder.strip("/")
+    return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)
+
+
+@router.post("/media/delete", include_in_schema=False)
+async def admin_media_delete(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    target: str = Form(...),
+    current_path: str | None = Form(default=None),
+):
+    target_path = _safe_media_path(target.strip("/"))
+    if target_path.is_dir():
+        if any(target_path.iterdir()):
+            raise HTTPException(status_code=400, detail="Folder is not empty")
+        target_path.rmdir()
+    else:
+        url = _url_for_media(target_path)
+        image_record = (await session.execute(select(ProductImage).where(ProductImage.url == url))).scalars().first()
+        if image_record:
+            await session.execute(
+                product_image_links.delete().where(product_image_links.c.image_id == image_record.id)
+            )
+            await session.delete(image_record)
+        if target_path.exists():
+            target_path.unlink()
+    await session.commit()
+    redirect_path = (current_path or "").strip("/")
+    return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)
+
+
+@router.post("/media/rename", include_in_schema=False)
+async def admin_media_rename(
+    request: Request,
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+    source: str = Form(...),
+    destination: str = Form(...),
+    current_path: str | None = Form(default=None),
+):
+    source_path = _safe_media_path(source.strip("/"))
+    destination_path = _safe_media_path(destination.strip("/"))
+    if source_path.is_dir():
+        raise HTTPException(status_code=400, detail="Folder rename is not supported")
+    if destination_path.suffix.lower() not in ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Only image files are allowed")
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    source_path.replace(destination_path)
+    old_url = _url_for_media(source_path)
+    new_url = _url_for_media(destination_path)
+    image_record = (await session.execute(select(ProductImage).where(ProductImage.url == old_url))).scalars().first()
+    if image_record:
+        image_record.url = new_url
+    await session.commit()
+    redirect_path = (current_path or "").strip("/")
+    return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)

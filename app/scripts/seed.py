@@ -7,7 +7,7 @@ from decimal import Decimal
 from sqlalchemy import delete, select
 
 from app.db.session import AsyncSessionLocal
-from app.db.models.product import Product, Variant, ProductImage
+from app.db.models.product import Product, Variant, ProductImage, product_image_links
 from app.db.models.content import ContentBlock
 from app.db.models.user import User
 from app.services.auth import hash_password
@@ -16,6 +16,7 @@ from app.services.auth import hash_password
 async def seed() -> None:
     async with AsyncSessionLocal() as session:
         # очистка (для dev)
+        await session.execute(delete(product_image_links))
         await session.execute(delete(ProductImage))
         await session.execute(delete(Variant))
         await session.execute(delete(Product))
@@ -32,13 +33,8 @@ async def seed() -> None:
                 "upload": {"required": False},
             },
         )
-        p1.images = [
-            ProductImage(url="/static/img/demo/case1.webp", sort=0),
-        ]
-        p1.variants = [
-            Variant(sku="NOIR-INIT-IPH15P", device_brand="iPhone", device_model="15 Pro Max", price_delta=Decimal("0.00")),
-            Variant(sku="NOIR-INIT-IPH15PM", device_brand="Samsung", device_model="S23 Ultra", price_delta=Decimal("2.00")),
-        ]
+        img1 = ProductImage(url="/static/img/demo/case1.webp", sort=0)
+        p1.images = [img1]
 
         p2 = Product(
             slug="noir-plate-case",
@@ -51,10 +47,12 @@ async def seed() -> None:
                 "upload": {"required": False},
             },
         )
-        p2.images = [ProductImage(url="/static/img/demo/case2.webp", sort=0)]
-        p2.variants = [
-            Variant(sku="NOIR-PLATE-IPH15P", device_brand="iPhone", device_model="15 Pro Max", price_delta=Decimal("0.00")),
-            Variant(sku="NOIR-PLATE-S23U", device_brand="Samsung", device_model="S23 Ultra", price_delta=Decimal("1.50")),
+        img2 = ProductImage(url="/static/img/demo/case2.webp", sort=0)
+        p2.images = [img2]
+
+        variants = [
+            Variant(sku="NOIR-INIT-IPH15P", device_brand="iPhone", device_model="15 Pro Max", price_delta=Decimal("0.00")),
+            Variant(sku="NOIR-INIT-S23U", device_brand="Samsung", device_model="S23 Ultra", price_delta=Decimal("2.00")),
         ]
 
         home_hero = ContentBlock(
@@ -73,7 +71,7 @@ async def seed() -> None:
             payload={"slugs": [p1.slug, p2.slug]},
         )
 
-        session.add_all([p1, p2, home_hero, featured])
+        session.add_all([p1, p2, home_hero, featured, *variants])
 
         admin_username = os.getenv("ADMIN_USERNAME", "admin")
         admin_password = os.getenv("ADMIN_PASSWORD", "admin")

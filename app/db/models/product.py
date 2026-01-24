@@ -6,11 +6,13 @@ from typing import Any
 
 from sqlalchemy import (
     Boolean,
+    Column,
     DateTime,
     ForeignKey,
     Index,
     Integer,
     Numeric,
+    Table,
     String,
     Text,
     UniqueConstraint,
@@ -55,8 +57,8 @@ class Product(Base):
     )
 
     images: Mapped[list["ProductImage"]] = relationship(
-        back_populates="product",
-        cascade="all, delete-orphan",
+        secondary="product_image_links",
+        back_populates="products",
     )
 
 
@@ -98,13 +100,18 @@ class ProductImage(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    product_id: Mapped[int | None] = mapped_column(
-        ForeignKey("products.id", ondelete="CASCADE"),
-        index=True,
-        nullable=True,
-    )
-
     url: Mapped[str] = mapped_column(String(500), nullable=False)
     sort: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    product: Mapped["Product"] = relationship(back_populates="images")
+    products: Mapped[list["Product"]] = relationship(
+        secondary="product_image_links",
+        back_populates="images",
+    )
+
+
+product_image_links = Table(
+    "product_image_links",
+    Base.metadata,
+    Column("product_id", ForeignKey("products.id", ondelete="CASCADE"), primary_key=True),
+    Column("image_id", ForeignKey("product_images.id", ondelete="CASCADE"), primary_key=True),
+)
