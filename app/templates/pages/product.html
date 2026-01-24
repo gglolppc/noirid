@@ -5,9 +5,25 @@
 {% block content %}
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
     <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
-      <div class="aspect-square rounded-2xl bg-black/40 border border-white/10 overflow-hidden">
-        {% if product.images and product.images[0].url %}
-          <img src="{{ product.images[0].url }}" alt="{{ product.title }}" class="h-full w-full object-cover" />
+      <div class="relative aspect-square rounded-2xl bg-black/40 border border-white/10 overflow-hidden">
+        {% if product.images %}
+          <div id="productGallery" class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scroll-smooth">
+            {% for image in product.images %}
+              <div class="h-full w-full flex-none snap-center">
+                <img src="{{ image.url }}" alt="{{ product.title }}" class="h-full w-full object-cover" />
+              </div>
+            {% endfor %}
+          </div>
+          {% if product.images|length > 1 %}
+            <button id="galleryPrev"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-black/40 px-2 py-1 text-sm text-white/80 backdrop-blur hover:text-white">
+              ‹
+            </button>
+            <button id="galleryNext"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-black/40 px-2 py-1 text-sm text-white/80 backdrop-blur hover:text-white">
+              ›
+            </button>
+          {% endif %}
         {% endif %}
       </div>
     </div>
@@ -70,6 +86,18 @@
     const brandSelect = document.getElementById('brandSelect');
     const modelSelect = document.getElementById('modelSelect');
     const modelWrap = document.getElementById('modelWrap');
+    const gallery = document.getElementById('productGallery');
+    const galleryPrev = document.getElementById('galleryPrev');
+    const galleryNext = document.getElementById('galleryNext');
+
+    function scrollGallery(direction) {
+      if (!gallery) return;
+      const amount = gallery.clientWidth;
+      gallery.scrollBy({ left: amount * direction, behavior: 'smooth' });
+    }
+
+    galleryPrev?.addEventListener('click', () => scrollGallery(-1));
+    galleryNext?.addEventListener('click', () => scrollGallery(1));
 
     const brands = [...new Set(variants.map(v => v.brand))].sort();
     brands.forEach((brand) => {

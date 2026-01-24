@@ -7,7 +7,7 @@ from decimal import Decimal
 from sqlalchemy import delete, select
 
 from app.db.session import AsyncSessionLocal
-from app.db.models.product import Product, Variant, ProductImage, product_image_links
+from app.db.models.product import Product, Variant
 from app.db.models.content import ContentBlock
 from app.db.models.user import User
 from app.services.auth import hash_password
@@ -16,8 +16,6 @@ from app.services.auth import hash_password
 async def seed() -> None:
     async with AsyncSessionLocal() as session:
         # очистка (для dev)
-        await session.execute(delete(product_image_links))
-        await session.execute(delete(ProductImage))
         await session.execute(delete(Variant))
         await session.execute(delete(Product))
         await session.execute(delete(ContentBlock))
@@ -33,8 +31,7 @@ async def seed() -> None:
                 "upload": {"required": False},
             },
         )
-        img1 = ProductImage(url="/static/img/demo/case1.webp", sort=0)
-        p1.images = [img1]
+        p1.images = [{"id": 0, "url": "/static/img/demo/case1.webp"}]
 
         p2 = Product(
             slug="noir-plate-case",
@@ -47,8 +44,7 @@ async def seed() -> None:
                 "upload": {"required": False},
             },
         )
-        img2 = ProductImage(url="/static/img/demo/case2.webp", sort=0)
-        p2.images = [img2]
+        p2.images = [{"id": 0, "url": "/static/img/demo/case2.webp"}]
 
         variants = [
             Variant(sku="NOIR-INIT-IPH15P", device_brand="iPhone", device_model="15 Pro Max", price_delta=Decimal("0.00")),

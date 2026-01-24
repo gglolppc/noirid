@@ -7,13 +7,12 @@ from decimal import Decimal
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import RedirectResponse
-from sqlalchemy import delete, select
-from sqlalchemy.orm import selectinload
+from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.templates import templates
-from app.db.models.product import Product, ProductImage, Variant, product_image_links
+from app.db.models.product import Product, Variant
 from app.db.models.user import User
 from app.db.session import get_async_session
 from app.repos.orders import OrdersRepo
@@ -224,13 +223,11 @@ async def admin_product_new(
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
 ):
-    images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
     return templates.TemplateResponse(
         "admin/product_form.html",
         {
             "request": request,
             "product": None,
-            "images": images,
             "media_folders": _list_media_folders(),
             "action_url": "/admin/products/new",
             "admin_user": admin_user,
@@ -249,7 +246,7 @@ async def admin_product_create(
     base_price: str = Form(...),
     currency: str = Form(default="USD"),
     is_active: bool = Form(default=False),
-    image_ids: list[int] = Form(default=[]),
+    image_urls: list[str] = Form(default=[]),
 ):
     product = Product(
         title=title.strip(),
@@ -258,15 +255,9 @@ async def admin_product_create(
         base_price=Decimal(base_price),
         currency=currency.strip().upper(),
         is_active=is_active,
+        images=_normalize_product_images(image_urls),
     )
     session.add(product)
-    await session.flush()
-
-    if image_ids:
-        await session.execute(
-            product_image_links.insert(),
-            [{"product_id": product.id, "image_id": image_id} for image_id in image_ids],
-        )
 
     await session.commit()
     return RedirectResponse("/admin/products", status_code=303)
@@ -279,20 +270,14 @@ async def admin_product_edit(
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
 ):
-    product = (
-        await session.execute(
-            select(Product).where(Product.id == product_id).options(selectinload(Product.images))
-        )
-    ).scalars().first()
+    product = (await session.execute(select(Product).where(Product.id == product_id))).scalars().first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    images = (await session.execute(select(ProductImage).order_by(ProductImage.id.desc()))).scalars().all()
     return templates.TemplateResponse(
         "admin/product_form.html",
         {
             "request": request,
             "product": product,
-            "images": images,
             "media_folders": _list_media_folders(),
             "action_url": f"/admin/products/{product_id}/edit",
             "admin_user": admin_user,
@@ -312,13 +297,9 @@ async def admin_product_update(
     base_price: str = Form(...),
     currency: str = Form(default="USD"),
     is_active: bool = Form(default=False),
-    image_ids: list[int] = Form(default=[]),
+    image_urls: list[str] = Form(default=[]),
 ):
-    product = (
-        await session.execute(
-            select(Product).where(Product.id == product_id).options(selectinload(Product.images))
-        )
-    ).scalars().first()
+    product = (await session.execute(select(Product).where(Product.id == product_id))).scalars().first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
@@ -328,13 +309,7 @@ async def admin_product_update(
     product.base_price = Decimal(base_price)
     product.currency = currency.strip().upper()
     product.is_active = is_active
-
-    await session.execute(delete(product_image_links).where(product_image_links.c.product_id == product.id))
-    if image_ids:
-        await session.execute(
-            product_image_links.insert(),
-            [{"product_id": product.id, "image_id": image_id} for image_id in image_ids],
-        )
+    product.images = _normalize_product_images(image_urls)
 
     await session.commit()
     return RedirectResponse("/admin/products", status_code=303)
@@ -477,11 +452,58 @@ def _list_media_folders() -> list[str]:
     return sorted(folders)
 
 
+def _list_media_images(current_path: Path, query: str = "") -> list[dict[str, str]]:
+    query = query.strip().lower()
+    images: list[dict[str, str]] = []
+    for path in sorted(current_path.iterdir(), key=lambda p: p.name.lower()):
+        if not path.is_file() or path.suffix.lower() not in ALLOWED_IMAGE_EXTENSIONS:
+            continue
+        url = _url_for_media(path)
+        if query and query not in path.name.lower() and query not in url.lower():
+            continue
+        images.append({"url": url})
+    return images
+
+
+def _normalize_product_images(image_urls: list[str]) -> list[dict[str, str]]:
+    seen = set()
+    normalized: list[dict[str, str]] = []
+    for url in image_urls:
+        cleaned = url.strip()
+        if not cleaned or cleaned in seen:
+            continue
+        seen.add(cleaned)
+        normalized.append({"id": len(normalized), "url": cleaned})
+    return normalized
+
+
+async def _update_products_for_image_change(
+    session: AsyncSession,
+    old_url: str,
+    new_url: str | None = None,
+) -> None:
+    products = (await session.execute(select(Product))).scalars().all()
+    for product in products:
+        if not product.images:
+            continue
+        updated = []
+        changed = False
+        for entry in product.images:
+            url = entry.get("url")
+            if url == old_url:
+                changed = True
+                if new_url:
+                    updated.append({"id": len(updated), "url": new_url})
+                continue
+            updated.append({"id": len(updated), "url": url})
+        if changed:
+            product.images = updated
+
+
 @router.get("/media", include_in_schema=False)
 async def admin_media_library(
     request: Request,
     admin_user=Depends(require_admin),
-    session: AsyncSession = Depends(get_async_session),
     path: str | None = None,
     q: str | None = None,
 ):
@@ -492,14 +514,7 @@ async def admin_media_library(
     folders = sorted([p for p in current_path.iterdir() if p.is_dir()], key=lambda p: p.name.lower())
 
     query = (q or "").strip().lower()
-    images_query = select(ProductImage).order_by(ProductImage.id.desc())
-    if path:
-        prefix = f"/static/images/{path.strip('/')}/"
-        images_query = images_query.where(ProductImage.url.like(f"{prefix}%"))
-    if query:
-        images_query = images_query.where(ProductImage.url.ilike(f"%{query}%"))
-    images = (await session.execute(images_query)).scalars().all()
-    products = (await session.execute(select(Product).order_by(Product.title.asc()))).scalars().all()
+    images = _list_media_images(current_path, query)
 
     folder_parts = [part for part in (path or "").split("/") if part]
     return templates.TemplateResponse(
@@ -507,7 +522,6 @@ async def admin_media_library(
         {
             "request": request,
             "images": images,
-            "products": products,
             "admin_user": admin_user,
             "folders": folders,
             "current_path": path or "",
@@ -518,11 +532,24 @@ async def admin_media_library(
     )
 
 
+@router.get("/media/images", include_in_schema=False)
+async def admin_media_images(
+    request: Request,
+    admin_user=Depends(require_admin),
+    folder: str | None = None,
+    q: str | None = None,
+):
+    current_path = _safe_media_path(folder or "")
+    if not current_path.exists():
+        raise HTTPException(status_code=404, detail="Folder not found")
+    images = _list_media_images(current_path, q or "")
+    return JSONResponse({"images": images})
+
+
 @router.post("/media/upload", include_in_schema=False)
 async def admin_media_upload(
     request: Request,
     admin_user=Depends(require_admin),
-    session: AsyncSession = Depends(get_async_session),
     image: UploadFile = File(...),
     folder: str | None = Form(default=None),
 ):
@@ -545,12 +572,6 @@ async def admin_media_upload(
 
     contents = await image.read()
     target_path.write_bytes(contents)
-
-    url = _url_for_media(target_path)
-    existing = (await session.execute(select(ProductImage).where(ProductImage.url == url))).scalars().first()
-    if not existing:
-        session.add(ProductImage(url=url, sort=0))
-    await session.commit()
     redirect_path = folder.strip("/") if folder else ""
     return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)
 
@@ -559,12 +580,10 @@ async def admin_media_upload(
 async def admin_media_create_folder(
     request: Request,
     admin_user=Depends(require_admin),
-    session: AsyncSession = Depends(get_async_session),
     folder: str = Form(...),
 ):
     target_dir = _safe_media_path(folder.strip("/"))
     target_dir.mkdir(parents=True, exist_ok=True)
-    await session.commit()
     redirect_path = folder.strip("/")
     return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)
 
@@ -584,14 +603,9 @@ async def admin_media_delete(
         target_path.rmdir()
     else:
         url = _url_for_media(target_path)
-        image_record = (await session.execute(select(ProductImage).where(ProductImage.url == url))).scalars().first()
-        if image_record:
-            await session.execute(
-                product_image_links.delete().where(product_image_links.c.image_id == image_record.id)
-            )
-            await session.delete(image_record)
         if target_path.exists():
             target_path.unlink()
+        await _update_products_for_image_change(session, url)
     await session.commit()
     redirect_path = (current_path or "").strip("/")
     return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)
@@ -616,9 +630,7 @@ async def admin_media_rename(
     source_path.replace(destination_path)
     old_url = _url_for_media(source_path)
     new_url = _url_for_media(destination_path)
-    image_record = (await session.execute(select(ProductImage).where(ProductImage.url == old_url))).scalars().first()
-    if image_record:
-        image_record.url = new_url
+    await _update_products_for_image_change(session, old_url, new_url)
     await session.commit()
     redirect_path = (current_path or "").strip("/")
     return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)

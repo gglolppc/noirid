@@ -6,13 +6,11 @@ from typing import Any
 
 from sqlalchemy import (
     Boolean,
-    Column,
     DateTime,
     ForeignKey,
     Index,
     Integer,
     Numeric,
-    Table,
     String,
     Text,
     UniqueConstraint,
@@ -56,9 +54,11 @@ class Product(Base):
         cascade="all, delete-orphan",
     )
 
-    images: Mapped[list["ProductImage"]] = relationship(
-        secondary="product_image_links",
-        back_populates="products",
+    images: Mapped[list[dict[str, str]]] = mapped_column(
+        JSONB,
+        default=list,
+        server_default="[]",
+        nullable=False,
     )
 
 
@@ -94,24 +94,3 @@ class Variant(Base):
 
     product: Mapped["Product"] = relationship(back_populates="variants")
 
-
-class ProductImage(Base):
-    __tablename__ = "product_images"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-
-    url: Mapped[str] = mapped_column(String(500), nullable=False)
-    sort: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-
-    products: Mapped[list["Product"]] = relationship(
-        secondary="product_image_links",
-        back_populates="images",
-    )
-
-
-product_image_links = Table(
-    "product_image_links",
-    Base.metadata,
-    Column("product_id", ForeignKey("products.id", ondelete="CASCADE"), primary_key=True),
-    Column("image_id", ForeignKey("product_images.id", ondelete="CASCADE"), primary_key=True),
-)
