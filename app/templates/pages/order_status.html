@@ -1,56 +1,67 @@
 {% extends "base.html" %}
-{% block title %}Order {{ order.id }} · NOIRID{% endblock %}
+{% block title %}Order {{ order_id }} · NOIRID{% endblock %}
 
 {% block content %}
   <div class="flex items-end justify-between gap-4">
     <div>
       <h1 class="text-2xl font-black">Order status</h1>
-      <p class="mt-1 text-sm text-zinc-400">Order: <span class="text-zinc-200">{{ order.id }}</span></p>
+      <p class="mt-1 text-sm text-zinc-400">Order: <span class="text-zinc-200">{{ order_id }}</span></p>
     </div>
     <a href="/catalog" class="text-sm text-zinc-300 hover:text-white">Catalog</a>
   </div>
 
-  <div class="mt-7 grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
-      <div class="text-sm text-zinc-400">Payment status</div>
-      <div id="payStatus" class="mt-2 text-xl font-bold">
-        {{ order.payment_status if order.payment_status else 'unpaid' }}
-      </div>
-
-      <div class="mt-4 text-sm text-zinc-400">Order status</div>
-      <div id="orderStatus" class="mt-1 text-lg font-semibold">
-        {{ order.status }}
-      </div>
-
-      <div id="hint" class="mt-4 text-sm text-zinc-300">
-        If it says <b>pending</b>, it’s waiting for webhook confirmation.
-      </div>
-
-      <div class="mt-6 flex gap-3">
-        <button id="refreshBtn"
-                class="rounded-2xl border border-white/15 px-5 py-3 font-semibold text-zinc-200 hover:bg-white/5">
-          Refresh
-        </button>
-        <a id="retryPayBtn"
-           href="/checkout"
-           class="hidden rounded-2xl bg-white text-zinc-950 px-5 py-3 font-semibold">
-          Try payment again
+  {% if not order %}
+    <div class="mt-7 rounded-3xl border border-white/10 bg-white/5 p-6 text-zinc-300">
+      We couldn’t find an order with that ID. Please double-check the number or return to the catalog.
+      <div class="mt-4">
+        <a href="/check-order" class="rounded-2xl border border-white/15 px-5 py-3 font-semibold text-zinc-200 hover:bg-white/5">
+          Check another order
         </a>
       </div>
     </div>
+  {% else %}
+    <div class="mt-7 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+        <div class="text-sm text-zinc-400">Payment status</div>
+        <div id="payStatus" class="mt-2 text-xl font-bold">
+          {{ order.payment_status if order.payment_status else 'unpaid' }}
+        </div>
 
-    <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
-      <h2 class="font-bold">Details</h2>
-      <div class="mt-4 text-sm text-zinc-300 space-y-2">
-        <div><span class="text-zinc-500">Email:</span> {{ order.customer_email or '-' }}</div>
-        <div><span class="text-zinc-500">Name:</span> {{ order.customer_name or '-' }}</div>
-        <div><span class="text-zinc-500">Address:</span> {{ (order.shipping_address or {}).get('line1','-') }}</div>
+        <div class="mt-4 text-sm text-zinc-400">Order status</div>
+        <div id="orderStatus" class="mt-1 text-lg font-semibold">
+          {{ order.status }}
+        </div>
+
+        <div id="hint" class="mt-4 text-sm text-zinc-300">
+          If it says <b>pending</b>, it’s waiting for webhook confirmation.
+        </div>
+
+        <div class="mt-6 flex gap-3">
+          <button id="refreshBtn"
+                  class="rounded-2xl border border-white/15 px-5 py-3 font-semibold text-zinc-200 hover:bg-white/5">
+            Refresh
+          </button>
+          <a id="retryPayBtn"
+             href="/checkout"
+             class="hidden rounded-2xl bg-white text-zinc-950 px-5 py-3 font-semibold">
+            Try payment again
+          </a>
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+        <h2 class="font-bold">Details</h2>
+        <div class="mt-4 text-sm text-zinc-300 space-y-2">
+          <div><span class="text-zinc-500">Email:</span> {{ order.customer_email or '-' }}</div>
+          <div><span class="text-zinc-500">Name:</span> {{ order.customer_name or '-' }}</div>
+          <div><span class="text-zinc-500">Address:</span> {{ (order.shipping_address or {}).get('line1','-') }}</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    const ORDER_ID = "{{ order.id }}";
-  </script>
-  <script src="/static/js/public/order_status.js"></script>
+    <script>
+      const ORDER_ID = "{{ order.id }}";
+    </script>
+    <script src="/static/js/public/order_status.js"></script>
+  {% endif %}
 {% endblock %}

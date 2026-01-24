@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
@@ -56,6 +57,11 @@ app.include_router(orders_api_router)
 app.include_router(order_status_page_router)
 app.include_router(info_page_router)
 app.include_router(admin_router)
+
+
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc) -> HTMLResponse:
+    return templates.TemplateResponse("pages/404.html", {"request": request}, status_code=404)
 
 @app.get("/health", include_in_schema=False)
 async def health() -> dict[str, str]:

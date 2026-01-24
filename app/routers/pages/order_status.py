@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.templates import templates
@@ -17,10 +17,7 @@ async def order_status_page(
     session: AsyncSession = Depends(get_async_session),
 ):
     order = await CheckoutRepo.get_order_any(session, order_id)
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
-
     return templates.TemplateResponse(
         "pages/order_status.html",
-        {"request": request, "order": order},
+        {"request": request, "order": order, "order_id": order_id},
     )
