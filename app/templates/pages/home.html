@@ -1,47 +1,39 @@
-<!-- home.html -->
 {% extends "base.html" %}
 {% block title %}NOIRID — Identity in Texture{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505]">
+<div class="relative bg-[#050505] overflow-x-hidden"> <section class="min-h-[90vh] flex flex-col justify-center relative px-6 overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,0.03),transparent_70%)] pointer-events-none"></div>
 
-  <!-- home.html (только hero section, остальное без изменений) -->
-<section class="min-h-screen flex flex-col justify-center relative px-6 overflow-hidden">
-  <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,0.03),transparent_70%)] pointer-events-none"></div>
+    <div class="relative z-10 text-center mx-auto max-w-5xl">
+      <h1 class="reveal text-[16vw] md:text-[14vw] leading-none font-black tracking-tighter uppercase text-white">
+        Noirid
+      </h1>
 
-  <div class="relative z-10 text-center mx-auto max-w-5xl">
-    <h1 class="reveal text-[18vw] md:text-[14vw] leading-none font-black tracking-tighter uppercase text-white">
-      Noirid
-    </h1>
+      <div class="reveal reveal-delay-100 flex flex-col items-center">
+        <p class="mt-2 md:mt-4 text-[10px] md:text-base tracking-[0.3em] md:tracking-[0.4em] font-light text-zinc-500 uppercase">
+          Custom black-on-black phone cases. Made to order.
+        </p>
 
-    <div class="reveal reveal-delay-100 flex flex-col items-center">
-      <p class="mt-2 md:mt-4 text-sm md:text-base tracking-[0.4em] font-light text-zinc-500 uppercase">
-        Custom black-on-black phone cases. Made to order.
-      </p>
+        <p class="mt-6 md:mt-8 text-sm md:text-xl tracking-[0.4em] md:tracking-[0.5em] font-light text-zinc-300 uppercase">
+          Personal Identity. In Black.
+        </p>
+      </div>
 
-      <p class="mt-8 text-base md:text-xl tracking-[0.5em] font-light text-zinc-300 uppercase">
-        Personal Identity. In Black.
-      </p>
+      <a
+        href="/catalog"
+        class="reveal reveal-delay-200 group relative inline-flex items-center gap-3 mt-10 md:mt-12 px-8 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-medium text-zinc-300 hover:text-white transition bg-white/5 rounded-full hover:bg-white/10"
+      >
+        <span class="relative z-10">Enter Catalog</span>
+        <span class="relative z-10 transition-transform duration-300 group-hover:translate-x-2">→</span>
+        <span class="absolute inset-0 rounded-full bg-white/5 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+      </a>
+
+      <div class="mx-auto w-px h-24 md:h-32 mt-12 bg-gradient-to-b from-zinc-700 to-transparent"></div>
     </div>
+  </section>
 
-    <a
-      href="/catalog"
-      class="reveal reveal-delay-200 group relative inline-flex items-center gap-3 mt-12 px-8 py-4 text-sm uppercase tracking-[0.4em] font-medium text-zinc-300 hover:text-white transition bg-white/5 rounded-full hover:bg-white/10"
-      aria-label="Enter Catalog"
-    >
-      <span class="relative z-10">Enter Catalog</span>
-      <span class="relative z-10 transition-transform duration-300 group-hover:translate-x-2">→</span>
-      <!-- Glow effect -->
-      <span class="absolute inset-0 rounded-full bg-white/5 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-    </a>
-
-    <!-- Divider -->
-    <div class="mx-auto w-px h-32 mt-12 bg-gradient-to-b from-zinc-700 to-transparent"></div>
-  </div>
-</section>
-
-  <section class="min-h-screen flex items-center px-6 py-24 bg-[#030303] border-y border-white/10 relative">
-    <div class="mx-auto max-w-7xl w-full grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
+  <section class="min-h-screen flex items-center px-6 py-24 bg-[#030303] border-y border-white/10 relative overflow-hidden"> <div class="mx-auto max-w-7xl w-full grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
 
       <div class="md:col-span-7">
         <div class="reveal">
@@ -52,19 +44,19 @@
           </h2>
         </div>
 
-        <div class="reveal reveal-delay-100 mt-16 grid grid-cols-1 sm:grid-cols-2 gap-10">
+        <div class="reveal reveal-delay-100 mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 gap-10">
           <div class="space-y-8">
             <div class="flex items-start gap-4">
               <div class="w-px h-12 bg-white/30"></div>
               <div>
-                <div class="text-xs uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Origin</div>
+                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Origin</div>
                 <div class="text-base font-light text-zinc-300">Crafted in Moldova</div>
               </div>
             </div>
             <div class="flex items-start gap-4">
               <div class="w-px h-12 bg-white/30"></div>
               <div>
-                <div class="text-xs uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Logistics</div>
+                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Logistics</div>
                 <div class="text-base font-light text-zinc-300">Global shipping included</div>
               </div>
             </div>
@@ -73,7 +65,7 @@
             <div class="flex items-start gap-4">
               <div class="w-px h-12 bg-white/30"></div>
               <div>
-                <div class="text-xs uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Guarantee</div>
+                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Guarantee</div>
                 <div class="text-base font-light text-zinc-300">Free remake on any issues</div>
               </div>
             </div>
@@ -81,9 +73,9 @@
         </div>
       </div>
 
-      <div class="md:col-span-5 reveal reveal-delay-200">
+      <div class="md:col-span-5 reveal reveal-delay-200 relative">
         <div class="relative group">
-          <div class="absolute -inset-24 bg-white/[0.02] blur-[80px] rounded-full group-hover:bg-white/[0.04] transition-all duration-700"></div>
+          <div class="absolute -inset-10 md:-inset-24 bg-white/[0.02] blur-[60px] md:blur-[80px] rounded-full group-hover:bg-white/[0.04] transition-all duration-700"></div>
           <img
             src="/static/img/texture.png"
             alt="NOIRID Texture Example"
@@ -95,21 +87,21 @@
     </div>
   </section>
 
-  <section class="min-h-screen flex items-center px-6 py-24">
+  <section class="min-h-screen flex items-center px-6 py-24 overflow-hidden">
     <div class="mx-auto max-w-7xl w-full">
       {% if featured_product %}
         <div class="flex flex-col md:flex-row items-center gap-16">
           <div class="w-full md:w-1/2 reveal">
             <img
               src="{{ featured_product.images[0]['url'] if featured_product.images else '' }}"
-              alt="{{ featured_product.title }} - Custom Phone Case"
+              alt="{{ featured_product.title }}"
               loading="lazy"
-              class="w-full max-w-[500px] mx-auto drop-shadow-xl brightness-105"
+              class="w-full max-w-[400px] md:max-w-[500px] mx-auto drop-shadow-xl brightness-105"
             />
           </div>
 
           <div class="w-full md:w-1/2 reveal reveal-delay-100 text-center md:text-left">
-            <h3 class="text-6xl md:text-8xl font-black uppercase tracking-tighter text-white mb-10">
+            <h3 class="text-5xl md:text-8xl font-black uppercase tracking-tighter text-white mb-10">
               {{ featured_product.title }}
             </h3>
             <div class="space-y-3 text-zinc-400 font-light text-lg mb-14">
@@ -119,11 +111,10 @@
 
             <div class="flex flex-col md:items-start items-center gap-6">
               <a href="/p/{{ featured_product.slug }}"
-                 class="inline-block bg-white text-black px-12 py-4 text-sm uppercase tracking-[0.4em] font-bold transition-all hover:bg-zinc-100 rounded-md"
-                 aria-label="Personalize {{ featured_product.title }}">
+                 class="w-full md:w-auto text-center bg-white text-black px-12 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-bold transition-all hover:bg-zinc-100 rounded-md">
                 Personalize <span class="ml-2">→</span>
               </a>
-              <span class="text-xs uppercase tracking-[0.3em] text-zinc-500">Just a minute to customize.</span>
+              <span class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">Just a minute to customize.</span>
             </div>
           </div>
         </div>
@@ -131,19 +122,19 @@
     </div>
   </section>
 
-  <section class="py-24 px-6 border-t border-white/10">
+  <section class="py-24 px-6 border-t border-white/10 overflow-hidden">
     <div class="mx-auto max-w-7xl">
-      <div class="reveal flex flex-col md:flex-row justify-between items-center gap-10 text-xs uppercase tracking-[0.3em] text-zinc-400 font-medium">
+      <div class="reveal flex flex-col md:flex-row justify-between items-center gap-10 text-[10px] md:text-xs uppercase tracking-[0.3em] text-zinc-400 font-medium">
         <div class="flex items-center gap-4">
-          <span class="text-white opacity-30 text-3xl font-black italic">01</span> Select Model
+          <span class="text-white opacity-30 text-2xl md:text-3xl font-black italic">01</span> Select Model
         </div>
         <div class="hidden md:block w-16 h-px bg-white/20"></div>
         <div class="flex items-center gap-4">
-          <span class="text-white opacity-30 text-3xl font-black italic">02</span> Add Personalization
+          <span class="text-white opacity-30 text-2xl md:text-3xl font-black italic">02</span> Add Personalization
         </div>
         <div class="hidden md:block w-16 h-px bg-white/20"></div>
         <div class="flex items-center gap-4">
-          <span class="text-white opacity-30 text-3xl font-black italic">03</span> Receive Your NOIRID
+          <span class="text-white opacity-30 text-2xl md:text-3xl font-black italic">03</span> Receive Your NOIRID
         </div>
       </div>
     </div>
@@ -151,4 +142,3 @@
 
 </div>
 {% endblock %}
-
