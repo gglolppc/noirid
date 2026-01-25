@@ -64,6 +64,7 @@ async def seed() -> None:
             base_price=Decimal("24.00"),
             currency="USD",
             personalization_schema={"initials": 4, "number": 6},
+            images=[],  # <-- ВОТ ЭТО ОБЯЗАТЕЛЬНО
         )
 
         p2 = Product(
@@ -73,6 +74,7 @@ async def seed() -> None:
             base_price=Decimal("26.00"),
             currency="USD",
             personalization_schema={"initials": 3, "number": 8},
+            images=[],  # <-- И ТУТ
         )
 
         # Варианты прикрепляем к продукту через relationship "product"
