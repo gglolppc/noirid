@@ -27,8 +27,8 @@ async def seed() -> None:
             base_price=Decimal("24.00"),
             currency="USD",
             personalization_schema={
-                "text": {"max_len": 4, "fonts": ["Inter", "Cinzel"], "colors": ["#ffffff"]},
-                "upload": {"required": False},
+                "initials": 4,
+                "number": 6,
             },
         )
         p1.images = [{"id": 0, "url": "/static/img/demo/case1.webp"}]
@@ -40,8 +40,8 @@ async def seed() -> None:
             base_price=Decimal("26.00"),
             currency="USD",
             personalization_schema={
-                "text": {"max_len": 10, "fonts": ["Inter"], "colors": ["#ffffff"]},
-                "upload": {"required": False},
+                "initials": 3,
+                "number": 8,
             },
         )
         p2.images = [{"id": 0, "url": "/static/img/demo/case2.webp"}]

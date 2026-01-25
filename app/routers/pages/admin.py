@@ -3,6 +3,7 @@ from __future__ import annotations
 from math import ceil
 
 from decimal import Decimal
+import json
 
 from pathlib import Path
 
@@ -247,7 +248,9 @@ async def admin_product_create(
     currency: str = Form(default="USD"),
     is_active: bool = Form(default=False),
     image_urls: list[str] = Form(default=[]),
+    personalization_schema: str | None = Form(default=None),
 ):
+    personalization_payload = _parse_personalization_schema(personalization_schema)
     product = Product(
         title=title.strip(),
         slug=slug.strip(),
@@ -255,6 +258,7 @@ async def admin_product_create(
         base_price=Decimal(base_price),
         currency=currency.strip().upper(),
         is_active=is_active,
+        personalization_schema=personalization_payload,
         images=_normalize_product_images(image_urls),
     )
     session.add(product)
@@ -298,17 +302,20 @@ async def admin_product_update(
     currency: str = Form(default="USD"),
     is_active: bool = Form(default=False),
     image_urls: list[str] = Form(default=[]),
+    personalization_schema: str | None = Form(default=None),
 ):
     product = (await session.execute(select(Product).where(Product.id == product_id))).scalars().first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
+    personalization_payload = _parse_personalization_schema(personalization_schema)
     product.title = title.strip()
     product.slug = slug.strip()
     product.description = description.strip() if description else None
     product.base_price = Decimal(base_price)
     product.currency = currency.strip().upper()
     product.is_active = is_active
+    product.personalization_schema = personalization_payload
     product.images = _normalize_product_images(image_urls)
 
     await session.commit()
@@ -475,6 +482,37 @@ def _normalize_product_images(image_urls: list[str]) -> list[dict[str, str]]:
         seen.add(cleaned)
         normalized.append({"id": len(normalized), "url": cleaned})
     return normalized
+
+
+def _parse_personalization_schema(raw_schema: str | None) -> dict[str, int]:
+    if raw_schema is None:
+        return {}
+    if not raw_schema.strip():
+        return {}
+    try:
+        data = json.loads(raw_schema)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid personalization schema JSON: {exc.msg}") from exc
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=400, detail="Personalization schema must be a JSON object")
+    parsed: dict[str, int] = {}
+    for key, value in data.items():
+        if not isinstance(key, str):
+            raise HTTPException(status_code=400, detail="Personalization schema keys must be strings")
+        try:
+            limit = int(value)
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Personalization schema value for '{key}' must be an integer",
+            ) from exc
+        if limit < 1:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Personalization schema value for '{key}' must be greater than 0",
+            )
+        parsed[key] = limit
+    return parsed
 
 
 async def _update_products_for_image_change(

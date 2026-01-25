@@ -120,9 +120,32 @@ async def add_to_cart(
     if not variant:
         raise HTTPException(status_code=404, detail="Variant not found")
 
-    personalization_text = (payload.personalization or {}).get("text", "")
-    if not str(personalization_text).strip():
-        raise HTTPException(status_code=400, detail="Personalization is required")
+    personalization_payload = payload.personalization or {}
+    schema = product.personalization_schema or {}
+    personalization: dict[str, str] = {}
+    if schema:
+        for key, limit in schema.items():
+            value = str(personalization_payload.get(key, "")).strip()
+            if not value:
+                raise HTTPException(status_code=400, detail=f"Personalization '{key}' is required")
+            if isinstance(limit, dict):
+                limit = limit.get("max_len", 0)
+            try:
+                limit_value = int(limit)
+            except (TypeError, ValueError):
+                limit_value = 0
+            if limit_value > 0 and len(value) > limit_value:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Personalization '{key}' must be {limit_value} characters or less",
+                )
+            personalization[key] = value
+    else:
+        personalization = {
+            str(key): str(value).strip()
+            for key, value in personalization_payload.items()
+            if str(value).strip()
+        }
 
     unit_price = PricingService.calc_unit_price(product, variant)
 
@@ -132,7 +155,7 @@ async def add_to_cart(
         product=product,
         variant=variant,
         qty=payload.qty,
-        personalization={"text": str(personalization_text).strip()},
+        personalization=personalization,
         unit_price=unit_price,
     )
 

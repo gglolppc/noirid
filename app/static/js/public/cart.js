@@ -40,6 +40,15 @@ function renderCart(cart) {
   itemsEl.innerHTML = "";
   cart.items.forEach((it) => {
     const row = document.createElement("div");
+    const personalizationEntries = Object.entries(it.personalization || {})
+      .filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== "")
+      .map(([key, value]) => `${key}: ${value}`);
+    const personalizationLine = personalizationEntries.length
+      ? `<div class="text-xs text-zinc-400 font-light flex items-center gap-2 justify-center md:justify-start">
+           <span class="w-1 h-1 rounded-full bg-white/30"></span>
+           Personalization: <span class="text-white/80 italic">${personalizationEntries.join(", ")}</span>
+         </div>`
+      : "";
     // Карточка товара: белый текст, серый вторичный текст
     row.className = "group relative flex flex-col md:flex-row items-center gap-8 py-8 border-b border-white/5 last:border-0";
 
@@ -52,12 +61,7 @@ function renderCart(cart) {
         <div class="text-xl font-medium text-white mb-1">${it.title}</div>
         <div class="text-[10px] uppercase tracking-widest text-zinc-500 mb-3 italic">Ref. #00${it.id}</div>
         
-        ${it.personalization && it.personalization.text 
-          ? `<div class="text-xs text-zinc-400 font-light flex items-center gap-2 justify-center md:justify-start">
-               <span class="w-1 h-1 rounded-full bg-white/30"></span> 
-               Personalization: <span class="text-white/80 italic">"${it.personalization.text}"</span>
-             </div>` 
-          : ""}
+        ${personalizationLine}
       </div>
 
       <div class="flex flex-col items-center md:items-end gap-4">

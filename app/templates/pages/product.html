@@ -45,16 +45,28 @@
 
         <div class="reveal reveal-delay-2 flex flex-col justify-center">
           <div class="space-y-10">
+            {% set personalization_schema = product.personalization_schema or {} %}
+            {% set personalization_count = personalization_schema|length %}
+
+            {% for key, limit in personalization_schema.items()|sort %}
+              {% set limit_value = limit.max_len if limit is mapping and limit.max_len is defined else limit %}
+              <div class="group relative">
+                <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 group-focus-within:text-zinc-200 transition-colors">
+                  {{ "%02d"|format(loop.index) }}. Type your {{ key }}
+                </label>
+                <input type="text"
+                       class="mt-2 w-full bg-transparent border-b border-white/10 py-4 text-xl text-white placeholder:text-zinc-800 focus:outline-none focus:border-white/40 transition-all duration-300 font-light"
+                       placeholder="Type your {{ key }}" autocomplete="off"
+                       data-personalization-key="{{ key }}"
+                       data-personalization-max="{{ limit_value }}"
+                       maxlength="{{ limit_value }}">
+              </div>
+            {% endfor %}
 
             <div class="group relative">
-              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 group-focus-within:text-zinc-200 transition-colors">01. Personalization Text</label>
-              <input id="personalizationInput" type="text"
-                     class="mt-2 w-full bg-transparent border-b border-white/10 py-4 text-xl text-white placeholder:text-zinc-800 focus:outline-none focus:border-white/40 transition-all duration-300 font-light"
-                     placeholder="Enter name or initials" autocomplete="off">
-            </div>
-
-            <div class="group relative">
-              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">02. Device Brand</label>
+              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
+                {{ "%02d"|format(personalization_count + 1) }}. Device Brand
+              </label>
               <div id="brandCustomSelect" class="relative mt-2">
                 <div class="select-trigger w-full border-b border-white/10 py-4 text-xl text-white font-light cursor-pointer flex justify-between items-center hover:border-white/30 transition-all">
                   <span class="selected-value text-zinc-600">Select Brand</span>
@@ -66,7 +78,9 @@
             </div>
 
             <div id="modelWrap" class="group relative hidden opacity-0 transition-all duration-500">
-              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">03. Device Model</label>
+              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
+                {{ "%02d"|format(personalization_count + 2) }}. Device Model
+              </label>
               <div id="modelCustomSelect" class="relative mt-2">
                 <div class="select-trigger w-full border-b border-white/10 py-4 text-xl text-white font-light cursor-pointer flex justify-between items-center hover:border-white/30 transition-all">
                   <span class="selected-value text-zinc-600">Select Model</span>
@@ -201,10 +215,21 @@
 
   // --- Cart Submission ---
   document.getElementById('addToCartBtn').addEventListener('click', async () => {
-    const personalization = document.getElementById('personalizationInput').value.trim();
+    const personalization = {};
+    const personalizationInputs = document.querySelectorAll('[data-personalization-key]');
+    for (const input of personalizationInputs) {
+      const key = input.getAttribute('data-personalization-key');
+      const maxLength = parseInt(input.getAttribute('data-personalization-max') || "0", 10);
+      const value = input.value.trim();
+
+      if (!value) return notify(`Enter personalization for ${key}`, true);
+      if (Number.isFinite(maxLength) && maxLength > 0 && value.length > maxLength) {
+        return notify(`"${key}" must be ${maxLength} characters or less`, true);
+      }
+      personalization[key] = value;
+    }
     const btn = document.getElementById('addToCartBtn');
 
-    if (!personalization) return notify('Enter personalization text', true);
     if (!selectedBrand || !selectedModel) return notify('Select your device', true);
 
     const match = variants.find(v => v.brand === selectedBrand && v.model === selectedModel);
@@ -220,7 +245,7 @@
           product_id: {{ product.id }},
           variant_id: match?.id,
           qty: 1,
-          personalization: { text: personalization }
+          personalization: personalization
         })
       });
 

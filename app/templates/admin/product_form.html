@@ -30,6 +30,14 @@
                 class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2 text-sm">{{ product.description if product else '' }}</textarea>
     </div>
 
+    <div>
+      <label class="text-xs text-zinc-400">Personalization schema (JSON)</label>
+      <textarea name="personalization_schema" rows="3"
+                class="mt-2 w-full rounded-xl bg-zinc-950 border border-white/10 px-3 py-2 text-sm font-mono"
+                placeholder='{"initials": 2, "number": 6}'>{{ product.personalization_schema|tojson if product else "" }}</textarea>
+      <p class="mt-2 text-[11px] text-zinc-500">Use a JSON object where each key is a personalization field and the value is the max character length.</p>
+    </div>
+
     <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
       <div>
         <label class="text-xs text-zinc-400">Base price</label>
