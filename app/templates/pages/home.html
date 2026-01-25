@@ -1,130 +1,129 @@
+<!-- home.html -->
 {% extends "base.html" %}
 {% block title %}NOIRID — Identity in Texture{% endblock %}
-
-
 
 {% block content %}
 <div class="relative bg-[#050505]">
 
-  <section class="min-h-screen flex flex-col justify-center relative px-6 overflow-hidden">
-  <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,_rgba(255,255,255,0.04),transparent_60%)] pointer-events-none"></div>
+  <!-- home.html (только hero section, остальное без изменений) -->
+<section class="min-h-screen flex flex-col justify-center relative px-6 overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,0.03),transparent_70%)] pointer-events-none"></div>
 
-  <div class="relative z-10 text-center">
-    <h1 class="reveal text-[20vw] md:text-[16vw] leading-none font-black tracking-tighter uppercase text-white">
+  <div class="relative z-10 text-center mx-auto max-w-5xl">
+    <h1 class="reveal text-[18vw] md:text-[14vw] leading-none font-black tracking-tighter uppercase text-white">
       Noirid
     </h1>
 
-    <div class="reveal reveal-delay-1 flex flex-col items-center -mt-2 md:-mt-6">
-  <p class="text-[10px] md:text-sm tracking-[0.45em] font-light text-zinc-600 uppercase">
-    Custom black-on-black phone cases. Made to order.
-  </p>
+    <div class="reveal reveal-delay-100 flex flex-col items-center">
+      <p class="mt-2 md:mt-4 text-sm md:text-base tracking-[0.4em] font-light text-zinc-500 uppercase">
+        Custom black-on-black phone cases. Made to order.
+      </p>
 
-  <p class="mt-6 text-xs md:text-lg tracking-[0.6em] font-light text-zinc-400 uppercase">
-    Personal Identity. in black.
-  </p>
-</div>
-
-        <a
-          href="/catalog"
-          class="group relative inline-flex items-center gap-4 text-[10px] md:text-xs uppercase tracking-[0.45em] font-medium text-zinc-400 hover:text-white transition"
-        >
-          <span class="relative z-10">Enter Catalog</span>
-          <span class="relative z-10 transition-transform duration-500 group-hover:translate-x-1">→</span>
-
-          <!-- glow -->
-          <span
-            class="absolute inset-x-[-48px] inset-y-[-16px] rounded-full bg-white/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-          ></span>
-        </a>
-
-        <!-- divider -->
-        <div class="w-px h-24 bg-gradient-to-b from-zinc-800 to-transparent"></div>
-      </div>
+      <p class="mt-8 text-base md:text-xl tracking-[0.5em] font-light text-zinc-300 uppercase">
+        Personal Identity. In Black.
+      </p>
     </div>
+
+    <a
+      href="/catalog"
+      class="reveal reveal-delay-200 group relative inline-flex items-center gap-3 mt-12 px-8 py-4 text-sm uppercase tracking-[0.4em] font-medium text-zinc-300 hover:text-white transition bg-white/5 rounded-full hover:bg-white/10"
+      aria-label="Enter Catalog"
+    >
+      <span class="relative z-10">Enter Catalog</span>
+      <span class="relative z-10 transition-transform duration-300 group-hover:translate-x-2">→</span>
+      <!-- Glow effect -->
+      <span class="absolute inset-0 rounded-full bg-white/5 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+    </a>
+
+    <!-- Divider -->
+    <div class="mx-auto w-px h-32 mt-12 bg-gradient-to-b from-zinc-700 to-transparent"></div>
   </div>
 </section>
 
-  <section class="min-h-screen flex items-center px-8 py-32 bg-[#030303] border-y border-white/5 relative">
-    <div class="mx-auto max-w-7xl w-full grid grid-cols-1 md:grid-cols-12 gap-20 items-center">
+  <section class="min-h-screen flex items-center px-6 py-24 bg-[#030303] border-y border-white/10 relative">
+    <div class="mx-auto max-w-7xl w-full grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
 
       <div class="md:col-span-7">
         <div class="reveal">
-            <h2 class="text-5xl md:text-[110px] font-light tracking-tight leading-[0.85] text-white">
-              No glossy print.<br/>
-              <span class="text-outline font-black italic">Only texture.</span><br/>
-              Pure.
-            </h2>
+          <h2 class="text-4xl md:text-8xl lg:text-[100px] font-light tracking-tight leading-[0.9] text-white">
+            No glossy print.<br/>
+            <span class="text-outline font-black italic">Only texture.</span><br/>
+            Pure & Discreet.
+          </h2>
         </div>
 
-        <div class="reveal reveal-delay-1 mt-20 grid grid-cols-1 sm:grid-cols-2 gap-12">
-          <div class="space-y-6">
+        <div class="reveal reveal-delay-100 mt-16 grid grid-cols-1 sm:grid-cols-2 gap-10">
+          <div class="space-y-8">
             <div class="flex items-start gap-4">
-              <div class="w-px h-10 bg-white/20"></div>
+              <div class="w-px h-12 bg-white/30"></div>
               <div>
-                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-600 font-bold mb-1">Origin</div>
-                <div class="text-sm font-light text-zinc-400">Made in Moldova</div>
+                <div class="text-xs uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Origin</div>
+                <div class="text-base font-light text-zinc-300">Crafted in Moldova</div>
               </div>
             </div>
             <div class="flex items-start gap-4">
-              <div class="w-px h-10 bg-white/20"></div>
+              <div class="w-px h-12 bg-white/30"></div>
               <div>
-                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-600 font-bold mb-1">Logistics</div>
-                <div class="text-sm font-light text-zinc-400">Worldwide shipping included</div>
+                <div class="text-xs uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Logistics</div>
+                <div class="text-base font-light text-zinc-300">Global shipping included</div>
               </div>
             </div>
           </div>
-          <div class="space-y-6">
+          <div class="space-y-8">
             <div class="flex items-start gap-4">
-              <div class="w-px h-10 bg-white/20"></div>
+              <div class="w-px h-12 bg-white/30"></div>
               <div>
-                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-600 font-bold mb-1">Guarantee</div>
-                <div class="text-sm font-light text-zinc-400">Free remake if something goes wrong</div>
+                <div class="text-xs uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Guarantee</div>
+                <div class="text-base font-light text-zinc-300">Free remake on any issues</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="md:col-span-5 reveal reveal-delay-2">
+      <div class="md:col-span-5 reveal reveal-delay-200">
         <div class="relative group">
-          <div class="absolute -inset-20 bg-white/[0.01] blur-[100px] rounded-full group-hover:bg-white/[0.03] transition-all duration-1000"></div>
+          <div class="absolute -inset-24 bg-white/[0.02] blur-[80px] rounded-full group-hover:bg-white/[0.04] transition-all duration-700"></div>
           <img
             src="/static/img/texture.png"
-            alt="Noirid Texture"
-            class="relative z-10 w-full h-auto object-contain opacity-90 drop-shadow-[0_0_50px_rgba(255,255,255,0.02)]"
+            alt="NOIRID Texture Example"
+            loading="lazy"
+            class="relative z-10 w-full h-auto object-contain opacity-95 drop-shadow-[0_0_40px_rgba(255,255,255,0.03)]"
           />
         </div>
       </div>
     </div>
   </section>
 
-  <section class="min-h-screen flex items-center px-8 py-32">
+  <section class="min-h-screen flex items-center px-6 py-24">
     <div class="mx-auto max-w-7xl w-full">
       {% if featured_product %}
-        <div class="flex flex-col md:flex-row items-center gap-20">
+        <div class="flex flex-col md:flex-row items-center gap-16">
           <div class="w-full md:w-1/2 reveal">
             <img
-                src="{{ featured_product.images[0]['url'] if featured_product.images else '' }}"
-                alt="{{ featured_product.title }}"
-                class="w-full max-w-[450px] mx-auto drop-shadow-2xl brightness-110"
+              src="{{ featured_product.images[0]['url'] if featured_product.images else '' }}"
+              alt="{{ featured_product.title }} - Custom Phone Case"
+              loading="lazy"
+              class="w-full max-w-[500px] mx-auto drop-shadow-xl brightness-105"
             />
           </div>
 
-          <div class="w-full md:w-1/2 reveal reveal-delay-1 text-center md:text-left">
-            <h3 class="text-7xl md:text-9xl font-black uppercase tracking-tighter text-white mb-8">
+          <div class="w-full md:w-1/2 reveal reveal-delay-100 text-center md:text-left">
+            <h3 class="text-6xl md:text-8xl font-black uppercase tracking-tighter text-white mb-10">
               {{ featured_product.title }}
             </h3>
-            <div class="space-y-2 text-zinc-500 font-light text-xl mb-12">
-                <p>Readable plate design.</p>
-                <p>Clean geometry.</p>
+            <div class="space-y-3 text-zinc-400 font-light text-lg mb-14">
+              <p>Readable plate design.</p>
+              <p>Clean, geometric forms.</p>
             </div>
 
             <div class="flex flex-col md:items-start items-center gap-6">
-                <a href="/p/{{ featured_product.slug }}"
-                   class="inline-block bg-white text-black px-14 py-5 text-[11px] uppercase tracking-[0.5em] font-black transition-all hover:bg-zinc-200">
-                  Personalize <span class="ml-2">→</span>
-                </a>
-                <span class="text-[10px] uppercase tracking-[0.3em] text-zinc-600">Takes less than a minute.</span>
+              <a href="/p/{{ featured_product.slug }}"
+                 class="inline-block bg-white text-black px-12 py-4 text-sm uppercase tracking-[0.4em] font-bold transition-all hover:bg-zinc-100 rounded-md"
+                 aria-label="Personalize {{ featured_product.title }}">
+                Personalize <span class="ml-2">→</span>
+              </a>
+              <span class="text-xs uppercase tracking-[0.3em] text-zinc-500">Just a minute to customize.</span>
             </div>
           </div>
         </div>
@@ -132,25 +131,24 @@
     </div>
   </section>
 
-  <section class="py-32 px-8 border-t border-white/5">
+  <section class="py-24 px-6 border-t border-white/10">
     <div class="mx-auto max-w-7xl">
-        <div class="reveal flex flex-col md:flex-row justify-between items-center gap-12 text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-medium">
-            <div class="flex items-center gap-4">
-                <span class="text-white opacity-20 text-2xl font-black italic">01</span> Choose model
-            </div>
-            <div class="hidden md:block w-12 h-px bg-white/10"></div>
-            <div class="flex items-center gap-4">
-                <span class="text-white opacity-20 text-2xl font-black italic">02</span> Add personalization
-            </div>
-            <div class="hidden md:block w-12 h-px bg-white/10"></div>
-            <div class="flex items-center gap-4">
-                <span class="text-white opacity-20 text-2xl font-black italic">03</span> Receive your Noirid
-            </div>
+      <div class="reveal flex flex-col md:flex-row justify-between items-center gap-10 text-xs uppercase tracking-[0.3em] text-zinc-400 font-medium">
+        <div class="flex items-center gap-4">
+          <span class="text-white opacity-30 text-3xl font-black italic">01</span> Select Model
         </div>
+        <div class="hidden md:block w-16 h-px bg-white/20"></div>
+        <div class="flex items-center gap-4">
+          <span class="text-white opacity-30 text-3xl font-black italic">02</span> Add Personalization
+        </div>
+        <div class="hidden md:block w-16 h-px bg-white/20"></div>
+        <div class="flex items-center gap-4">
+          <span class="text-white opacity-30 text-3xl font-black italic">03</span> Receive Your NOIRID
+        </div>
+      </div>
     </div>
   </section>
 
 </div>
 {% endblock %}
 
-{% block footer %}{% endblock %}

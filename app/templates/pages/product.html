@@ -3,77 +3,91 @@
 {% block title %}{{ product.title }} · NOIRID{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505]">
-  <section class="min-h-screen pt-36 pb-24 px-8">
-    <div class="mx-auto max-w-6xl">
+<div class="relative bg-[#050505] selection:bg-white selection:text-black min-h-screen">
+  <section class="pt-32 pb-24 px-6 md:px-12">
+    <div class="mx-auto max-w-6xl w-full">
+
       <div class="reveal">
-        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-600">Product</div>
-        <h1 class="mt-6 text-5xl md:text-7xl font-black uppercase tracking-tight text-white">{{ product.title }}</h1>
-        <p class="mt-4 text-sm md:text-base text-zinc-400 max-w-2xl">{{ product.description or "" }}</p>
+        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-500 font-medium">Design / Detail</div>
+        <h1 class="mt-6 text-6xl md:text-8xl font-bold uppercase tracking-[-0.05em] text-white leading-[0.85]">
+          {{ product.title }}
+        </h1>
+        <div class="mt-8 flex items-center justify-between border-b border-white/10 pb-6">
+          <p class="text-sm md:text-base text-zinc-400 font-light max-w-xl leading-relaxed">
+            {{ product.description or "Limited edition design. Engineered for a perfect fit and minimalist aesthetic." }}
+          </p>
+          <div class="text-right">
+             <div class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-1">Base Price</div>
+             <div class="text-3xl font-light text-white italic tracking-tight">
+               {{ "%.2f"|format(product.base_price) }} <span class="text-sm font-normal text-zinc-500 not-italic uppercase">{{ product.currency }}</span>
+             </div>
+          </div>
+        </div>
       </div>
 
-      <div class="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div class="reveal rounded-3xl border border-white/10 bg-white/5 p-6">
-          <div class="relative aspect-square rounded-2xl bg-black/40 border border-white/10 overflow-hidden">
+      <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+        <div class="reveal reveal-delay-1">
+          <div class="relative aspect-[4/5] rounded-[40px] border border-white/10 bg-[#0A0A0A] overflow-hidden group">
+            <div class="pointer-events-none absolute inset-0 z-10 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"></div>
             {% if product.images %}
-              <div id="productGallery" class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scroll-smooth">
+              <div id="productGallery" class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
                 {% for image in product.images %}
-                  <div class="h-full w-full flex-none snap-center">
-                    <img src="{{ image.url }}" alt="{{ product.title }}" class="h-full w-full object-cover" />
+                  <div class="h-full w-full flex-none snap-center flex items-center justify-center p-12 md:p-20">
+                    <img src="{{ image.url }}" alt="{{ product.title }}" class="h-full w-full object-contain transition-transform duration-700 group-hover:scale-105" />
                   </div>
                 {% endfor %}
               </div>
-              {% if product.images|length > 1 %}
-                <button id="galleryPrev"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-black/40 px-2 py-1 text-sm text-white/80 backdrop-blur hover:text-white">
-                  ‹
-                </button>
-                <button id="galleryNext"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-black/40 px-2 py-1 text-sm text-white/80 backdrop-blur hover:text-white">
-                  ›
-                </button>
-              {% endif %}
+            {% else %}
+               <div class="h-full w-full flex items-center justify-center text-zinc-700 text-[10px] uppercase tracking-[0.5em]">No Visuals Available</div>
             {% endif %}
           </div>
         </div>
 
-        <div class="reveal reveal-delay-1">
-          <div class="rounded-3xl border border-white/10 bg-white/5 p-8 space-y-6">
-            <div class="flex items-center justify-between">
-              <div class="text-sm uppercase tracking-[0.3em] text-zinc-500">Base price</div>
-              <div class="text-2xl font-semibold text-white">{{ "%.2f"|format(product.base_price) }} {{ product.currency }}</div>
+        <div class="reveal reveal-delay-2 flex flex-col justify-center">
+          <div class="space-y-10">
+
+            <div class="group relative">
+              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 group-focus-within:text-zinc-200 transition-colors">01. Personalization Text</label>
+              <input id="personalizationInput" type="text"
+                     class="mt-2 w-full bg-transparent border-b border-white/10 py-4 text-xl text-white placeholder:text-zinc-800 focus:outline-none focus:border-white/40 transition-all duration-300 font-light"
+                     placeholder="Enter name or initials" autocomplete="off">
             </div>
 
-            <div>
-              <label class="text-sm text-zinc-400">Personalization</label>
-              <input id="personalizationInput" type="text" required
-                     class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                     placeholder="Enter your text">
+            <div class="group relative">
+              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">02. Device Brand</label>
+              <div id="brandCustomSelect" class="relative mt-2">
+                <div class="select-trigger w-full border-b border-white/10 py-4 text-xl text-white font-light cursor-pointer flex justify-between items-center hover:border-white/30 transition-all">
+                  <span class="selected-value text-zinc-600">Select Brand</span>
+                  <span class="text-[10px] transition-transform duration-300">↓</span>
+                </div>
+                <div class="select-options absolute top-full left-0 w-full z-30 mt-2 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-200 translate-y-2">
+                  </div>
+              </div>
             </div>
 
-            <div>
-              <label class="text-sm text-zinc-400">Select brand</label>
-              <select id="brandSelect" class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm">
-                <option value="">Select brand</option>
-              </select>
+            <div id="modelWrap" class="group relative hidden opacity-0 transition-all duration-500">
+              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">03. Device Model</label>
+              <div id="modelCustomSelect" class="relative mt-2">
+                <div class="select-trigger w-full border-b border-white/10 py-4 text-xl text-white font-light cursor-pointer flex justify-between items-center hover:border-white/30 transition-all">
+                  <span class="selected-value text-zinc-600">Select Model</span>
+                  <span class="text-[10px] transition-transform duration-300">↓</span>
+                </div>
+                <div class="select-options absolute top-full left-0 w-full z-30 mt-2 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-200 translate-y-2">
+                  </div>
+              </div>
             </div>
 
-            <div id="modelWrap" class="hidden">
-              <label class="text-sm text-zinc-400">Select model</label>
-              <select id="modelSelect" class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm">
-                <option value="">Select model</option>
-              </select>
-            </div>
-
-            <div class="flex flex-wrap gap-3">
+            <div class="pt-8 space-y-4">
               <button id="addToCartBtn"
-                      class="rounded-2xl bg-white text-zinc-950 px-6 py-3 text-[11px] uppercase tracking-[0.4em] font-semibold">
-                Add to cart
+                      class="w-full rounded-full bg-white text-black py-6 text-[11px] font-bold uppercase tracking-[0.5em] transition-all hover:bg-zinc-200 active:scale-[0.98] disabled:opacity-50">
+                Add To Bag
               </button>
-              <a href="/catalog" class="rounded-2xl border border-white/15 px-6 py-3 text-[11px] uppercase tracking-[0.4em] font-semibold text-zinc-200 hover:bg-white/5">
-                Back
-              </a>
+              <div class="flex items-center justify-between px-4">
+                <span class="text-[9px] uppercase tracking-[0.2em] text-zinc-600 italic">Limited Edition / Noirid Drop</span>
+                <a href="/catalog" class="text-[9px] uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition underline underline-offset-8 decoration-zinc-800 hover:decoration-white">Back to Catalog</a>
+              </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -81,103 +95,160 @@
   </section>
 </div>
 
-<div id="cartToast" class="pointer-events-none fixed inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300">
-  <div class="pointer-events-auto rounded-2xl bg-zinc-900/90 border border-white/10 px-6 py-4 flex items-center gap-4 shadow-xl">
-    <div class="text-sm">Added to cart</div>
-    <a href="/cart" class="rounded-xl bg-white text-zinc-950 px-4 py-2 text-xs font-semibold">
-      Open cart
-    </a>
+<div id="cartToast" class="pointer-events-none fixed bottom-12 left-1/2 -translate-x-1/2 z-50 flex opacity-0 transition-all duration-500 translate-y-10">
+  <div class="pointer-events-auto rounded-full bg-white px-8 py-4 flex items-center gap-8 shadow-2xl">
+    <div id="toastMessage" class="text-[10px] font-bold uppercase tracking-[0.2em] text-black">Added to selection</div>
+    <a id="toastLink" href="/cart" class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 hover:text-black transition">Open Bag →</a>
   </div>
 </div>
 
 <script>
   const variants = {{ variants_payload|tojson }};
-  const brandSelect = document.getElementById('brandSelect');
-  const modelSelect = document.getElementById('modelSelect');
-  const modelWrap = document.getElementById('modelWrap');
-  const gallery = document.getElementById('productGallery');
-  const galleryPrev = document.getElementById('galleryPrev');
-  const galleryNext = document.getElementById('galleryNext');
+  let selectedBrand = null;
+  let selectedModel = null;
 
-  function scrollGallery(direction) {
-    if (!gallery) return;
-    const amount = gallery.clientWidth;
-    gallery.scrollBy({ left: amount * direction, behavior: 'smooth' });
+  // --- UI Logic: Custom Selects ---
+  function initCustomSelect(containerId, options, onSelect) {
+    const container = document.getElementById(containerId);
+    const trigger = container.querySelector('.select-trigger');
+    const optionsList = container.querySelector('.select-options');
+    const label = container.querySelector('.selected-value');
+
+    // Закрытие при клике вне селекта
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) {
+        optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        trigger.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+      }
+    });
+
+    trigger.addEventListener('click', () => {
+      const isOpen = !optionsList.classList.contains('opacity-0');
+      // Закрываем другие открытые селекты
+      document.querySelectorAll('.select-options').forEach(el => {
+          if (el !== optionsList) el.classList.add('opacity-0', 'invisible', 'translate-y-2');
+      });
+
+      if (!isOpen) {
+        optionsList.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+        trigger.querySelector('span:last-child').style.transform = 'rotate(180deg)';
+      } else {
+        optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        trigger.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+      }
+    });
+
+    // ТУТ ИСПРАВЛЕНИЕ: добавил text-white по умолчанию
+    optionsList.innerHTML = options.map(opt => `
+      <div class="px-6 py-4 text-white hover:bg-white hover:text-black cursor-pointer text-sm transition-all duration-200 border-b border-white/5 last:border-0" data-value="${opt}">
+        ${opt}
+      </div>
+    `).join('');
+
+    optionsList.querySelectorAll('[data-value]').forEach(item => {
+      item.addEventListener('click', () => {
+        const val = item.getAttribute('data-value');
+        label.textContent = val;
+        label.classList.remove('text-zinc-600');
+        label.classList.add('text-white');
+        optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        trigger.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+        onSelect(val);
+      });
+    });
   }
 
-  galleryPrev?.addEventListener('click', () => scrollGallery(-1));
-  galleryNext?.addEventListener('click', () => scrollGallery(1));
-
+  // --- Initializing Brands ---
   const brands = [...new Set(variants.map(v => v.brand))].sort();
-  brands.forEach((brand) => {
-    const opt = document.createElement('option');
-    opt.value = brand;
-    opt.textContent = brand;
-    brandSelect.appendChild(opt);
-  });
+  initCustomSelect('brandCustomSelect', brands, (brand) => {
+    selectedBrand = brand;
+    selectedModel = null;
 
-  brandSelect.addEventListener('change', () => {
-    const brand = brandSelect.value;
-    modelSelect.innerHTML = '<option value="">Select model</option>';
-    if (!brand) {
-      modelWrap.classList.add('hidden');
-      return;
-    }
+    // Reset Model Select
+    const modelWrap = document.getElementById('modelWrap');
+    const modelLabel = modelWrap.querySelector('.selected-value');
+    modelLabel.textContent = "Select Model";
+    modelLabel.classList.add('text-zinc-600');
+
     const models = variants.filter(v => v.brand === brand).map(v => v.model);
-    [...new Set(models)].sort().forEach((model) => {
-      const opt = document.createElement('option');
-      opt.value = model;
-      opt.textContent = model;
-      modelSelect.appendChild(opt);
+    initCustomSelect('modelCustomSelect', [...new Set(models)].sort(), (model) => {
+      selectedModel = model;
     });
+
     modelWrap.classList.remove('hidden');
+    setTimeout(() => modelWrap.classList.remove('opacity-0', 'translate-y-4'), 10);
   });
 
-  function showToast() {
+  // --- Notifications ---
+  function notify(msg, isError = false) {
     const toast = document.getElementById('cartToast');
-    toast.classList.remove('opacity-0');
-    toast.classList.add('opacity-100');
+    const text = document.getElementById('toastMessage');
+    const link = document.getElementById('toastLink');
+
+    text.textContent = msg;
+    toast.querySelector('div').style.backgroundColor = isError ? '#ff3b3b' : 'white';
+    text.style.color = isError ? 'white' : 'black';
+    link.style.display = isError ? 'none' : 'block';
+
+    toast.classList.remove('opacity-0', 'translate-y-10');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
     setTimeout(() => {
-      toast.classList.add('opacity-0');
-      toast.classList.remove('opacity-100');
-    }, 2000);
+      toast.classList.add('opacity-0', 'translate-y-10');
+      toast.classList.remove('opacity-100', 'translate-y-0');
+    }, 4000);
   }
 
+  // --- Cart Submission ---
   document.getElementById('addToCartBtn').addEventListener('click', async () => {
-    const brand = brandSelect.value;
-    const model = modelSelect.value;
     const personalization = document.getElementById('personalizationInput').value.trim();
+    const btn = document.getElementById('addToCartBtn');
 
-    if (!personalization) {
-      alert('Please enter personalization text.');
-      return;
+    if (!personalization) return notify('Enter personalization text', true);
+    if (!selectedBrand || !selectedModel) return notify('Select your device', true);
+
+    const match = variants.find(v => v.brand === selectedBrand && v.model === selectedModel);
+
+    btn.textContent = "Adding...";
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          product_id: {{ product.id }},
+          variant_id: match?.id,
+          qty: 1,
+          personalization: { text: personalization }
+        })
+      });
+
+      if (!res.ok) throw new Error();
+      notify('Added to selection');
+    } catch (err) {
+      notify('System error. Try again.', true);
+    } finally {
+      btn.textContent = "Add To Bag";
+      btn.disabled = false;
     }
-    if (!brand || !model) {
-      alert('Please select a brand and model.');
-      return;
-    }
-
-    const match = variants.find(v => v.brand === brand && v.model === model);
-    const variantId = match ? match.id : null;
-
-    const res = await fetch('/api/cart/add', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        product_id: {{ product.id }},
-        variant_id: variantId,
-        qty: 1,
-        personalization: { text: personalization }
-      })
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      alert(data.detail || 'Failed to add');
-      return;
-    }
-
-    showToast();
   });
 </script>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Плавный фокус без вспышек */
+  input:focus {
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  /* Скролл внутри выпадающего списка */
+  .select-options {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+</style>
 {% endblock %}

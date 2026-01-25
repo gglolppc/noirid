@@ -2,140 +2,163 @@
 {% block title %}Checkout · NOIRID{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505]">
-  <section class="min-h-screen pt-36 pb-24 px-8">
+<div class="relative bg-[#050505] selection:bg-white selection:text-black">
+  <section class="min-h-screen pt-32 pb-24 px-6 md:px-12">
     <div class="mx-auto max-w-6xl w-full">
-      <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+
+      <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-8">
         <div>
-          <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-600">Checkout</div>
-          <h1 class="mt-6 text-5xl md:text-7xl font-black uppercase tracking-tight text-white">Finalize</h1>
-          <p class="mt-4 text-sm md:text-base text-zinc-400">No accounts. Just pay and go.</p>
+          <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-500 font-medium">Finalize / Order</div>
+          <h1 class="mt-6 text-6xl md:text-8xl font-bold uppercase tracking-[-0.05em] text-white leading-[0.85]">
+            Checkout
+          </h1>
+          <p class="mt-6 text-sm text-zinc-400 font-light">Direct fulfillment. No account required.</p>
         </div>
-        <a href="/cart" class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 hover:text-white transition">
-          Back to cart
+        <a href="/cart" class="group text-[10px] uppercase tracking-[0.3em] text-zinc-500 hover:text-white transition flex items-center gap-2">
+          <span class="inline-block transition-transform group-hover:-translate-x-1">←</span> Review bag
         </a>
       </div>
 
+      <div class="mt-12 h-px w-full bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
+
       {% if not order or not order.items %}
-        <div class="reveal reveal-delay-1 mt-14 rounded-3xl border border-white/10 bg-white/5 p-8 text-zinc-300">
-          Cart is empty.
-          <div class="mt-6">
-            <a href="/catalog" class="inline-flex rounded-2xl bg-white text-zinc-950 px-6 py-3 text-[11px] uppercase tracking-[0.4em] font-semibold">
-              Go to catalog
-            </a>
-          </div>
+        <div class="reveal reveal-delay-1 mt-16 py-24 rounded-[40px] border border-dashed border-white/10 bg-white/[0.02] text-center">
+          <h3 class="text-2xl font-light text-white mb-8">Nothing to finalize.</h3>
+          <a href="/catalog" class="inline-block border border-white/20 px-10 py-4 text-[10px] uppercase tracking-[0.3em] text-white hover:bg-white hover:text-black transition-all">
+            Return to Catalog
+          </a>
         </div>
       {% else %}
-        <div class="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div class="reveal rounded-3xl border border-white/10 bg-white/5 p-8">
-            <h2 class="text-lg uppercase tracking-[0.3em] text-zinc-500">Contact</h2>
+        <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
 
-            <form id="checkoutForm" class="mt-6 space-y-5">
-              <div>
-                <label class="text-sm text-zinc-400">Email</label>
-                <input name="email" type="email" required
-                       class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                       placeholder="you@email.com" value="{{ order.customer_email or '' }}">
-              </div>
+          <div class="reveal reveal-delay-1 space-y-12">
+            <form id="checkoutForm" class="space-y-10">
 
-              <div>
-                <label class="text-sm text-zinc-400">Name</label>
-                <input name="name" type="text" required
-                       class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                       placeholder="Your name" value="{{ order.customer_name or '' }}">
-              </div>
+              <section>
+                <h2 class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 mb-6 flex items-center gap-4">
+                  01. Contact Info <span class="h-px flex-1 bg-white/5"></span>
+                </h2>
+                <div class="space-y-6">
+                  <div class="group">
+                    <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-600 group-focus-within:text-white transition">Email Address</label>
+                    <input name="email" type="email" required
+                           class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-white transition"
+                           placeholder="your@email.com" value="{{ order.customer_email or '' }}">
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="group">
+                      <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-600 group-focus-within:text-white transition">Full Name</label>
+                      <input name="name" type="text" required
+                             class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-white transition"
+                             placeholder="First Last" value="{{ order.customer_name or '' }}">
+                    </div>
+                    <div class="group">
+                      <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-600 group-focus-within:text-white transition">Phone (Optional)</label>
+                      <input name="phone" type="text"
+                             class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-white transition"
+                             placeholder="+000..." value="{{ order.customer_phone or '' }}">
+                    </div>
+                  </div>
+                </div>
+              </section>
 
-              <div>
-                <label class="text-sm text-zinc-400">Phone (optional)</label>
-                <input name="phone" type="text"
-                       class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                       placeholder="+84..." value="{{ order.customer_phone or '' }}">
-              </div>
+              <section>
+                <h2 class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 mb-6 flex items-center gap-4">
+                  02. Shipping Destination <span class="h-px flex-1 bg-white/5"></span>
+                </h2>
+                <div class="space-y-6">
+                  <div class="grid grid-cols-2 gap-6">
+                    <div class="group">
+                      <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-600 group-focus-within:text-white transition">Country</label>
+                      <input name="country" type="text" required
+                             class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-white transition"
+                             placeholder="Select Country">
+                    </div>
+                    <div class="group">
+                      <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-600 group-focus-within:text-white transition">City</label>
+                      <input name="city" type="text" required
+                             class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-white transition"
+                             placeholder="City Name">
+                    </div>
+                  </div>
+                  <div class="group">
+                    <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-600 group-focus-within:text-white transition">Address Line 1</label>
+                    <input name="line1" type="text" required
+                           class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-white transition"
+                           placeholder="Street, Building, Apt">
+                  </div>
+                  <div class="grid grid-cols-2 gap-6">
+                    <div class="group">
+                      <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-600 group-focus-within:text-white transition">Postal Code</label>
+                      <input name="postal_code" type="text"
+                             class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-white transition"
+                             placeholder="000000">
+                    </div>
+                  </div>
+                  <div class="group">
+                    <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-600 group-focus-within:text-white transition">Order Notes</label>
+                    <textarea name="notes" rows="2"
+                              class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-700 focus:outline-none focus:border-white resize-none transition"
+                              placeholder="Any special instructions?"></textarea>
+                  </div>
+                </div>
+              </section>
 
-              <h2 class="pt-4 text-lg uppercase tracking-[0.3em] text-zinc-500">Shipping address</h2>
-
-              <div>
-                <label class="text-sm text-zinc-400">Country</label>
-                <input name="country" type="text" required
-                       class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                       placeholder="Vietnam">
-              </div>
-
-              <div>
-                <label class="text-sm text-zinc-400">City</label>
-                <input name="city" type="text" required
-                       class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                       placeholder="Phu Quoc">
-              </div>
-
-              <div>
-                <label class="text-sm text-zinc-400">Address line 1</label>
-                <input name="line1" type="text" required
-                       class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                       placeholder="Street, building, apt">
-              </div>
-
-              <div>
-                <label class="text-sm text-zinc-400">Address line 2 (optional)</label>
-                <input name="line2" type="text"
-                       class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                       placeholder="Apartment, floor, etc">
-              </div>
-
-              <div>
-                <label class="text-sm text-zinc-400">Postal code (optional)</label>
-                <input name="postal_code" type="text"
-                       class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                       placeholder="70000">
-              </div>
-
-              <div>
-                <label class="text-sm text-zinc-400">Notes (optional)</label>
-                <textarea name="notes" rows="3"
-                          class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                          placeholder="Anything for courier?"></textarea>
-              </div>
+              <div id="err" class="hidden rounded-2xl border border-red-900/50 bg-red-950/20 p-4 text-red-400 text-xs italic"></div>
 
               <button id="payBtn" type="submit"
-                      class="mt-2 w-full rounded-2xl bg-white text-zinc-950 px-6 py-3 text-[11px] uppercase tracking-[0.4em] font-semibold">
-                Continue to payment (Day 5)
+                      class="w-full rounded-full bg-white text-black py-6 text-[11px] font-bold uppercase tracking-[0.5em] transition-all hover:scale-[1.01] active:scale-[0.98]">
+                Proceed to Payment
               </button>
-
-              <div id="err" class="hidden mt-3 text-sm text-red-300"></div>
             </form>
           </div>
 
-          <div class="reveal reveal-delay-1 rounded-3xl border border-white/10 bg-white/5 p-8">
-            <h2 class="text-lg uppercase tracking-[0.3em] text-zinc-500">Summary</h2>
+          <div class="relative">
+            <div class="sticky top-32 lg:pl-12">
+              <div class="rounded-[32px] border border-white/10 bg-white/[0.03] p-8 space-y-8">
+                <h2 class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 pb-4 border-b border-white/5">Bag Contents</h2>
 
-            <div class="mt-6 space-y-4">
-              {% for it in order.items %}
-                <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
-                  <div class="min-w-0">
-                    <div class="font-semibold truncate text-white">{{ it.title_snapshot }}</div>
-                    <div class="text-xs text-zinc-500">Qty: {{ it.qty }}</div>
+                <div class="space-y-6 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                  {% for it in order.items %}
+                    <div class="flex justify-between gap-4">
+                      <div class="min-w-0">
+                        <div class="text-sm font-medium text-white truncate">{{ it.title_snapshot }}</div>
+                        <div class="text-[9px] uppercase tracking-widest text-zinc-600 mt-1 italic">Quantity: {{ it.qty }}</div>
+                      </div>
+                      <div class="text-sm text-white/80 italic shrink-0">
+                        {{ "%.2f"|format(it.unit_price) }} <span class="text-[10px] text-zinc-600 uppercase">{{ currency }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <div class="pt-6 border-t border-white/10 space-y-4">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500 font-light">Subtotal</span>
+                    <span class="text-white font-medium">{{ "%.2f"|format(subtotal) }} {{ currency }}</span>
                   </div>
-                  <div class="text-sm font-semibold text-zinc-200">
-                    {{ "%.2f"|format(it.unit_price) }} {{ currency }}
+                  <div class="flex justify-between items-end">
+                    <span class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-1">Total Amount</span>
+                    <span class="text-3xl font-bold text-white tracking-tight">
+                      {{ "%.2f"|format(total) }} <span class="text-sm font-normal text-zinc-400 uppercase ml-1">{{ currency }}</span>
+                    </span>
                   </div>
                 </div>
-              {% endfor %}
-            </div>
+              </div>
 
-            <div class="mt-6 flex items-center justify-between">
-              <div class="text-sm uppercase tracking-[0.3em] text-zinc-500">Subtotal</div>
-              <div class="text-lg font-semibold text-white">{{ "%.2f"|format(subtotal) }} {{ currency }}</div>
-            </div>
-
-            <div class="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
-              <div class="text-sm uppercase tracking-[0.3em] text-zinc-500">Total</div>
-              <div class="text-lg font-semibold text-white">{{ "%.2f"|format(total) }} {{ currency }}</div>
+              <div class="mt-8 px-4 flex items-center gap-4 text-zinc-600">
+                <div class="w-1.5 h-1.5 rounded-full bg-green-900 animate-pulse"></div>
+                <span class="text-[9px] uppercase tracking-[0.2em] leading-relaxed">
+                  Secured transaction handled by 2Checkout / NOIRID
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
+        </div>
         <script src="/static/js/public/checkout.js"></script>
       {% endif %}
+
     </div>
   </section>
 </div>

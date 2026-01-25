@@ -1,3 +1,5 @@
+// cart.js
+
 async function api(url, body) {
   const res = await fetch(url, {
     method: body ? "POST" : "GET",
@@ -29,76 +31,89 @@ function renderCart(cart) {
 
   document.getElementById("subtotal").textContent = fmt(cart.subtotal);
   document.getElementById("total").textContent = fmt(cart.total || 0);
-  document.getElementById("currency").textContent = cart.currency || "USD";
+  
+  const currencyStr = cart.currency || "USD";
   document.querySelectorAll(".currency").forEach((el) => {
-    el.textContent = cart.currency || "USD";
+    el.textContent = currencyStr;
   });
 
   itemsEl.innerHTML = "";
   cart.items.forEach((it) => {
     const row = document.createElement("div");
-    row.className = "rounded-3xl border border-white/10 bg-white/5 p-5 flex items-center justify-between gap-4";
+    // Карточка товара: белый текст, серый вторичный текст
+    row.className = "group relative flex flex-col md:flex-row items-center gap-8 py-8 border-b border-white/5 last:border-0";
 
     row.innerHTML = `
-      <div class="min-w-0">
-        <div class="font-semibold truncate">${it.title}</div>
-        <div class="text-xs text-zinc-500">Item #${it.id}</div>
-        ${it.personalization && it.personalization.text ? `<div class="text-xs text-zinc-500">Personalization: ${it.personalization.text}</div>` : ""}
-        <div class="mt-2 text-sm text-zinc-300">${fmt(it.unit_price)} × ${it.qty} = <span class="text-zinc-100 font-semibold">${fmt(it.line_total)}</span></div>
+      <div class="shrink-0 w-24 h-32 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center overflow-hidden">
+         <span class="text-[9px] uppercase tracking-widest text-zinc-600 italic">Noirid</span>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button data-dec="${it.id}" class="px-3 py-2 rounded-xl border border-white/15 hover:bg-white/5">-</button>
-        <input data-qty="${it.id}" value="${it.qty}" class="w-14 text-center rounded-xl bg-zinc-950 border border-white/10 px-2 py-2" />
-        <button data-inc="${it.id}" class="px-3 py-2 rounded-xl border border-white/15 hover:bg-white/5">+</button>
-        <button data-rm="${it.id}" class="px-3 py-2 rounded-xl border border-white/15 hover:bg-white/5 text-zinc-300">Remove</button>
+      <div class="flex-1 min-w-0 text-center md:text-left">
+        <div class="text-xl font-medium text-white mb-1">${it.title}</div>
+        <div class="text-[10px] uppercase tracking-widest text-zinc-500 mb-3 italic">Ref. #00${it.id}</div>
+        
+        ${it.personalization && it.personalization.text 
+          ? `<div class="text-xs text-zinc-400 font-light flex items-center gap-2 justify-center md:justify-start">
+               <span class="w-1 h-1 rounded-full bg-white/30"></span> 
+               Personalization: <span class="text-white/80 italic">"${it.personalization.text}"</span>
+             </div>` 
+          : ""}
+      </div>
+
+      <div class="flex flex-col items-center md:items-end gap-4">
+        <div class="flex items-center gap-4 bg-white/[0.03] border border-white/10 p-1 rounded-full">
+          <button data-dec="${it.id}" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white transition transition-colors">-</button>
+          <span class="text-xs font-medium text-white w-4 text-center">${it.qty}</span>
+          <button data-inc="${it.id}" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white transition transition-colors">+</button>
+        </div>
+        
+        <div class="text-right">
+          <div class="text-white font-medium">${fmt(it.line_total)} <span class="text-[10px] text-zinc-500 uppercase">${currencyStr}</span></div>
+          <button data-rm="${it.id}" class="mt-1 text-[10px] uppercase tracking-widest text-zinc-600 hover:text-white transition-colors underline underline-offset-4">
+            Remove
+          </button>
+        </div>
       </div>
     `;
 
     itemsEl.appendChild(row);
   });
 
-  // handlers
-  itemsEl.querySelectorAll("[data-inc]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
+  // Привязка событий (остается той же, так как ID те же)
+  attachEvents(itemsEl);
+}
+
+function attachEvents(container) {
+  container.querySelectorAll("[data-inc]").forEach((btn) => {
+    btn.onclick = async () => {
       const id = Number(btn.getAttribute("data-inc"));
-      const input = itemsEl.querySelector(`[data-qty="${id}"]`);
-      const next = Math.min(99, Number(input.value) + 1);
-      const cart = await api("/api/cart/update-qty", { item_id: id, qty: next });
+      const currentQty = parseInt(btn.previousElementSibling.textContent);
+      const cart = await api("/api/cart/update-qty", { item_id: id, qty: currentQty + 1 });
       renderCart(cart);
-    });
+    };
   });
 
-  itemsEl.querySelectorAll("[data-dec]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
+  container.querySelectorAll("[data-dec]").forEach((btn) => {
+    btn.onclick = async () => {
       const id = Number(btn.getAttribute("data-dec"));
-      const input = itemsEl.querySelector(`[data-qty="${id}"]`);
-      const next = Math.max(1, Number(input.value) - 1);
-      const cart = await api("/api/cart/update-qty", { item_id: id, qty: next });
-      renderCart(cart);
-    });
+      const currentQty = parseInt(btn.nextElementSibling.textContent);
+      if (currentQty > 1) {
+        const cart = await api("/api/cart/update-qty", { item_id: id, qty: currentQty - 1 });
+        renderCart(cart);
+      }
+    };
   });
 
-  itemsEl.querySelectorAll("[data-rm]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
+  container.querySelectorAll("[data-rm]").forEach((btn) => {
+    btn.onclick = async () => {
       const id = Number(btn.getAttribute("data-rm"));
       try {
         const cart = await api("/api/cart/remove", { item_id: id });
         renderCart(cart);
       } catch (e) {
-        // cart empty -> api throws 404
         renderCart({ items: [] });
       }
-    });
-  });
-
-  itemsEl.querySelectorAll("[data-qty]").forEach((input) => {
-    input.addEventListener("change", async () => {
-      const id = Number(input.getAttribute("data-qty"));
-      const next = Math.min(99, Math.max(1, Number(input.value || 1)));
-      const cart = await api("/api/cart/update-qty", { item_id: id, qty: next });
-      renderCart(cart);
-    });
+    };
   });
 }
 

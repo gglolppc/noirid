@@ -1691,3 +1691,27 @@ NameError: name 'templates' is not defined
 2026-01-24 16:01:14,841 [INFO] uvicorn.error: Waiting for application shutdown.
 2026-01-24 16:01:14,841 [INFO] uvicorn.error: Application shutdown complete.
 2026-01-24 16:01:14,841 [INFO] uvicorn.error: Finished server process [15320]
+2026-01-24 16:02:11,801 [INFO] root: Logging initialized (prod)
+2026-01-24 16:02:11,844 [INFO] uvicorn.error: Started server process [38024]
+2026-01-24 16:02:11,844 [INFO] uvicorn.error: Waiting for application startup.
+2026-01-24 16:02:11,845 [INFO] uvicorn.error: Application startup complete.
+2026-01-24 16:02:11,845 [INFO] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-01-24 16:12:24,716 [INFO] uvicorn.error: Shutting down
+2026-01-24 16:12:24,825 [INFO] uvicorn.error: Waiting for application shutdown.
+2026-01-24 16:12:24,826 [INFO] uvicorn.error: Application shutdown complete.
+2026-01-24 16:12:24,826 [INFO] uvicorn.error: Finished server process [38024]
+2026-01-24 16:13:11,293 [INFO] root: Logging initialized (prod)
+2026-01-24 16:13:11,332 [INFO] uvicorn.error: Started server process [20224]
+2026-01-24 16:13:11,332 [INFO] uvicorn.error: Waiting for application startup.
+2026-01-24 16:13:11,332 [INFO] uvicorn.error: Application startup complete.
+2026-01-24 16:13:11,333 [INFO] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-01-24 16:13:54,693 [INFO] orders: Order status changed | order_id=6096f3f0-14d3-421a-b52e-40be7087292b | from=draft | to=pending_payment
+2026-01-24 16:13:54,708 [INFO] payments: Payment created | order_id=6096f3f0-14d3-421a-b52e-40be7087292b | amount=120.00 | provider=2checkout
+2026-01-24 16:13:54,711 [INFO] payments: Payment status changed | order_id=6096f3f0-14d3-421a-b52e-40be7087292b | payment_id=17 | from=created | to=redirected
+2026-01-25 11:13:40,132 [INFO] orders: Order status changed | order_id=8c506ef9-b1fa-410a-b0b1-3626dce2e6e7 | from=draft | to=pending_payment
+2026-01-25 11:13:40,153 [INFO] payments: Payment created | order_id=8c506ef9-b1fa-410a-b0b1-3626dce2e6e7 | amount=142.00 | provider=2checkout
+2026-01-25 11:13:40,155 [INFO] payments: Payment status changed | order_id=8c506ef9-b1fa-410a-b0b1-3626dce2e6e7 | payment_id=18 | from=created | to=redirected
+2026-01-25 12:35:54,826 [INFO] uvicorn.error: Shutting down
+2026-01-25 12:35:54,937 [INFO] uvicorn.error: Waiting for application shutdown.
+2026-01-25 12:35:54,938 [INFO] uvicorn.error: Application shutdown complete.
+2026-01-25 12:35:54,938 [INFO] uvicorn.error: Finished server process [20224]

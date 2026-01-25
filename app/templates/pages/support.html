@@ -2,53 +2,125 @@
 {% block title %}Support · NOIRID{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505]">
-  <section class="min-h-screen pt-36 pb-24 px-8">
-    <div class="mx-auto max-w-5xl">
-      <div class="reveal">
-        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-600">Support</div>
-        <h1 class="mt-6 text-5xl md:text-7xl font-black uppercase tracking-tight text-white">We listen</h1>
-        <p class="mt-4 text-sm md:text-base text-zinc-400 max-w-2xl">
-          Leave a question and we will reply within 24 hours.
-        </p>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support · NOIRID</title>
+    <!-- Assuming Tailwind CSS is used, include it -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#050505] text-white">
+    <div class="relative bg-[#050505] selection:bg-white selection:text-black">
+        <section class="min-h-screen pt-32 pb-24 px-6 md:px-12">
+            <div class="mx-auto max-w-6xl w-full">
 
-      {% if success %}
-        <div class="reveal reveal-delay-1 mt-10 rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-4 text-sm text-emerald-200">
-          Thanks! Your question has been received.
-        </div>
-      {% endif %}
+                <div class="reveal">
+                    <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-300 font-medium">Concierge / Assistance</div>
+                    <h1 class="mt-6 text-6xl md:text-8xl font-bold uppercase tracking-[-0.05em] text-white leading-[0.85]">
+                        Dialogue
+                    </h1>
+                    <p class="mt-8 text-sm md:text-base text-zinc-300 max-w-md leading-relaxed font-light">
+                        Human-to-human support. Our team typically responds within 24 hours to all inquiries.
+                    </p>
+                </div>
 
-      <form method="post" class="reveal reveal-delay-1 mt-12 space-y-5 rounded-3xl border border-white/10 bg-white/5 p-8">
-        <div>
-          <label class="text-sm text-zinc-400">Name</label>
-          <input name="name" type="text" required
-                 class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                 placeholder="Your name">
-        </div>
-        <div>
-          <label class="text-sm text-zinc-400">Email</label>
-          <input name="email" type="email" required
-                 class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                 placeholder="you@email.com">
-        </div>
-        <div>
-          <label class="text-sm text-zinc-400">Order ID (optional)</label>
-          <input name="order_id" type="text"
-                 class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                 placeholder="Order ID">
-        </div>
-        <div>
-          <label class="text-sm text-zinc-400">Question</label>
-          <textarea name="question" rows="4" required
-                    class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
-                    placeholder="How can we help?"></textarea>
-        </div>
-        <button type="submit" class="rounded-2xl bg-white text-zinc-950 px-6 py-3 text-[11px] uppercase tracking-[0.4em] font-semibold">
-          Send question
-        </button>
-      </form>
+                <div class="mt-12 h-px w-full bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
+
+                <!-- Assuming no success message for static HTML -->
+                <!-- If success, uncomment this:
+                <div class="reveal mt-12 rounded-[32px] border border-white/10 bg-white/[0.03] p-8 text-center">
+                    <div class="text-[10px] uppercase tracking-[0.4em] text-white mb-4">Transmission Received</div>
+                    <p class="text-sm text-zinc-300 font-light italic">Your message has been logged. Check your email for our response shortly.</p>
+                    <a href="/catalog" class="mt-8 inline-block text-[10px] uppercase tracking-[0.3em] text-white underline underline-offset-8 decoration-white/20 hover:decoration-white transition-all">Return to Designs</a>
+                </div>
+                -->
+
+                <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+
+                    <div class="reveal reveal-delay-1 space-y-12">
+                        <section>
+                            <h2 class="text-[10px] uppercase tracking-[0.4em] text-zinc-300 mb-8 flex items-center gap-4">
+                                Quick Solutions <span class="h-px flex-1 bg-white/5"></span>
+                            </h2>
+
+                            <div class="space-y-8">
+                                <div class="group">
+                                    <div class="text-sm text-white font-medium mb-2 tracking-tight">How do I track my order?</div>
+                                    <p class="text-xs text-zinc-300 leading-relaxed font-light">
+                                        Use our <a href="/check-order" class="text-zinc-100 underline underline-offset-2">tracking tool</a> with your unique order ID sent via email.
+                                    </p>
+                                </div>
+                                <div class="group">
+                                    <div class="text-sm text-white font-medium mb-2 tracking-tight">International delivery times?</div>
+                                    <p class="text-xs text-zinc-300 leading-relaxed font-light">
+                                        Typically 7–21 working days. View our full <a href="/delivery" class="text-zinc-100 underline underline-offset-2">shipping flow</a> for details.
+                                    </p>
+                                </div>
+                                <div class="group">
+                                    <div class="text-sm text-white font-medium mb-2 tracking-tight">Personalization changes?</div>
+                                    <p class="text-xs text-zinc-300 leading-relaxed font-light">
+                                        Modification is only possible within 12 hours of order placement. Contact us immediately below.
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="rounded-[32px] border border-white/10 bg-white/[0.03] p-8">
+                            <div class="text-[10px] uppercase tracking-[0.2em] text-zinc-300 mb-4 italic">Direct Mail</div>
+                            <div class="text-xl text-white font-light tracking-tight">studio@noirid.md</div>
+                        </section>
+                    </div>
+
+                    <div class="reveal reveal-delay-2">
+                        <form method="post" class="space-y-10">
+                            <h2 class="text-[10px] uppercase tracking-[0.4em] text-zinc-300 mb-8 flex items-center gap-4">
+                                Submit Inquiry <span class="h-px flex-1 bg-white/5"></span>
+                            </h2>
+
+                            <div class="space-y-8">
+                                <div class="group">
+                                    <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-400 group-focus-within:text-white transition">Full Name</label>
+                                    <input name="name" type="text" required
+                                           class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white transition"
+                                           placeholder="Identity">
+                                </div>
+
+                                <div class="group">
+                                    <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-400 group-focus-within:text-white transition">Email Address</label>
+                                    <input name="email" type="email" required
+                                           class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white transition"
+                                           placeholder="contact@email.com">
+                                </div>
+
+                                <div class="group">
+                                    <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-400 group-focus-within:text-white transition">Order ID (Optional)</label>
+                                    <input name="order_id" type="text"
+                                           class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white transition"
+                                           placeholder="e.g. #00123">
+                                </div>
+
+                                <div class="group">
+                                    <label class="text-[10px] uppercase tracking-[0.2em] text-zinc-400 group-focus-within:text-white transition">Inquiry / Question</label>
+                                    <textarea name="question" rows="4" required
+                                              class="mt-2 w-full bg-transparent border-b border-white/10 py-3 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white resize-none transition"
+                                              placeholder="How can we assist you?"></textarea>
+                                </div>
+                            </div>
+
+                            <button type="submit"
+                                    class="w-full rounded-full bg-white text-black py-6 text-[11px] font-bold uppercase tracking-[0.5em] transition-all hover:scale-[1.01] active:scale-[0.98]">
+                                Send Inquiry
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
     </div>
-  </section>
-</div>
+</body>
+</html>
 {% endblock %}

@@ -1,84 +1,142 @@
+<!-- base.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="js-loading">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NOIRID: Custom black-on-black phone cases. Personal identity in texture." />
   <title>{% block title %}NOIRID{% endblock %}</title>
+
+  <!-- Preload fonts и Tailwind для ускорения -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" as="style">
+  <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;900&display=swap');
-    body { font-family: 'Inter', sans-serif; background-color: #050505; color: #f4f4f5; }
 
-    /* Эффект контурного текста */
-    .text-outline { -webkit-text-stroke: 1px rgba(255,255,255,0.15); color: transparent; }
+    <style>
+    html, body {
+      background-color: #050505 !important; /* Приоритетно задаём чёрный фон */
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #f4f4f5;
+    }
 
-    /* Плавное появление при скролле */
+    /* Остальные стили как были... */
     .reveal {
       opacity: 0;
+      filter: blur(8px);
       transform: translateY(30px);
-      transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform, filter;
     }
+
     .reveal.active {
       opacity: 1;
+      filter: blur(0);
       transform: translateY(0);
     }
-    .reveal-delay-1 { transition-delay: 0.2s; }
-    .reveal-delay-2 { transition-delay: 0.4s; }
 
+    .js-loading .reveal {
+      opacity: 0 !important;
+    }
+
+    .reveal-delay-100 { transition-delay: 0.1s; }
+    .reveal-delay-200 { transition-delay: 0.2s; }
+    .reveal-delay-300 { transition-delay: 0.3s; }
+
+    .text-outline { -webkit-text-stroke: 1px rgba(255,255,255,0.2); color: transparent; }
     html { scroll-behavior: smooth; }
+
+    /* Focus states for accessibility */
+    a:focus, button:focus {
+      outline: 2px solid rgba(255,255,255,0.5);
+      outline-offset: 2px;
+    }
+
+    /* Light mode fallback (optional, but improves accessibility) */
+    @media (prefers-color-scheme: light) {
+      body {
+        background-color: #f4f4f5;
+        color: #050505;
+      }
+      /* Adjust other colors as needed */
+    }
   </style>
+
+  <script>
+    // Hide content until JS loads
+    document.documentElement.classList.add('js-loading');
+  </script>
 </head>
 
 <body class="antialiased selection:bg-white selection:text-black">
-  <div class="pointer-events-none fixed inset-0 z-[100] opacity-[0.1]"
-     style="background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');">
+  <div class="pointer-events-none fixed inset-0 z-[100] opacity-[0.08]"
+       style="background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.7%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');">
   </div>
 
   {% block header %}
-<header class="fixed top-0 left-0 right-0 z-[60] py-8 pointer-events-none">
-  <div class="mx-auto max-w-7xl px-8 flex items-center justify-between pointer-events-auto">
-    <a href="/" class="text-[11px] tracking-[0.6em] font-light text-white/70 hover:text-white transition">
-      NOIRID
-    </a>
-
-    <nav class="flex gap-12 text-[10px] uppercase tracking-[0.4em] text-zinc-500">
-      <a class="hover:text-white transition" href="/catalog">Catalog</a>
-      <a class="hover:text-white transition" href="/delivery">Delivery</a>
-      <a class="hover:text-white transition" href="/cart">Cart</a>
-    </nav>
-  </div>
-</header>
-{% endblock %}
+  <header class="fixed top-0 left-0 right-0 z-[60] py-6 pointer-events-none bg-[#050505]/80 backdrop-blur-md">
+    <div class="mx-auto max-w-7xl px-6 flex items-center justify-between pointer-events-auto">
+      <a href="/" class="text-xs tracking-[0.5em] font-light text-white/80 hover:text-white transition" aria-label="NOIRID Home">
+        NOIRID
+      </a>
+      <nav class="flex gap-10 text-xs uppercase tracking-[0.3em] text-zinc-400">
+        <a class="hover:text-white transition" href="/catalog" aria-label="Catalog">Catalog</a>
+        <a class="hover:text-white transition" href="/delivery" aria-label="Delivery">Delivery</a>
+        <a class="hover:text-white transition" href="/cart" aria-label="Cart">Cart</a>
+          <a class="hover:text-white transition" href="/check-order" aria-label="tracking">Check Order</a>
+      </nav>
+    </div>
+  </header>
+  {% endblock %}
 
   <main>
     {% block content %}{% endblock %}
   </main>
 
   {% block footer %}
-  <footer class="border-t border-white/5 py-20 bg-[#050505]">
-    <div class="mx-auto max-w-7xl px-8 flex flex-col md:flex-row justify-between items-center gap-10">
-      <div class="text-[10px] uppercase tracking-[0.4em] text-zinc-600">
-        © NOIRID — Discreet Identity
+  <footer class="border-t border-white/10 py-16 bg-[#050505]">
+    <div class="mx-auto max-w-7xl px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+      <div class="text-xs uppercase tracking-[0.3em] text-zinc-500">
+        © NOIRID — Discreet Identity in Texture
       </div>
-      <nav class="flex gap-10 text-[9px] uppercase tracking-[0.3em] text-zinc-500">
-        <a href="/about" class="hover:text-white transition">Philosophy</a>
-        <a href="/support" class="hover:text-white transition">Support</a>
+      <nav class="flex gap-8 text-xs uppercase tracking-[0.3em] text-zinc-400">
+        <a href="/about" class="hover:text-white transition" aria-label="Philosophy">Philosophy</a>
+        <a href="/support" class="hover:text-white transition" aria-label="Support">Support</a>
       </nav>
     </div>
   </footer>
   {% endblock %}
 
   <script>
-    // Инициализация анимаций появления
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
-      });
-    }, { threshold: 0.1 });
+    const initApp = () => {
+      document.documentElement.classList.remove('js-loading');
 
-    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target); // Unobserve after reveal for perf
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    };
+
+    Promise.all([
+      document.fonts.ready,
+      new Promise(resolve => window.addEventListener('load', resolve))
+    ]).then(initApp);
   </script>
 </body>
 </html>

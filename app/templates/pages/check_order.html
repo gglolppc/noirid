@@ -2,28 +2,35 @@
 {% block title %}Check order · NOIRID{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505]">
-  <section class="min-h-screen pt-36 pb-24 px-8">
-    <div class="mx-auto max-w-4xl">
+<div class="relative bg-[#050505] selection:bg-white selection:text-black">
+  <section class="min-h-screen pt-32 pb-24 px-6">
+    <div class="mx-auto max-w-4xl w-full">
+
       <div class="reveal">
-        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-600">Order status</div>
-        <h1 class="mt-6 text-5xl md:text-7xl font-black uppercase tracking-tight text-white">Check order</h1>
-        <p class="mt-4 text-sm md:text-base text-zinc-400 max-w-2xl">
-          Enter your order ID to see payment and delivery status.
+        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-500 font-medium">Tracking / Archive</div>
+        <h1 class="mt-6 text-6xl md:text-8xl font-bold uppercase tracking-[-0.05em] text-white leading-[0.85]">
+          Check Order
+        </h1>
+        <p class="mt-8 text-sm md:text-base text-zinc-400/80 max-w-md leading-relaxed font-light">
+          Enter your unique order identifier to view current fulfillment status.
         </p>
       </div>
 
-      <form id="checkOrderForm" class="reveal reveal-delay-1 mt-12 space-y-5 rounded-3xl border border-white/10 bg-white/5 p-8">
-        <div>
-          <label class="text-sm text-zinc-400">Order ID</label>
+      <div class="mt-12 h-px w-full bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
+
+      <form id="checkOrderForm" class="reveal reveal-delay-1 mt-16 max-w-xl">
+        <div class="group relative">
+          <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-600 group-focus-within:text-white transition-colors">Order ID</label>
           <input id="orderIdInput" type="text" required
-                 class="mt-2 w-full rounded-2xl bg-zinc-950 border border-white/10 px-4 py-3 text-sm"
+                 class="mt-4 w-full bg-transparent border-b border-white/10 py-4 text-xl md:text-2xl text-white placeholder:text-zinc-800 focus:outline-none focus:border-white transition-all font-light"
                  placeholder="e.g. 3d9f6...">
+
+          <button type="submit" class="mt-12 w-full md:w-auto px-12 py-4 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-[0.4em] transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            Find Order
+          </button>
         </div>
-        <button type="submit" class="rounded-2xl bg-white text-zinc-950 px-6 py-3 text-[11px] uppercase tracking-[0.4em] font-semibold">
-          Check order
-        </button>
       </form>
+
     </div>
   </section>
 </div>
