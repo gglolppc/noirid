@@ -78,27 +78,9 @@ async def seed() -> None:
         )
 
         # Варианты прикрепляем к продукту через relationship "product"
-        v1 = Variant(
-            sku="NOIR-INIT-IPH15P",
-            device_brand="iPhone",
-            device_model="15 Pro Max",
-            price_delta=Decimal("0.00"),
-            stock_qty=None,
-            is_active=True,
-            product=p1,
-        )
 
-        v2 = Variant(
-            sku="NOIR-INIT-S23U",
-            device_brand="Samsung",
-            device_model="S23 Ultra",
-            price_delta=Decimal("2.00"),
-            stock_qty=None,
-            is_active=True,
-            product=p1,
-        )
 
-        session.add_all([p1, p2, v1, v2])
+        session.add_all([p1, p2])
 
         await _ensure_admin(session)
 
