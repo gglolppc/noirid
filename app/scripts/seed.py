@@ -20,54 +20,7 @@ async def seed() -> None:
         await session.execute(delete(Product))
         await session.execute(delete(ContentBlock))
 
-        p1 = Product(
-            slug="noir-initials-case",
-            title="NOIR Initials Case",
-            description="Minimal black-on-black. Your initials, discreet.",
-            base_price=Decimal("24.00"),
-            currency="USD",
-            personalization_schema={
-                "initials": 4,
-                "number": 6,
-            },
-        )
-        p1.images = [{"id": 0, "url": "/static/img/demo/case1.webp"}]
 
-        p2 = Product(
-            slug="noir-plate-case",
-            title="NOIR Plate Case",
-            description="Plate style. Clean, sharp, readable.",
-            base_price=Decimal("26.00"),
-            currency="USD",
-            personalization_schema={
-                "initials": 3,
-                "number": 8,
-            },
-        )
-        p2.images = [{"id": 0, "url": "/static/img/demo/case2.webp"}]
-
-        variants = [
-            Variant(sku="NOIR-INIT-IPH15P", device_brand="iPhone", device_model="15 Pro Max", price_delta=Decimal("0.00")),
-            Variant(sku="NOIR-INIT-S23U", device_brand="Samsung", device_model="S23 Ultra", price_delta=Decimal("2.00")),
-        ]
-
-        home_hero = ContentBlock(
-            key="home_hero",
-            payload={
-                "title": "NOIRID",
-                "subtitle": "Discreet personalization. Dark aesthetics.",
-                "cta_text": "Shop designs",
-                "cta_href": "/catalog",
-                "bg": "texture-black-1",
-            },
-        )
-
-        featured = ContentBlock(
-            key="featured_products",
-            payload={"slugs": [p1.slug, p2.slug]},
-        )
-
-        session.add_all([p1, p2, home_hero, featured, *variants])
 
         admin_username = os.getenv("ADMIN_USERNAME", "admin")
         admin_password = os.getenv("ADMIN_PASSWORD", "admin")
