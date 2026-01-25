@@ -15,9 +15,9 @@ router = APIRouter(tags=["pages"])
 
 @router.get("/", include_in_schema=False)
 async def home(request: Request, session: AsyncSession = Depends(get_async_session)):
-    hero_block = None
-    hero_block = await ContentRepo.get_by_key(session, "home_hero")
-    hero = hero_block.payload if hero_block else {
+
+    # hero_block = await ContentRepo.get_by_key(session, "home_hero")
+    hero = {
         "title": "NOIRID",
         "subtitle": "Discreet personalization.",
         "cta_text": "Catalog",
