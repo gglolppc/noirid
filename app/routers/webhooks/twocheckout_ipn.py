@@ -161,6 +161,8 @@ async def ins_listener(
     order = None
     if merchant_order_id:
         order = await CheckoutRepo.get_order_any(session, str(merchant_order_id))
+        if not order:
+            log.error(f"Order not found for ID: {merchant_order_id}")
 
     payment = None
     if provider_order_number:
@@ -182,7 +184,7 @@ async def ins_listener(
         expected_currency = (getattr(payment, "currency", None) or "").upper().strip() or None
 
     if expected_amount is None and order is not None:
-        expected_amount = getattr(order, "total_amount", None)
+        expected_amount = getattr(order, "total", None)
 
     if expected_currency is None and order is not None:
         expected_currency = (getattr(order, "currency", None) or "").upper().strip() or None
@@ -242,9 +244,15 @@ async def ins_listener(
     def _can_apply_status(status: str | None) -> bool:
         if not status:
             return False
-        # paid применяем только если сумма и валюта ок
-        if status == "paid" and (not amount_ok or not currency_ok):
-            return False
+
+        if status == "paid":
+            # УЖЕСТОЧАЕМ: если мы не смогли найти ожидаемую сумму,
+            # значит мы не можем подтвердить валидность платежа.
+            if expected_amount is None or not amount_ok:
+                return False
+            if expected_currency is None or not currency_ok:
+                return False
+
         return True
 
     # 6) Обновляем Order (если нашли)
