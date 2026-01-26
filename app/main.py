@@ -6,6 +6,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import JSONResponse
+
 from app.core.config import settings
 from app.core.logger_setup import setup_logging
 from app.core.templates import templates
@@ -24,6 +26,7 @@ from app.routers.api.orders import router as orders_api_router
 from app.routers.pages.order_status import router as order_status_page_router
 from app.routers.pages.info import router as info_page_router
 from app.routers.pages.admin import router as admin_router
+from app.routers.api import mockups
 
 
 
@@ -58,11 +61,25 @@ app.include_router(orders_api_router)
 app.include_router(order_status_page_router)
 app.include_router(info_page_router)
 app.include_router(admin_router)
+app.include_router(mockups.router)
 
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 @app.exception_handler(404)
-async def not_found_handler(request: Request, exc) -> HTMLResponse:
-    return templates.TemplateResponse("pages/404.html", {"request": request}, status_code=404)
+async def not_found_handler(request: Request, exc: StarletteHTTPException):
+    # API — всегда JSON, чтобы фронт видел причину
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(
+            status_code=404,
+            content={"detail": getattr(exc, "detail", "Not Found"), "path": request.url.path},
+        )
+
+    # страницы — твой красивый HTML
+    return templates.TemplateResponse(
+        "pages/404.html",
+        {"request": request},
+        status_code=404,
+    )
 
 @app.get("/health", include_in_schema=False)
 async def health() -> dict[str, str]:

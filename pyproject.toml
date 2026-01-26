@@ -1,6 +1,8 @@
 [project]
 name = "NOIRID"
 version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115",
@@ -13,11 +15,6 @@ dependencies = [
   "asyncpg>=0.29",
   "alembic>=1.13",
   "python-dotenv>=1.0",
+  "pillow>=12.1.0",
+  "itsdangerous>=2.2.0",
 ]
-
-[tool.uvicorn]
-factory = false
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["app*"]  # Указываем, что кодом является только папка app

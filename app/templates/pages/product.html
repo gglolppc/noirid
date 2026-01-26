@@ -29,17 +29,26 @@
         <div class="reveal reveal-delay-1">
           <div class="relative aspect-[4/5] rounded-[40px] border border-white/10 bg-[#0A0A0A] overflow-hidden group">
             <div class="pointer-events-none absolute inset-0 z-10 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"></div>
-            {% if product.images %}
-              <div id="productGallery" class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
-                {% for image in product.images %}
-                  <div class="h-full w-full flex-none snap-center flex items-center justify-center p-12 md:p-20">
-                    <img src="{{ image.url }}" alt="{{ product.title }}" class="h-full w-full object-contain transition-transform duration-700 group-hover:scale-105" />
-                  </div>
-                {% endfor %}
+
+            <div id="previewBadge" class="hidden absolute top-6 left-6 z-20 rounded-full bg-white/10 backdrop-blur px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-white/80 border border-white/10">
+              Preview
+            </div>
+
+            <div id="previewSpinner" class="hidden absolute inset-0 z-20 items-center justify-center pointer-events-none">
+              <div class="rounded-full border border-white/20 bg-black/40 backdrop-blur px-6 py-4 text-[10px] uppercase tracking-[0.4em] text-white/80">
+                Rendering…
               </div>
-            {% else %}
-               <div class="h-full w-full flex items-center justify-center text-zinc-700 text-[10px] uppercase tracking-[0.5em]">No Visuals Available</div>
-            {% endif %}
+            </div>
+
+            <div id="productGallery" class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
+              <div class="h-full w-full flex-none snap-center flex items-center justify-center p-12 md:p-20">
+                {% if product.images %}
+                  <img src="{{ product.images[0].url }}" alt="{{ product.title }}" class="gallery-img h-full w-full object-contain transition-transform duration-700 group-hover:scale-105" />
+                {% else %}
+                  <img id="mainProductImg" src="/static/img/placeholder.webp" alt="{{ product.title }}" class="gallery-img h-full w-full object-contain transition-transform duration-700 group-hover:scale-105" />
+                {% endif %}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -67,13 +76,13 @@
               <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
                 {{ "%02d"|format(personalization_count + 1) }}. Device Brand
               </label>
-              <div id="brandCustomSelect" class="relative mt-2">
+              <div id="brandCustomSelect" class="custom-select relative mt-2">
                 <div class="select-trigger w-full border-b border-white/10 py-4 text-xl text-white font-light cursor-pointer flex justify-between items-center hover:border-white/30 transition-all">
                   <span class="selected-value text-zinc-600">Select Brand</span>
-                  <span class="text-[10px] transition-transform duration-300">↓</span>
+                  <span class="arrow text-[10px] transition-transform duration-300">↓</span>
                 </div>
                 <div class="select-options absolute top-full left-0 w-full z-30 mt-2 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-200 translate-y-2">
-                  </div>
+                </div>
               </div>
             </div>
 
@@ -81,13 +90,13 @@
               <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
                 {{ "%02d"|format(personalization_count + 2) }}. Device Model
               </label>
-              <div id="modelCustomSelect" class="relative mt-2">
+              <div id="modelCustomSelect" class="custom-select relative mt-2">
                 <div class="select-trigger w-full border-b border-white/10 py-4 text-xl text-white font-light cursor-pointer flex justify-between items-center hover:border-white/30 transition-all">
                   <span class="selected-value text-zinc-600">Select Model</span>
-                  <span class="text-[10px] transition-transform duration-300">↓</span>
+                  <span class="arrow text-[10px] transition-transform duration-300">↓</span>
                 </div>
                 <div class="select-options absolute top-full left-0 w-full z-30 mt-2 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-200 translate-y-2">
-                  </div>
+                </div>
               </div>
             </div>
 
@@ -117,124 +126,212 @@
 </div>
 
 <script>
-  const variants = {{ variants_payload|tojson }};
+const variants = {{ variants_payload|tojson }};
+  const productSlug = {{ product.slug|tojson }};
+
   let selectedBrand = null;
   let selectedModel = null;
+  let selectedVariant = null;
 
-  // --- UI Logic: Custom Selects ---
-  function initCustomSelect(containerId, options, onSelect) {
-    const container = document.getElementById(containerId);
-    const trigger = container.querySelector('.select-trigger');
-    const optionsList = container.querySelector('.select-options');
-    const label = container.querySelector('.selected-value');
+  let previewUrl = null;
+  let previewAbort = null;
+  let previewTimer = null;
 
-    // Закрытие при клике вне селекта
-    document.addEventListener('click', (e) => {
+  const previewSpinner = document.getElementById('previewSpinner');
+  const previewBadge = document.getElementById('previewBadge');
+
+  // Глобальный клик для закрытия
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.custom-select').forEach(container => {
       if (!container.contains(e.target)) {
+        const optionsList = container.querySelector('.select-options');
+        const arrow = container.querySelector('.arrow');
         optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        trigger.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
       }
     });
+  });
 
-    trigger.addEventListener('click', () => {
+  function initCustomSelect(containerId, options, onSelect) {
+    const container = document.getElementById(containerId);
+    let trigger = container.querySelector('.select-trigger');
+    const optionsList = container.querySelector('.select-options');
+
+    // Очистка старых слушателей через замену элемента
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+    trigger = newTrigger; // Теперь работаем с актуальным триггером
+
+    const label = trigger.querySelector('.selected-value');
+    const arrow = trigger.querySelector('.arrow');
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
       const isOpen = !optionsList.classList.contains('opacity-0');
-      // Закрываем другие открытые селекты
+
       document.querySelectorAll('.select-options').forEach(el => {
-          if (el !== optionsList) el.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        if (el !== optionsList) el.classList.add('opacity-0', 'invisible', 'translate-y-2');
       });
 
       if (!isOpen) {
         optionsList.classList.remove('opacity-0', 'invisible', 'translate-y-2');
-        trigger.querySelector('span:last-child').style.transform = 'rotate(180deg)';
+        arrow.style.transform = 'rotate(180deg)';
       } else {
         optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        trigger.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+        arrow.style.transform = 'rotate(0deg)';
       }
     });
 
-    // ТУТ ИСПРАВЛЕНИЕ: добавил text-white по умолчанию
     optionsList.innerHTML = options.map(opt => `
-      <div class="px-6 py-4 text-white hover:bg-white hover:text-black cursor-pointer text-sm transition-all duration-200 border-b border-white/5 last:border-0" data-value="${opt}">
-        ${opt}
-      </div>
+      <div class="px-6 py-4 text-white hover:bg-white hover:text-black cursor-pointer text-sm transition-all duration-200" data-value="${opt}">${opt}</div>
     `).join('');
 
     optionsList.querySelectorAll('[data-value]').forEach(item => {
-      item.addEventListener('click', () => {
+      item.onclick = () => {
         const val = item.getAttribute('data-value');
+
+        // Обновляем текст в актуальном триггере
         label.textContent = val;
         label.classList.remove('text-zinc-600');
         label.classList.add('text-white');
+
         optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        trigger.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+        arrow.style.transform = 'rotate(0deg)';
         onSelect(val);
-      });
+      };
     });
   }
 
-  // --- Initializing Brands ---
+  // --- Preview Logic ---
+  function setPreviewLoading(isLoading) {
+    if (isLoading) {
+      previewSpinner.classList.remove('hidden');
+      previewSpinner.classList.add('flex');
+    } else {
+      previewSpinner.classList.add('hidden');
+      previewSpinner.classList.remove('flex');
+    }
+  }
+
+  function updateGalleryMainImage(newUrl) {
+    const firstImg = document.querySelector('#productGallery .gallery-img');
+    if (!firstImg) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = newUrl;
+    firstImg.src = newUrl;
+    previewBadge.classList.remove('hidden');
+  }
+
+  async function fetchPreviewNow() {
+    if (!selectedVariant?.id) return;
+    const p = collectPersonalization();
+    if (!p.ok) return;
+
+    const startTime = Date.now();
+    const MIN_LOAD_TIME = 1000;
+
+    try { previewAbort?.abort(); } catch (e) {}
+    previewAbort = new AbortController();
+
+    setPreviewLoading(true);
+
+    try {
+      const res = await fetch('/api/mockups/preview', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        signal: previewAbort.signal,
+        body: JSON.stringify({
+          product_slug: productSlug,
+          variant_id: selectedVariant.id,
+          personalization: p.personalization
+        })
+      });
+
+      if (!res.ok) throw new Error("render_error");
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const remaining = Math.max(0, MIN_LOAD_TIME - (Date.now() - startTime));
+
+      setTimeout(() => {
+        updateGalleryMainImage(url);
+        setPreviewLoading(false);
+      }, remaining);
+
+    } catch (e) {
+      if (e.name !== 'AbortError') setPreviewLoading(false);
+    }
+  }
+
+  function debouncePreview(ms = 800) {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(fetchPreviewNow, ms);
+  }
+
+  // --- Initialization ---
   const brands = [...new Set(variants.map(v => v.brand))].sort();
+
   initCustomSelect('brandCustomSelect', brands, (brand) => {
     selectedBrand = brand;
     selectedModel = null;
+    selectedVariant = null;
 
-    // Reset Model Select
-    const modelWrap = document.getElementById('modelWrap');
-    const modelLabel = modelWrap.querySelector('.selected-value');
-    modelLabel.textContent = "Select Model";
+    // Сброс визуального состояния модели
+    const modelContainer = document.getElementById('modelCustomSelect');
+    const modelLabel = modelContainer.querySelector('.selected-value');
+    modelLabel.textContent = 'Select Model';
     modelLabel.classList.add('text-zinc-600');
+    modelLabel.classList.remove('text-white');
 
+    const modelWrap = document.getElementById('modelWrap');
     const models = variants.filter(v => v.brand === brand).map(v => v.model);
+
     initCustomSelect('modelCustomSelect', [...new Set(models)].sort(), (model) => {
       selectedModel = model;
+      selectedVariant = variants.find(v => v.brand === selectedBrand && v.model === selectedModel);
+      fetchPreviewNow();
     });
 
     modelWrap.classList.remove('hidden');
-    setTimeout(() => modelWrap.classList.remove('opacity-0', 'translate-y-4'), 10);
+    setTimeout(() => modelWrap.classList.remove('opacity-0'), 10);
   });
 
-  // --- Notifications ---
+  document.querySelectorAll('[data-personalization-key]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      if (selectedVariant) debouncePreview(800);
+    });
+  });
+
+  function collectPersonalization() {
+    const personalization = {};
+    const inputs = document.querySelectorAll('[data-personalization-key]');
+    for (const input of inputs) {
+      const key = input.getAttribute('data-personalization-key');
+      const val = input.value.trim();
+      if (!val) return { ok: false };
+      personalization[key] = val;
+    }
+    return { ok: true, personalization };
+  }
+
   function notify(msg, isError = false) {
     const toast = document.getElementById('cartToast');
     const text = document.getElementById('toastMessage');
-    const link = document.getElementById('toastLink');
-
     text.textContent = msg;
-    toast.querySelector('div').style.backgroundColor = isError ? '#ff3b3b' : 'white';
+    toast.querySelector('div').style.backgroundColor = isError ? '#111' : 'white';
+    toast.querySelector('div').style.border = isError ? '1px solid #333' : 'none';
     text.style.color = isError ? 'white' : 'black';
-    link.style.display = isError ? 'none' : 'block';
-
+    document.getElementById('toastLink').style.display = isError ? 'none' : 'block';
     toast.classList.remove('opacity-0', 'translate-y-10');
-    toast.classList.add('opacity-100', 'translate-y-0');
-
-    setTimeout(() => {
-      toast.classList.add('opacity-0', 'translate-y-10');
-      toast.classList.remove('opacity-100', 'translate-y-0');
-    }, 4000);
+    setTimeout(() => toast.classList.add('opacity-0', 'translate-y-10'), 4000);
   }
 
-  // --- Cart Submission ---
   document.getElementById('addToCartBtn').addEventListener('click', async () => {
-    const personalization = {};
-    const personalizationInputs = document.querySelectorAll('[data-personalization-key]');
-    for (const input of personalizationInputs) {
-      const key = input.getAttribute('data-personalization-key');
-      const maxLength = parseInt(input.getAttribute('data-personalization-max') || "0", 10);
-      const value = input.value.trim();
+    if (!selectedVariant) return notify('Select Device', true);
+    const p = collectPersonalization();
+    if (!p.ok) return notify('Fill personalization', true);
 
-      if (!value) return notify(`Enter personalization for ${key}`, true);
-      if (Number.isFinite(maxLength) && maxLength > 0 && value.length > maxLength) {
-        return notify(`"${key}" must be ${maxLength} characters or less`, true);
-      }
-      personalization[key] = value;
-    }
     const btn = document.getElementById('addToCartBtn');
-
-    if (!selectedBrand || !selectedModel) return notify('Select your device', true);
-
-    const match = variants.find(v => v.brand === selectedBrand && v.model === selectedModel);
-
-    btn.textContent = "Adding...";
     btn.disabled = true;
 
     try {
@@ -243,18 +340,16 @@
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           product_id: {{ product.id }},
-          variant_id: match?.id,
+          variant_id: selectedVariant.id,
           qty: 1,
-          personalization: personalization
+          personalization: p.personalization
         })
       });
-
-      if (!res.ok) throw new Error();
-      notify('Added to selection');
-    } catch (err) {
-      notify('System error. Try again.', true);
+      if (res.ok) notify('Added to bag');
+      else notify('Error adding to bag', true);
+    } catch (e) {
+      notify('Error', true);
     } finally {
-      btn.textContent = "Add To Bag";
       btn.disabled = false;
     }
   });
@@ -263,17 +358,7 @@
 <style>
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-  /* Плавный фокус без вспышек */
-  input:focus {
-    box-shadow: none !important;
-    outline: none !important;
-  }
-
-  /* Скролл внутри выпадающего списка */
-  .select-options {
-    max-height: 250px;
-    overflow-y: auto;
-  }
+  input:focus { box-shadow: none !important; outline: none !important; }
+  .select-options { max-height: 250px; overflow-y: auto; }
 </style>
 {% endblock %}
