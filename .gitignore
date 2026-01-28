@@ -8,4 +8,4 @@ __pycache__/
 .env
 app.log
 *.log
-static/out/
+app/static/out

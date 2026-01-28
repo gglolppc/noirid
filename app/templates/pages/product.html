@@ -126,7 +126,7 @@
 </div>
 
 <script>
-const variants = {{ variants_payload|tojson }};
+  const variants = {{ variants_payload|tojson }};
   const productSlug = {{ product.slug|tojson }};
 
   let selectedBrand = null;
@@ -136,6 +136,7 @@ const variants = {{ variants_payload|tojson }};
   let previewUrl = null;
   let previewAbort = null;
   let previewTimer = null;
+  let previewPublicUrl = null; // <-- server url from X-Preview-Url
 
   const previewSpinner = document.getElementById('previewSpinner');
   const previewBadge = document.getElementById('previewBadge');
@@ -222,6 +223,12 @@ const variants = {{ variants_payload|tojson }};
     previewBadge.classList.remove('hidden');
   }
 
+  function resetPreviewState() {
+    // сбрасываем то, что может "протечь" между вариантами/текстом
+    previewPublicUrl = null;
+    previewBadge.classList.add('hidden');
+  }
+
   async function fetchPreviewNow() {
     if (!selectedVariant?.id) return;
     const p = collectPersonalization();
@@ -236,6 +243,9 @@ const variants = {{ variants_payload|tojson }};
     setPreviewLoading(true);
 
     try {
+      // на старте запроса считаем превью "не готовым", чтобы Add не забрал старое
+      previewPublicUrl = null;
+
       const res = await fetch('/api/mockups/preview', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -249,6 +259,9 @@ const variants = {{ variants_payload|tojson }};
 
       if (!res.ok) throw new Error("render_error");
 
+      // сохраняем серверный URL для корзины
+      previewPublicUrl = res.headers.get("X-Preview-Url") || null;
+
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const remaining = Math.max(0, MIN_LOAD_TIME - (Date.now() - startTime));
@@ -259,6 +272,7 @@ const variants = {{ variants_payload|tojson }};
       }, remaining);
 
     } catch (e) {
+      previewPublicUrl = null;
       if (e.name !== 'AbortError') setPreviewLoading(false);
     }
   }
@@ -268,6 +282,14 @@ const variants = {{ variants_payload|tojson }};
     previewTimer = setTimeout(fetchPreviewNow, ms);
   }
 
+  async function waitForPreviewUrl(timeoutMs = 3000) {
+    const started = Date.now();
+    while (!previewPublicUrl && (Date.now() - started) < timeoutMs) {
+      await new Promise(r => setTimeout(r, 80));
+    }
+    return previewPublicUrl;
+  }
+
   // --- Initialization ---
   const brands = [...new Set(variants.map(v => v.brand))].sort();
 
@@ -275,6 +297,8 @@ const variants = {{ variants_payload|tojson }};
     selectedBrand = brand;
     selectedModel = null;
     selectedVariant = null;
+
+    resetPreviewState();
 
     // Сброс визуального состояния модели
     const modelContainer = document.getElementById('modelCustomSelect');
@@ -289,6 +313,8 @@ const variants = {{ variants_payload|tojson }};
     initCustomSelect('modelCustomSelect', [...new Set(models)].sort(), (model) => {
       selectedModel = model;
       selectedVariant = variants.find(v => v.brand === selectedBrand && v.model === selectedModel);
+
+      resetPreviewState();
       fetchPreviewNow();
     });
 
@@ -298,6 +324,8 @@ const variants = {{ variants_payload|tojson }};
 
   document.querySelectorAll('[data-personalization-key]').forEach(inp => {
     inp.addEventListener('input', () => {
+      // любое изменение текста делает старый URL невалидным
+      resetPreviewState();
       if (selectedVariant) debouncePreview(800);
     });
   });
@@ -335,6 +363,15 @@ const variants = {{ variants_payload|tojson }};
     btn.disabled = true;
 
     try {
+      // гарантируем, что preview_url не потеряется/не будет старым
+      if (!previewPublicUrl) {
+        await fetchPreviewNow();
+        await waitForPreviewUrl(3500);
+      }
+      if (!previewPublicUrl) {
+        return notify('Preview not ready', true);
+      }
+
       const res = await fetch('/api/cart/add', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -342,7 +379,8 @@ const variants = {{ variants_payload|tojson }};
           product_id: {{ product.id }},
           variant_id: selectedVariant.id,
           qty: 1,
-          personalization: p.personalization
+          personalization: p.personalization,
+          preview_url: previewPublicUrl,
         })
       });
       if (res.ok) notify('Added to bag');

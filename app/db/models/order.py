@@ -4,12 +4,35 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 from uuid import uuid4
-
+from sqlalchemy import Text
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+import datetime
+import secrets
+import string
+
+
+def generate_smart_order_number():
+    # Берем текущую дату
+    now = datetime.datetime.now()
+    year = str(now.year)[2:]  # '26'
+    month = f"{now.month:02d}"  # '01'
+
+    # Алфавит без сомнительных символов
+    chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+
+    # Генерим части "X"
+    x1 = secrets.choice(chars)
+    x2 = ''.join(secrets.choice(chars) for _ in range(2))
+    x3 = ''.join(secrets.choice(chars) for _ in range(2))
+
+    # Собираем шаблон: X 26 XX 01 XX
+    # Пример: B26HT01PX
+    return f"{x1}{year}{x2}{month}{x3}"
 
 
 class Order(Base):
@@ -21,8 +44,20 @@ class Order(Base):
         default=lambda: str(uuid4()),
     )
 
+    # order_number: Mapped[str] = mapped_column(
+    #     String(12),
+    #     unique=True,
+    #     index=True,
+    #     default=generate_smart_order_number
+    # )
+
     # draft -> pending_payment -> paid (завтра будет)
     status: Mapped[str] = mapped_column(String(32), default="draft", index=True)
+    tracking_number: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        index=True,
+    )
 
     currency: Mapped[str] = mapped_column(String(8), default="USD")
 
@@ -60,6 +95,7 @@ class OrderItem(Base):
 
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id", ondelete="RESTRICT"), index=True)
     variant_id: Mapped[int | None] = mapped_column(ForeignKey("variants.id", ondelete="RESTRICT"), index=True, default=None)
+    preview_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     title_snapshot: Mapped[str] = mapped_column(String(300))
     unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))

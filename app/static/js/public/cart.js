@@ -54,7 +54,11 @@ function renderCart(cart) {
 
     row.innerHTML = `
       <div class="shrink-0 w-24 h-32 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center overflow-hidden">
-         <span class="text-[9px] uppercase tracking-widest text-zinc-600 italic">Noirid</span>
+          ${
+            it.preview_url
+              ? `<img src="${it.preview_url}" alt="${it.title}" class="w-full h-full object-cover" />`
+              : `<span class="text-[9px] uppercase tracking-widest text-zinc-600 italic">Noirid</span>`
+          }
       </div>
 
       <div class="flex-1 min-w-0 text-center md:text-left">

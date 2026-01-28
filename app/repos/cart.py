@@ -53,6 +53,7 @@ class CartRepo:
         qty: int,
         personalization: dict[str, Any],
         unit_price: Decimal,
+        preview_url: str | None = None
     ) -> None:
         variant_label = None
         if variant:
@@ -65,6 +66,8 @@ class CartRepo:
                 it.qty += qty
                 it.unit_price = unit_price
                 it.title_snapshot = title_snapshot
+                if preview_url:
+                    it.preview_url = preview_url
                 return
 
         item = OrderItem(
@@ -75,6 +78,7 @@ class CartRepo:
             unit_price=unit_price,
             qty=qty,
             personalization_json=personalization or {},
+            preview_url=preview_url,
         )
         order.items.append(item)
         # session.add(item)

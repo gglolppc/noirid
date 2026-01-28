@@ -72,6 +72,7 @@ def _cart_to_out(order) -> CartOut:
                 "line_total": line,
                 "variant_id": it.variant_id,
                 "personalization": it.personalization_json or {},
+                "preview_url": it.preview_url,
             }
         )
     return CartOut(
@@ -120,6 +121,10 @@ async def add_to_cart(
     if not variant:
         raise HTTPException(status_code=404, detail="Variant not found")
 
+    preview_url = (payload.preview_url or "").strip() or None
+    if preview_url and not preview_url.startswith("/static/out/mockups/"):
+        raise HTTPException(status_code=400, detail="Invalid preview_url")
+
     personalization_payload = payload.personalization or {}
     schema = product.personalization_schema or {}
     personalization: dict[str, str] = {}
@@ -157,6 +162,7 @@ async def add_to_cart(
         qty=payload.qty,
         personalization=personalization,
         unit_price=unit_price,
+        preview_url=preview_url
     )
 
     # await session.refresh(order)  # чтобы items подхватились

@@ -59,6 +59,10 @@
           <dt class="text-zinc-400">Updated at</dt>
           <dd class="font-semibold">{{ order.updated_at }}</dd>
         </div>
+        <div>
+          <dt class="text-zinc-400">Tracking number</dt>
+          <dd class="font-semibold">{{ order.tracking_number }}</dd>
+        </div>
       </dl>
     </div>
 
@@ -71,7 +75,25 @@
             <div class="text-zinc-400">Qty: {{ item.qty }} · Price: {{ item.unit_price }}</div>
             <div class="text-zinc-500 text-xs">Product ID: {{ item.product_id }} · Variant ID: {{ item.variant_id or "—" }}</div>
             <div class="text-zinc-500 text-xs">Personalization: {{ item.personalization_json }}</div>
+            {% if item.preview_url %}
+              <div class="text-zinc-500 text-xs">
+                URL:
+                <a
+                  href="{{ item.preview_url }}"
+                  target="_blank"
+                  class="text-zinc-300 hover:text-white underline break-all"
+                >
+                  open preview
+                </a>
+              </div>
+            {% else %}
+              <div class="text-zinc-500 text-xs italic text-zinc-600">
+                No preview
+              </div>
+            {% endif %}
+
           </div>
+
         {% else %}
           <div class="text-sm text-zinc-400">No items.</div>
         {% endfor %}

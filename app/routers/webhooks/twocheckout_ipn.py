@@ -7,10 +7,13 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
+from pathlib import Path
 
+from app.core.directories import STATIC_DIR
 from app.db.session import get_async_session
 from app.repos.checkout import CheckoutRepo
 from app.repos.payments import PaymentRepo
+from app.services.order_previews import persist_order_previews
 from app.services.payment_state import apply_payment_status
 from app.services.twocheckout import TwoCOConfig, TwoCOService
 from app.services.twocheckout_ins_parser import map_to_internal_status, pick
@@ -276,6 +279,11 @@ async def ins_listener(
             # если реально paid — можно двигать бизнес-статус
             if order.payment_status == "paid" and order.status == "pending_payment":
                 order.status = "paid"
+                persist_order_previews(
+                    order=order,
+                    static_dir=Path(STATIC_DIR),  # или как у тебя хранится STATIC_DIR
+                    session=session,
+                )
             if order.payment_status == "refunded" and order.status != "refunded":
                 order.status = "refunded"
             if order.payment_status == "canceled" and order.status != "canceled":

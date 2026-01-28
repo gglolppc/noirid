@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from typing import Literal
 from app.core.templates import templates
 from app.db.models.product import Product, Variant
 from app.db.models.user import User
@@ -88,18 +88,27 @@ async def admin_dashboard(
     )
 
 
+
 @router.get("/orders", include_in_schema=False)
 async def admin_orders(
     request: Request,
     page: int = 1,
+    status: Literal["pending_payment", "paid"] | None = None,
     admin_user=Depends(require_admin),
     session: AsyncSession = Depends(get_async_session),
 ):
     page = max(page, 1)
-    total = await OrdersRepo.count(session)
+    total = await OrdersRepo.count(session, status=status)
     total_pages = max(ceil(total / PER_PAGE), 1)
     page = min(page, total_pages)
-    orders = await OrdersRepo.list_paginated(session, offset=(page - 1) * PER_PAGE, limit=PER_PAGE)
+
+    orders = await OrdersRepo.list_paginated(
+        session,
+        offset=(page - 1) * PER_PAGE,
+        limit=PER_PAGE,
+        status=status,
+    )
+
     return templates.TemplateResponse(
         "admin/orders.html",
         {
@@ -108,6 +117,7 @@ async def admin_orders(
             "page": page,
             "total_pages": total_pages,
             "total": total,
+            "status": status,
             "admin_user": admin_user,
         },
     )

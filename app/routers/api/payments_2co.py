@@ -80,7 +80,7 @@ async def start_2co_payment(
         order_id=order.id,
         total=Decimal(order.total),
         currency=order.currency,
-        title="NOIRID order",
+        title=f"NOIRID — Custom Black-on-Black Case",
     )
 
     previous_status = payment.status

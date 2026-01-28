@@ -11,6 +11,7 @@ class CartAddIn(BaseModel):
     variant_id: int | None = None
     qty: int = Field(default=1, ge=1, le=99)
     personalization: dict[str, Any] = Field(default_factory=dict)
+    preview_url: str | None = None
 
 
 class CartUpdateQtyIn(BaseModel):
@@ -29,6 +30,7 @@ class CartItemOut(BaseModel):
     unit_price: Decimal
     line_total: Decimal
     variant_id: int | None = None
+    preview_url: str | None = None
     personalization: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -37,4 +39,6 @@ class CartOut(BaseModel):
     currency: str
     subtotal: Decimal
     total: Decimal
+
     items: list[CartItemOut]
+

@@ -8,6 +8,24 @@
       <h1 class="text-2xl font-black">Orders</h1>
       <p class="text-sm text-zinc-400">Showing {{ orders|length }} of {{ total }} orders</p>
     </div>
+
+    <!-- FILTER -->
+    <div class="flex gap-2 text-sm">
+      <a
+        href="/admin/orders"
+        class="px-3 py-1 rounded border border-white/10 hover:bg-white/10 {% if not status %}bg-white/10{% endif %}"
+      >All</a>
+
+      <a
+        href="/admin/orders?status=pending_payment"
+        class="px-3 py-1 rounded border border-white/10 hover:bg-white/10 {% if status == 'pending_payment' %}bg-white/10{% endif %}"
+      >Pending</a>
+
+      <a
+        href="/admin/orders?status=paid"
+        class="px-3 py-1 rounded border border-white/10 hover:bg-white/10 {% if status == 'paid' %}bg-white/10{% endif %}"
+      >Paid</a>
+    </div>
   </div>
 
   <div class="mt-6 overflow-hidden rounded-xl border border-white/10">
@@ -46,14 +64,21 @@
     </table>
   </div>
 
+  <!-- PAGINATION -->
   <div class="mt-6 flex items-center justify-between text-sm">
     <div class="text-zinc-400">Page {{ page }} of {{ total_pages }}</div>
     <div class="flex gap-2">
       {% if page > 1 %}
-        <a class="px-3 py-1 rounded border border-white/10 hover:bg-white/10" href="/admin/orders?page={{ page - 1 }}">Prev</a>
+        <a
+          class="px-3 py-1 rounded border border-white/10 hover:bg-white/10"
+          href="/admin/orders?page={{ page - 1 }}{% if status %}&status={{ status }}{% endif %}"
+        >Prev</a>
       {% endif %}
       {% if page < total_pages %}
-        <a class="px-3 py-1 rounded border border-white/10 hover:bg-white/10" href="/admin/orders?page={{ page + 1 }}">Next</a>
+        <a
+          class="px-3 py-1 rounded border border-white/10 hover:bg-white/10"
+          href="/admin/orders?page={{ page + 1 }}{% if status %}&status={{ status }}{% endif %}"
+        >Next</a>
       {% endif %}
     </div>
   </div>

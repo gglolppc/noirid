@@ -161,4 +161,12 @@ async def preview(req: MockupPreviewRequest, session: AsyncSession = Depends(get
         payload,
     )
 
-    return FileResponse(out_path, media_type="image/webp")
+    out_path = Path(out_path)
+    rel = out_path.relative_to(CACHE_DIR).as_posix()
+    public_url = f"/static/out/mockups/{rel}"
+
+    return FileResponse(
+        out_path,
+        media_type="image/webp",
+        headers={"X-Preview-Url": public_url},
+    )
