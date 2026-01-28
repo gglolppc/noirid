@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade():
     # 1. Создаем колонку, разрешая временный NULL
-    op.add_column('orders', sa.Column('order_number', sa.String(length=12), nullable=True))
+    op.add_column('orders', sa.Column('order_number', sa.String(length=16), nullable=True))
 
     # 2. Наполняем данными существующие записи
     connection = op.get_bind()
