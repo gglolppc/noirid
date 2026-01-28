@@ -32,7 +32,7 @@ def generate_smart_order_number():
 
     # Собираем шаблон: X 26 XX 01 XX
     # Пример: B26HT01PX
-    return f"{x1}{year}{x2}{month}{x3}"
+    return f"NRD-{x1}{year}{x2}{month}{x3}"
 
 
 class Order(Base):
@@ -44,12 +44,13 @@ class Order(Base):
         default=lambda: str(uuid4()),
     )
 
-    # order_number: Mapped[str] = mapped_column(
-    #     String(12),
-    #     unique=True,
-    #     index=True,
-    #     default=generate_smart_order_number
-    # )
+    order_number: Mapped[str] = mapped_column(
+        String(16),
+        unique=True,
+        index=True,
+        default=generate_smart_order_number,
+        nullable=True,
+    )
 
     # draft -> pending_payment -> paid (завтра будет)
     status: Mapped[str] = mapped_column(String(32), default="draft", index=True)

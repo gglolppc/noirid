@@ -69,15 +69,15 @@ async def start_2co_payment(
     )
     await PaymentRepo.create(session, payment)
     log.info(
-        "Payment created | order_id=%s | amount=%s | provider=%s",
-        order.id,
+        "Payment created | order_uuid=%s | order_number=%s | amount=%s",
+        order.id,  # UUID
+        order.order_number,  # NRD-...
         payment.amount,
-        payment.provider,
     )
 
     url = TwoCOService.build_hosted_checkout_url(
         cfg,
-        order_id=order.id,
+        order_id=order.order_number,
         total=Decimal(order.total),
         currency=order.currency,
         title=f"NOIRID — Custom Black-on-Black Case",

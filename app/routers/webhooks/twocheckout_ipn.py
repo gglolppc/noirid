@@ -12,6 +12,7 @@ from pathlib import Path
 from app.core.directories import STATIC_DIR
 from app.db.session import get_async_session
 from app.repos.checkout import CheckoutRepo
+from app.repos.orders import OrdersRepo
 from app.repos.payments import PaymentRepo
 from app.services.order_previews import persist_order_previews
 from app.services.payment_state import apply_payment_status
@@ -96,23 +97,20 @@ async def ipn_probe_head() -> Response:
 
 
 @router.post("/ipn", include_in_schema=False)
-async def ins_listener(
+async def ipn_listener(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
-    # IPN прилетает как Form Data
     form = await request.form()
     items = list(form.multi_items())  # сохраняет порядок и дубли
     payload: dict[str, Any] = dict(items)
 
     client = getattr(request, "client", None)
     client_host = getattr(client, "host", None)
-    ct = request.headers.get("content-type")
-    ua = request.headers.get("user-agent")
 
     cfg = _cfg()
 
-    # 1) Проверка подписи
+    # 1) Подпись
     is_valid = TwoCOService.verify_ipn_signature_sha2_256(cfg.secret_key, items)
 
     log.info(
@@ -128,23 +126,23 @@ async def ins_listener(
     log.debug(
         "2CO IPN debug: %s",
         {
-            "content_type": ct,
-            "user_agent": ua,
-            "keys": sorted(set([k for k, _ in items])),
+            "content_type": request.headers.get("content-type"),
+            "user_agent": request.headers.get("user-agent"),
+            "keys": sorted({k for k, _ in items}),
             "payload_preview": _sanitize(dict(items)),
         },
     )
 
-    # Если подпись невалидна — отвечаем 200 (чтобы не получить retry-шторм), но ничего не применяем
+    # Невалидная подпись — не применяем, но отвечаем 200, чтобы не ловить ретраи
     if not is_valid:
         return Response(status_code=200, content="OK", media_type="text/plain")
 
     # 2) Идентификаторы
-    merchant_order_id = payload.get("REFNOEXT")  # связь с нашим Order
-    provider_order_number = pick(payload, "REFNO", "ORDERNO", "sale_id")  # provider order number
+    merchant_order_id = (payload.get("REFNOEXT") or "").strip() or None  # твой order_number (NRD-...)
+    provider_order_number = pick(payload, "REFNO", "ORDERNO", "sale_id")
     invoice_id = pick(payload, "invoice_id", "INVOICE_ID")
 
-    # 3) Маппинг статуса
+    # 3) Статус
     internal_status, extracted = map_to_internal_status(payload)
 
     log.info(
@@ -160,22 +158,25 @@ async def ins_listener(
         },
     )
 
-    # 4) Найдём Order/Payment
+    # 4) Ищем Order
     order = None
     if merchant_order_id:
-        order = await CheckoutRepo.get_order_any(session, str(merchant_order_id))
+        order = await OrdersRepo.get_by_order_number(session, merchant_order_id)
         if not order:
-            log.error(f"Order not found for ID: {merchant_order_id}")
+            # Если REFNOEXT не совпал — дальше гадать опасно: можем заапдейтить чужой payment.
+            log.error("Order not found for REFNOEXT: %s", merchant_order_id)
+            response_content = TwoCOService.calculate_ipn_response(cfg.secret_key, payload)
+            return Response(content=response_content, media_type="text/plain")
 
+    # 5) Ищем Payment
     payment = None
     if provider_order_number:
-        payment = await PaymentRepo.get_by_provider_order(
-            session, "2checkout", str(provider_order_number)
-        )
-    if not payment and merchant_order_id:
-        payment = await PaymentRepo.get_latest_for_order(session, str(merchant_order_id))
+        payment = await PaymentRepo.get_by_provider_order(session, "2checkout", str(provider_order_number))
 
-    # 5) Проверка суммы + валюты (только для paid)
+    if payment is None and order is not None:
+        payment = await PaymentRepo.get_latest_for_order(session, str(order.id))
+
+    # 6) Сумма/валюта (для paid — строгий гейт по сумме, валюта только если есть expected_currency)
     received_amount = _to_decimal(payload.get("IPN_TOTALGENERAL"))
     received_currency = (payload.get("CURRENCY") or "").upper().strip() or None
 
@@ -209,7 +210,6 @@ async def ins_listener(
                 },
             )
     else:
-        # Не валим обработку: просто предупреждаем
         log.warning(
             "2CO amount check skipped (missing expected/received): %s",
             {
@@ -233,7 +233,7 @@ async def ins_listener(
                 },
             )
     else:
-        # тоже не валим — иногда у тебя может не быть currency в Payment/Order
+        # валюта может отсутствовать у тебя в базе — не блокируем paid только из-за этого
         log.debug(
             "2CO currency check skipped: %s",
             {
@@ -249,21 +249,22 @@ async def ins_listener(
             return False
 
         if status == "paid":
-            # УЖЕСТОЧАЕМ: если мы не смогли найти ожидаемую сумму,
-            # значит мы не можем подтвердить валидность платежа.
-            if expected_amount is None or not amount_ok:
+            # paid применяем ТОЛЬКО если можем подтвердить сумму
+            if expected_amount is None or received_amount is None or not amount_ok:
                 return False
-            if expected_currency is None or not currency_ok:
+
+            # валюту проверяем только если она у нас есть (expected_currency)
+            if expected_currency and received_currency and not currency_ok:
                 return False
 
         return True
 
-    # 6) Обновляем Order (если нашли)
+    # 7) Обновляем Order
     if order is not None and internal_status:
         if not _can_apply_status(internal_status):
             if internal_status == "paid":
                 log.error(
-                    "2CO paid ignored due to mismatch: %s",
+                    "2CO paid ignored due to verification failure: %s",
                     {
                         "merchant_order_id": merchant_order_id,
                         "provider_order_number": provider_order_number,
@@ -276,22 +277,26 @@ async def ins_listener(
         else:
             order.payment_status = apply_payment_status(order.payment_status, internal_status)
 
-            # если реально paid — можно двигать бизнес-статус
             if order.payment_status == "paid" and order.status == "pending_payment":
                 order.status = "paid"
-                persist_order_previews(
-                    order=order,
-                    static_dir=Path(STATIC_DIR),  # или как у тебя хранится STATIC_DIR
-                    session=session,
-                )
+
+                if not getattr(order, "items", None):
+                    log.error("Paid order has no items loaded: %s (%s)", order.id, order.order_number)
+                else:
+                    persist_order_previews(
+                        order=order,
+                        static_dir=Path(STATIC_DIR),
+                        session=session,
+                    )
+
             if order.payment_status == "refunded" and order.status != "refunded":
                 order.status = "refunded"
+
             if order.payment_status == "canceled" and order.status != "canceled":
                 order.status = "canceled"
 
-    # 7) Обновляем Payment (если найдём)
+    # 8) Обновляем Payment
     if payment is not None:
-        # статус — только если можно применить (paid фильтруем по сумме/валюте)
         if internal_status and _can_apply_status(internal_status):
             payment.status = internal_status
 
@@ -304,11 +309,10 @@ async def ins_listener(
         payment.provider_invoice_status = extracted.get("invoice_status")
         payment.provider_approve_status = extracted.get("approve_status")
 
-        # raw_payload пишем всегда (очень полезно для разборов)
         payment.raw_payload = payload
 
     await session.commit()
 
-    # 8) Ответ 2CO
+    # 9) Ответ 2CO
     response_content = TwoCOService.calculate_ipn_response(cfg.secret_key, payload)
     return Response(content=response_content, media_type="text/plain")

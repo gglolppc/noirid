@@ -48,3 +48,15 @@ class OrdersRepo:
             select(Order).where(Order.id == order_id).options(selectinload(Order.items))
         )
         return res.scalar_one_or_none()
+
+    @staticmethod
+    async def get_by_order_number(session: AsyncSession, order_number: str) -> Order | None:
+        # Приводим к верхнему регистру на всякий случай
+        clean_number = order_number.strip().upper()
+
+        res = await session.execute(
+            select(Order)
+            .where(Order.order_number == clean_number)
+            .options(selectinload(Order.items))
+        )
+        return res.scalar_one_or_none()
