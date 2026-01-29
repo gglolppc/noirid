@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_name: str = "NOIRID"
     env: str = "dev"
     secret_key: str = "secret"
+    MAILGUN_API_KEY: str
 
     database_url: str
     session_cookie_name: str = "noirid_session"

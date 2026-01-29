@@ -23,8 +23,6 @@ async def order_status_page(
 
     # Если заказ не найден, лучше сразу выдать 404 или редирект,
     # чтобы шаблон не упал при попытке прочитать order.status
-    if not order:
-        return templates.TemplateResponse("pages/404.html", {"request": request}, status_code=404)
 
     return templates.TemplateResponse(
         "pages/order_status.html",
@@ -34,3 +32,4 @@ async def order_status_page(
             "order_number": order_number  # Передаем в шаблон красивый номер
         },
     )
+

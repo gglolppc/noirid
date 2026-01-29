@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import logging
 import os
 from decimal import Decimal, InvalidOperation
@@ -14,7 +15,7 @@ from app.db.session import get_async_session
 from app.repos.checkout import CheckoutRepo
 from app.repos.orders import OrdersRepo
 from app.repos.payments import PaymentRepo
-from app.services.order_previews import persist_order_previews
+
 from app.services.payment_state import apply_payment_status
 from app.services.twocheckout import TwoCOConfig, TwoCOService
 from app.services.twocheckout_ins_parser import map_to_internal_status, pick
@@ -279,15 +280,7 @@ async def ipn_listener(
 
             if order.payment_status == "paid" and order.status == "pending_payment":
                 order.status = "paid"
-
-                if not getattr(order, "items", None):
-                    log.error("Paid order has no items loaded: %s (%s)", order.id, order.order_number)
-                else:
-                    persist_order_previews(
-                        order=order,
-                        static_dir=Path(STATIC_DIR),
-                        session=session,
-                    )
+                order.need_post_process = True
 
             if order.payment_status == "refunded" and order.status != "refunded":
                 order.status = "refunded"

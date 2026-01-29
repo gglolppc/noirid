@@ -11,7 +11,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-import datetime
 import secrets
 import string
 
@@ -52,8 +51,17 @@ class Order(Base):
         nullable=True,
     )
 
-    # draft -> pending_payment -> paid (завтра будет)
     status: Mapped[str] = mapped_column(String(32), default="draft", index=True)
+
+    confirmation_email_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        default=None
+    )
+    need_post_process: Mapped[bool] = mapped_column(
+        default=False,
+        server_default="false",
+        nullable=False,
+    )
     tracking_number: Mapped[str | None] = mapped_column(
         String(64),
         nullable=True,
