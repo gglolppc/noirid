@@ -3,6 +3,7 @@ import logging
 from app.core.config import settings
 
 
+
 log = logging.getLogger("emails")
 
 MAILGUN_API_KEY = settings.MAILGUN_API_KEY
