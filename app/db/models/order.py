@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any
 from uuid import uuid4
@@ -17,7 +17,7 @@ import string
 
 def generate_smart_order_number():
     # Берем текущую дату
-    now = datetime.datetime.now()
+    now = datetime.now(timezone.utc)
     year = str(now.year)[2:]  # '26'
     month = f"{now.month:02d}"  # '01'
 
