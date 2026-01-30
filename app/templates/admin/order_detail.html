@@ -63,6 +63,14 @@
           <dt class="text-zinc-400">Tracking number</dt>
           <dd class="font-semibold">{{ order.tracking_number }}</dd>
         </div>
+          <div>
+          <dt class="text-zinc-400">Email sent at:</dt>
+          <dd class="font-semibold">{{ order.confirmation_email_sent_at }}</dd>
+        </div>
+          <div>
+          <dt class="text-zinc-400">Need post process:</dt>
+          <dd class="font-semibold">{{ order.need_post_process }}</dd>
+        </div>
       </dl>
     </div>
 

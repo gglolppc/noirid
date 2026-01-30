@@ -682,3 +682,27 @@ async def admin_media_rename(
     await session.commit()
     redirect_path = (current_path or "").strip("/")
     return RedirectResponse(f"/admin/media?path={redirect_path}", status_code=303)
+
+@router.post("/orders/{order_id}/tracking", include_in_schema=False)
+async def admin_add_tracking(
+    request: Request,
+    order_id: str,
+    tracking_number: str = Form(...),
+    admin_user=Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session),
+):
+    order = await OrdersRepo.get_by_id(session, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    if order.status != "paid":
+        raise HTTPException(status_code=400, detail="Order is not paid")
+
+    if order.tracking_number:
+        raise HTTPException(status_code=400, detail="Tracking already set")
+
+    order.tracking_number = tracking_number.strip()
+    order.tracking_email_sent_at = None
+    await session.commit()
+
+    return RedirectResponse("/admin/orders", status_code=303)

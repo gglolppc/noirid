@@ -57,6 +57,10 @@ class Order(Base):
         DateTime(timezone=True),
         default=None
     )
+    tracking_email_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        default=None
+    )
     need_post_process: Mapped[bool] = mapped_column(
         default=False,
         server_default="false",
