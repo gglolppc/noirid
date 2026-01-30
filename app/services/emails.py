@@ -19,7 +19,7 @@ async def send_success_payment_email(email: str, order_number: str):
     auth = ("api", MAILGUN_API_KEY)
 
     # Ссылка на твой трэкинг
-    tracking_url = f"{BASE_URL}/orders/{order_number}"
+    tracking_url = f"{BASE_URL}/order/{order_number}"
 
     html_content = f"""
         <html>
@@ -96,7 +96,7 @@ async def send_tracking_email(
     auth = ("api", MAILGUN_API_KEY)
 
     # если потом появится страница трекинга — просто поменяешь URL
-    tracking_url = f"{BASE_URL}/orders/{order_number}"
+    tracking_url = f"{BASE_URL}/order/{order_number}"
 
     html_content = f"""
     <html>
