@@ -3,129 +3,289 @@
 {% block title %}Catalog · NOIRID{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505] selection:bg-white selection:text-black">
-  <section class="min-h-screen pt-32 pb-24 px-6">
-    <div class="mx-auto max-w-6xl w-full">
+<div class="relative bg-[#050505] text-zinc-400 selection:bg-white selection:text-black">
+  <section class="min-h-screen pt-16 md:pt-24 pb-24 px-6 md:px-12">
+    <div class="mx-auto max-w-7xl w-full">
 
+      {# =========================
+         Header
+         ========================= #}
       <div class="reveal">
-        <div class="text-[10px] md:text-[11px] uppercase tracking-[0.5em] text-zinc-500 font-medium">
-          Collection / 2026
+        <div class="text-[12px] uppercase tracking-[0.5em] text-zinc-600 font-medium">
+          Vault / 2026
         </div>
 
-        <div class="mt-6 flex items-end justify-between gap-8 flex-wrap">
-          <h1 class="text-6xl md:text-8xl font-bold uppercase tracking-[-0.05em] text-white leading-[0.85]">
-            Designs
+        <div class="mt-4 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
+          <h1 class="text-6xl md:text-9xl font-bold uppercase tracking-[-0.05em] text-white leading-none">
+            The Vault
           </h1>
-          <div class="mb-2 text-[10px] uppercase tracking-[0.32em] text-zinc-500 border-b border-white/10 pb-1">
-            {% if products %}{{ products|length }} items{% else %}0 items{% endif %}
+
+          <div class="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-mono">
+            Objects <span id="itemCount" class="text-white ml-2">{{ products|length if products else 0 }}</span>
           </div>
         </div>
+      </div>
 
-        <p class="mt-8 text-sm md:text-base text-zinc-400/80 max-w-md leading-relaxed font-light">
-          Limited drop. Clean typography. Quiet texture. <br class="hidden md:block">
-          Each piece is a study in functional minimalism.
-        </p>
+      {# =========================
+         Series Filter (ACTIVE state via JS)
+         Uses series_slug + optional series_title.
+         If you don't have series_title, it will humanize slug.
+         ========================= #}
+      {% set ns = namespace(series=[]) %}
+      {% if products %}
+        {% for p in products %}
+          {% if p.series_slug %}
+            {% set title = (p.series_title if p.series_title else (p.series_slug|replace('-', ' ')|title)) %}
+            {% set key = p.series_slug ~ '||' ~ title %}
+            {% if key not in ns.series %}
+              {% set _ = ns.series.append(key) %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
 
-        <div class="mt-12 h-px w-full bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
+      <div class="reveal reveal-delay-100 mt-10 flex items-center gap-10 overflow-x-auto no-scrollbar pb-6 border-b border-white/5">
+        <button
+          type="button"
+          class="filter-btn text-[11px] uppercase tracking-[0.4em] text-zinc-600 hover:text-white transition-colors relative whitespace-nowrap"
+          data-filter="all"
+        >
+          All objects
+        </button>
+
+        {% for item in ns.series %}
+          {% set parts = item.split('||') %}
+          {% set slug = parts[0] %}
+          {% set title = parts[1] %}
+          <button
+            type="button"
+            class="filter-btn text-[11px] uppercase tracking-[0.4em] text-zinc-600 hover:text-white transition-colors whitespace-nowrap"
+            data-filter="{{ slug }}"
+          >
+            {{ title }}
+          </button>
+        {% endfor %}
       </div>
 
       {% if products %}
-        <div class="reveal reveal-delay-100 mt-16 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
-
+        {# =========================
+           Grid
+           ========================= #}
+        <div id="grid" class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-16 md:gap-y-20">
           {% for p in products %}
-            <a href="/p/{{ p.slug }}"
-               class="group relative flex flex-col focus:outline-none"
-               aria-label="Open {{ p.title }}">
+            <a
+              href="/p/{{ p.slug }}"
+              class="product-item group block reveal"
+              data-series="{{ p.series_slug or 'other' }}"
+            >
+              <div class="relative aspect-[4/5] rounded-[24px] border border-white/[0.04] bg-[#080808] overflow-hidden transition-all duration-700 group-hover:border-white/20">
 
-              <div class="relative aspect-[4/5] overflow-hidden rounded-[32px] border border-white/10 bg-[#0A0A0A] transition-all duration-700 group-hover:border-white/20 group-hover:shadow-[0_0_80px_rgba(255,255,255,0.03)]">
-                
-                {% if p.status %}
-                <div class="absolute top-6 left-6 z-20">
-                    <span class="px-3 py-1 rounded-full border border-white/10 bg-black/50 backdrop-blur-md text-[9px] uppercase tracking-[0.2em] text-white">
-                        {{ p.status }}
-                    </span>
+                {# Badge: use p.badge if exists (NOT p.status) #}
+                <div class="absolute top-5 left-5 z-20">
+                  <span class="px-3 py-1 rounded-full border border-white/10 bg-black/60 backdrop-blur-md text-[9px] uppercase tracking-[0.22em] text-zinc-400">
+                    {{ p.badge or "Edition 01" }}
+                  </span>
                 </div>
-                {% endif %}
 
-                <span class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000
-                             bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,0.08),transparent_70%)]"></span>
-
-                {# Art Image #}
-                <div class="absolute inset-0 p-12 md:p-16 flex items-center justify-center">
+                {# Image: scale ONLY the img, not the whole wrapper #}
+                <div class="absolute inset-0 p-10 flex items-center justify-center">
                   {% if p.images and p.images[0].url %}
                     <img
                       src="{{ p.images[0].url }}"
                       alt="{{ p.title }}"
                       loading="lazy"
-                      class="h-full w-full object-contain transition-transform duration-1000 ease-out
-                             group-hover:scale-110"
+                      class="h-full w-full object-contain transition-transform duration-1000 ease-out group-hover:scale-[1.06]"
                     />
-                  {% else %}
-                    <div class="text-[10px] uppercase tracking-[0.4em] text-zinc-600">No Image</div>
                   {% endif %}
                 </div>
 
-                <div class="pointer-events-none absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.4)]"></div>
-                
-                <div class="absolute inset-x-0 bottom-8 flex justify-center translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-                    <div class="px-6 py-2 bg-white text-black text-[10px] font-bold uppercase tracking-[0.3em] rounded-full">
-                        View Details
-                    </div>
+                {# Soft vignette #}
+                <div class="pointer-events-none absolute inset-0 shadow-[inset_0_0_140px_rgba(0,0,0,0.55)]"></div>
+
+                {# CTA overlay: single action, no fake choice #}
+                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div class="px-8 py-3 bg-white text-black rounded-full text-[10px] font-bold uppercase tracking-[0.4em]">
+                    Personalize
+                  </div>
                 </div>
               </div>
 
-              <div class="mt-8 px-2">
-                <div class="flex items-start justify-between gap-4">
-                  <div class="space-y-1">
-                    <h2 class="text-2xl md:text-3xl font-medium text-white tracking-tight">
-                      {{ p.title }}
-                    </h2>
-                    <p class="text-sm text-zinc-500 font-light line-clamp-1">
-                      {{ p.description or "Minimal design. Built for personalization." }}
-                    </p>
-                  </div>
-                  
-                  <div class="text-right">
-                    <span class="text-lg font-light text-white/90 italic">
-                      {% if p.base_price %}${{ p.base_price }}{% else %}Price TBD{% endif %}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="mt-6 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-                  <span class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-zinc-800"></span>
-                    Made to order
+              <div class="mt-6 space-y-2 px-1">
+                <div class="flex justify-between items-baseline gap-6">
+                  <h2 class="text-xl font-medium text-white tracking-tight">
+                    {{ p.title }}
+                  </h2>
+                  <span class="text-lg font-light text-white italic tracking-tighter whitespace-nowrap">
+                    {% if p.base_price %}${{ p.base_price }}{% else %}TBD{% endif %}
                   </span>
-                  <span class="group-hover:text-white transition-colors duration-300">Edition 01</span>
                 </div>
-              </div>
 
+                {# Replace "Handcrafted / Global" with something that fits the brand #}
+                <p class="text-[12px] uppercase tracking-widest text-zinc-600 leading-none">
+                  Made to order · Noir finish
+                  {% if p.series_title %}
+                    · {{ p.series_title }}
+                  {% elif p.series_slug %}
+                    · {{ p.series_slug|replace('-', ' ')|title }}
+                  {% endif %}
+                </p>
+              </div>
             </a>
           {% endfor %}
-
-        </div>
-
-        <div class="reveal reveal-delay-200 mt-24 text-center">
-            <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-600 inline-block border-t border-white/5 pt-8 w-full max-w-xs">
-                Limited availability
-            </span>
         </div>
 
       {% else %}
-        <div class="reveal reveal-delay-100 mt-24 py-32 rounded-[40px] border border-dashed border-white/10 bg-white/[0.02] text-center">
-          <div class="text-zinc-500 uppercase tracking-[0.5em] text-xs mb-4">Status: Locked</div>
-          <h3 class="text-3xl font-light text-white mb-6">The Vault is currently empty.</h3>
-          <p class="text-zinc-500 text-sm max-w-xs mx-auto mb-10">
-            Sign up to be notified when the next drop goes live.
+        <div class="mt-20 py-40 border border-dashed border-white/5 rounded-[48px] text-center">
+          <h3 class="text-2xl font-light text-white italic uppercase tracking-widest">
+            The Vault is empty
+          </h3>
+          <p class="mt-4 text-zinc-700 text-[10px] uppercase tracking-[0.5em]">
+            Next drop soon
           </p>
-          <a href="/" class="inline-block border border-white/20 px-8 py-3 text-[10px] uppercase tracking-[0.3em] text-white hover:bg-white hover:text-black transition-all">
-            Return Home
-          </a>
         </div>
       {% endif %}
+
+      {# =========================
+         Bottom manifesto grid (short, punchy, alive)
+         ========================= #}
+      <div class="mt-28 md:mt-32 border-t border-white/5 pt-12 md:pt-16">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-0 border-l border-white/5">
+
+          <div class="group border-r border-b md:border-b-0 border-white/5 p-7 md:p-8 transition-colors hover:bg-white/[0.02]">
+            <div class="flex flex-col gap-6">
+              <div class="flex items-center justify-between">
+                <span class="text-[14px] font-bold text-white tracking-tighter italic">01/</span>
+                <div class="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-white transition-colors"></div>
+              </div>
+              <div class="space-y-2">
+                <h4 class="text-[12px] uppercase tracking-[0.3em] text-white font-bold">
+                  Made to order
+                </h4>
+                <p class="text-[10px] uppercase tracking-widest text-zinc-600 leading-relaxed">
+                  Produced after purchase.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="group border-r border-b md:border-b-0 border-white/5 p-7 md:p-8 transition-colors hover:bg-white/[0.02]">
+            <div class="flex flex-col gap-6">
+              <div class="flex items-center justify-between">
+                <span class="text-[14px] font-bold text-white tracking-tighter italic">02/</span>
+                <div class="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-white transition-colors"></div>
+              </div>
+              <div class="space-y-2">
+                <h4 class="text-[12px] uppercase tracking-[0.3em] text-white font-bold">
+                  Worldwide shipping
+                </h4>
+                <p class="text-[10px] uppercase tracking-widest text-zinc-600 leading-relaxed">
+                  Tracked worldwide.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="group border-r border-white/5 p-7 md:p-8 transition-colors hover:bg-white/[0.02]">
+            <div class="flex flex-col gap-6">
+              <div class="flex items-center justify-between">
+                <span class="text-[14px] font-bold text-white tracking-tighter italic">03/</span>
+                <div class="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-white transition-colors"></div>
+              </div>
+              <div class="space-y-2">
+                <h4 class="text-[12px] uppercase tracking-[0.3em] text-white font-bold">
+                  Secure checkout
+                </h4>
+                <p class="text-[10px] uppercase tracking-widest text-zinc-600 leading-relaxed">
+                  Trusted payment flow.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="group border-r border-white/5 p-7 md:p-8 transition-colors hover:bg-white/[0.02]">
+            <div class="flex flex-col gap-6">
+              <div class="flex items-center justify-between">
+                <span class="text-[14px] font-bold text-white tracking-tighter italic">04/</span>
+                <div class="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-white transition-colors"></div>
+              </div>
+              <div class="space-y-2">
+                <h4 class="text-[12px] uppercase tracking-[0.3em] text-white font-bold">
+                  Premium TPU
+                </h4>
+                <p class="text-[10px] uppercase tracking-widest text-zinc-600 leading-relaxed">
+                  Matte noir-grade TPU.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
 
     </div>
   </section>
 </div>
+
+{# =========================
+   Filter JS (no innerText hacks)
+   - active underline follows selection
+   - count updates
+   ========================= #}
+<script>
+  (function () {
+    const buttons = Array.from(document.querySelectorAll('.filter-btn'));
+    const items = Array.from(document.querySelectorAll('.product-item'));
+    const countEl = document.getElementById('itemCount');
+
+    function setActive(btn) {
+      buttons.forEach(b => {
+        b.classList.remove('text-white');
+        b.classList.add('text-zinc-600');
+        b.classList.remove('is-active');
+      });
+
+      btn.classList.add('is-active');
+      btn.classList.add('text-white');
+      btn.classList.remove('text-zinc-600');
+    }
+
+    function applyFilter(filter) {
+      let visible = 0;
+      items.forEach(item => {
+        const v = item.getAttribute('data-series') || 'other';
+        const show = (filter === 'all' || v === filter);
+        item.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      if (countEl) countEl.textContent = String(visible);
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.getAttribute('data-filter') || 'all';
+        setActive(btn);
+        applyFilter(filter);
+      });
+    });
+
+    const defaultBtn = document.querySelector('.filter-btn[data-filter="all"]') || buttons[0];
+    if (defaultBtn) setActive(defaultBtn);
+    applyFilter('all');
+  })();
+</script>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .filter-btn { position: relative; }
+  .filter-btn.is-active::after {
+    content: '';
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: white;
+    opacity: 0.9;
+  }
+</style>
 {% endblock %}

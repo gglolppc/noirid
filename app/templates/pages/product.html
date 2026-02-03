@@ -3,125 +3,206 @@
 {% block title %}{{ product.title }} · NOIRID{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505] selection:bg-white selection:text-black min-h-screen">
-  <section class="pt-32 pb-24 px-6 md:px-12">
-    <div class="mx-auto max-w-6xl w-full">
+<div class="relative bg-[#050505] selection:bg-white selection:text-black min-h-screen text-zinc-300">
+  <nav class="absolute top-8 left-6 md:left-12 z-40">
+    <a href="/catalog" class="group flex items-center gap-3 text-sm md:text-base uppercase tracking-wider text-zinc-400 hover:text-white transition-colors">
+      <span class="transition-transform group-hover:-translate-x-1">←</span> Back to Catalog
+    </a>
+  </nav>
 
-      <div class="reveal">
-        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-500 font-medium">Design / Detail</div>
-        <h1 class="mt-6 text-6xl md:text-8xl font-bold uppercase tracking-[-0.05em] text-white leading-[0.85]">
-          {{ product.title }}
-        </h1>
-        <div class="mt-8 flex items-center justify-between border-b border-white/10 pb-6">
-          <p class="text-sm md:text-base text-zinc-400 font-light max-w-xl leading-relaxed">
-            {{ product.description or "Limited edition design. Engineered for a perfect fit and minimalist aesthetic." }}
-          </p>
-          <div class="text-right">
-             <div class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-1">Base Price</div>
-             <div class="text-3xl font-light text-white italic tracking-tight">
-               {{ "%.2f"|format(product.base_price) }} <span class="text-sm font-normal text-zinc-500 not-italic uppercase">{{ product.currency }}</span>
-             </div>
-          </div>
-        </div>
-      </div>
+  <section class="pt-24 md:pt-32 pb-32 px-6 md:px-12">
+    <div class="mx-auto max-w-7xl">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
 
-      <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-        <div class="reveal reveal-delay-1">
-          <div class="relative aspect-[4/5] rounded-[40px] border border-white/10 bg-[#0A0A0A] overflow-hidden group">
-            <div class="pointer-events-none absolute inset-0 z-10 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"></div>
+        <!-- LEFT: PREVIEW (sticky) -->
+        <div class="lg:col-span-7">
+          <div class="lg:sticky lg:top-32">
+            <div class="relative aspect-[4/5] rounded-3xl md:rounded-4xl border border-white/5 bg-[#080808] overflow-hidden group shadow-2xl">
+              <div class="pointer-events-none absolute inset-0 z-10 shadow-[inset_0_0_160px_rgba(0,0,0,0.7)]"></div>
 
-            <div id="previewBadge" class="hidden absolute top-6 left-6 z-20 rounded-full bg-white/10 backdrop-blur px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-white/80 border border-white/10">
-              Preview
-            </div>
-
-            <div id="previewSpinner" class="hidden absolute inset-0 z-20 items-center justify-center pointer-events-none">
-              <div class="rounded-full border border-white/20 bg-black/40 backdrop-blur px-6 py-4 text-[10px] uppercase tracking-[0.4em] text-white/80">
-                Rendering…
+              <div id="previewBadge"
+                   class="hidden absolute top-8 left-8 z-20 rounded-full bg-white/5 backdrop-blur-lg px-6 py-3
+                          text-sm uppercase tracking-wider text-white/80 border border-white/10">
+                Live Preview
               </div>
-            </div>
 
-            <div id="productGallery" class="flex h-full w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
-              <div class="h-full w-full flex-none snap-center flex items-center justify-center p-12 md:p-20">
+              <div id="previewSpinner" class="hidden flex absolute inset-0 z-30 items-center justify-center bg-black/30 backdrop-blur-sm">
+                <div class="flex flex-col items-center gap-6">
+                  <div class="w-16 h-0.5 bg-white/20 overflow-hidden relative">
+                    <div class="absolute inset-0 bg-white translate-x-[-100%] animate-[shimmer_1.5s_infinite]"></div>
+                  </div>
+                  <span class="text-sm uppercase tracking-wider text-white font-light">
+                    Refining Your Design
+                  </span>
+                </div>
+              </div>
+
+              <div id="productGallery" class="flex h-full w-full items-center justify-center p-12 md:p-20">
                 {% if product.images %}
-                  <img src="{{ product.images[0].url }}" alt="{{ product.title }}" class="gallery-img h-full w-full object-contain transition-transform duration-700 group-hover:scale-105" />
+                  <img id="mainProductImg"
+                       src="{{ product.images[0].url }}"
+                       alt="{{ product.title }}"
+                       class="gallery-img h-full w-full object-contain transition-transform duration-1000 group-hover:scale-105" />
                 {% else %}
-                  <img id="mainProductImg" src="/static/img/placeholder.webp" alt="{{ product.title }}" class="gallery-img h-full w-full object-contain transition-transform duration-700 group-hover:scale-105" />
+                  <img id="mainProductImg"
+                       src="/static/img/placeholder.webp"
+                       alt="{{ product.title }}"
+                       class="gallery-img h-full w-full object-contain transition-transform duration-1000 group-hover:scale-105" />
                 {% endif %}
               </div>
             </div>
           </div>
         </div>
 
-        <div class="reveal reveal-delay-2 flex flex-col justify-center">
-          <div class="space-y-10">
-            {% set personalization_schema = product.personalization_schema or {} %}
-            {% set personalization_count = personalization_schema|length %}
+        <!-- RIGHT: INFO + CONFIG -->
+        <div class="lg:col-span-5 flex flex-col justify-center">
+          <div class="reveal space-y-10">
 
-            {% for key, limit in personalization_schema.items()|sort %}
-              {% set limit_value = limit.max_len if limit is mapping and limit.max_len is defined else limit %}
-              <div class="group relative">
-                <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 group-focus-within:text-zinc-200 transition-colors">
-                  {{ "%02d"|format(loop.index) }}. Type your {{ key }}
-                </label>
-                <input type="text"
-                       class="mt-2 w-full bg-transparent border-b border-white/10 py-4 text-xl text-white placeholder:text-zinc-800 focus:outline-none focus:border-white/40 transition-all duration-300 font-light"
-                       placeholder="Type your {{ key }}" autocomplete="off"
-                       data-personalization-key="{{ key }}"
-                       data-personalization-max="{{ limit_value }}"
-                       maxlength="{{ limit_value }}">
+
+
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-tight text-white">
+              {{ product.title }}
+            </h1>
+
+            <!-- PRICE + DISCOUNT (если добавишь) -->
+            <div class="mt-6 space-y-4">
+              <div class="flex items-baseline gap-6">
+                <span id="priceValue" class="text-4xl md:text-5xl font-light text-white italic tracking-tight">
+                  {{ "%.2f"|format(product.base_price) }}
+                  <span class="text-base md:text-lg not-italic uppercase opacity-60 ml-2">{{ product.currency }}</span>
+                </span>
+
+                <span class="text-sm md:text-base uppercase tracking-wider text-zinc-400 font-light">
+                  Free worldwide shipping
+                </span>
               </div>
-            {% endfor %}
 
-            <div class="group relative">
-              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
-                {{ "%02d"|format(personalization_count + 1) }}. Device Brand
-              </label>
-              <div id="brandCustomSelect" class="custom-select relative mt-2">
-                <div class="select-trigger w-full border-b border-white/10 py-4 text-xl text-white font-light cursor-pointer flex justify-between items-center hover:border-white/30 transition-all">
-                  <span class="selected-value text-zinc-600">Select Brand</span>
-                  <span class="arrow text-[10px] transition-transform duration-300">↓</span>
-                </div>
-                <div class="select-options absolute top-full left-0 w-full z-30 mt-2 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-200 translate-y-2">
-                </div>
+              <!-- Добавь скидку здесь, как я советовал ранее -->
+              <div class="text-sm md:text-base text-zinc-400 font-light italic">
+                Buy 2+ cases – 15% off automatically at checkout
               </div>
-            </div>
 
-            <div id="modelWrap" class="group relative hidden opacity-0 transition-all duration-500">
-              <label class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
-                {{ "%02d"|format(personalization_count + 2) }}. Device Model
-              </label>
-              <div id="modelCustomSelect" class="custom-select relative mt-2">
-                <div class="select-trigger w-full border-b border-white/10 py-4 text-xl text-white font-light cursor-pointer flex justify-between items-center hover:border-white/30 transition-all">
-                  <span class="selected-value text-zinc-600">Select Model</span>
-                  <span class="arrow text-[10px] transition-transform duration-300">↓</span>
-                </div>
-                <div class="select-options absolute top-full left-0 w-full z-30 mt-2 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-200 translate-y-2">
-                </div>
+              <div class="text-sm uppercase tracking-wider text-zinc-500">
+                Free remake guarantee · Secure checkout
               </div>
             </div>
 
-            <div class="pt-8 space-y-4">
-              <button id="addToCartBtn"
-                      class="w-full rounded-full bg-white text-black py-6 text-[11px] font-bold uppercase tracking-[0.5em] transition-all hover:bg-zinc-200 active:scale-[0.98] disabled:opacity-50">
-                Add To Bag
-              </button>
-              <div class="flex items-center justify-between px-4">
-                <span class="text-[9px] uppercase tracking-[0.2em] text-zinc-600 italic">Limited Edition / Noirid Drop</span>
-                <a href="/catalog" class="text-[9px] uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition underline underline-offset-8 decoration-zinc-800 hover:decoration-white">Back to Catalog</a>
+            <p class="text-base md:text-lg text-zinc-300 leading-relaxed max-w-xl font-light">
+              {{ product.description or "Premium protection with discreet personalization — visible only in the light. Raised texture, matte finish, and perfect fit for your device." }}
+            </p>
+
+            <!-- FEATURES (упростил, сделал крупнее) -->
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 border-y border-white/5 py-10">
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full bg-white/40"></div>
+                <span class="text-base md:text-lg uppercase tracking-wide text-zinc-400">Precision Fit</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full bg-white/40"></div>
+                <span class="text-base md:text-lg uppercase tracking-wide text-zinc-400">Matte Texture</span>
               </div>
             </div>
 
+            <!-- PERSONALIZATION + SELECTS -->
+            <div class="mt-12 space-y-12">
+              {% set personalization_schema = product.personalization_schema or {} %}
+
+              {% for key, limit in personalization_schema.items()|sort %}
+                {% set limit_value = limit.max_len if limit is mapping and limit.max_len is defined else limit %}
+                <div class="space-y-4">
+                  <label class="block text-sm uppercase tracking-wider text-zinc-400 font-medium">
+                    {{ "%02d"|format(loop.index) }}. {{ key }}
+                  </label>
+
+                  <div class="relative">
+                    <input type="text"
+                           class="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5
+                                  text-lg md:text-xl text-white placeholder:text-zinc-500
+                                  focus:outline-none focus:border-white/30 focus:bg-white/[0.08]
+                                  transition-all duration-300 font-light tracking-wide"
+                           placeholder="Type here…"
+                           data-personalization-key="{{ key }}"
+                           data-personalization-max="{{ limit_value }}"
+                           maxlength="{{ limit_value }}">
+                    <span class="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-zinc-500 font-mono">
+                      MAX {{ limit_value }}
+                    </span>
+                  </div>
+                </div>
+              {% endfor %}
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                  <label class="block text-sm uppercase tracking-wider text-zinc-400 font-medium">Brand</label>
+
+                  <div id="brandCustomSelect" class="custom-select relative">
+                    <div class="select-trigger w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5
+                                text-lg text-white font-light cursor-pointer flex justify-between items-center
+                                hover:bg-white/[0.08] transition-all">
+                      <span class="selected-value text-zinc-400 italic">Select…</span>
+                      <span class="arrow opacity-50 text-sm transition-transform duration-500">▼</span>
+                    </div>
+
+                    <div class="select-options absolute top-full left-0 w-full z-50 mt-3 bg-[#0F0F0F] border border-white/10
+                                rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-300 translate-y-2 shadow-2xl"></div>
+                  </div>
+                </div>
+
+                <div id="modelWrap" class="space-y-4 opacity-20 pointer-events-none transition-all duration-500">
+                  <label class="block text-sm uppercase tracking-wider text-zinc-400 font-medium">Model</label>
+
+                  <div id="modelCustomSelect" class="custom-select relative">
+                    <div class="select-trigger w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5
+                                text-lg text-white font-light cursor-pointer flex justify-between items-center
+                                hover:bg-white/[0.08] transition-all">
+                      <span class="selected-value text-zinc-400 italic">Select…</span>
+                      <span class="arrow opacity-50 text-sm transition-transform duration-500">▼</span>
+                    </div>
+
+                    <div class="select-options absolute top-full left-0 w-full z-50 mt-3 bg-[#0F0F0F] border border-white/10
+                                rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-300 translate-y-2 shadow-2xl"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CTA -->
+              <div class="pt-8">
+                <button id="addToCartBtn"
+                        class="group relative w-full overflow-hidden rounded-full bg-white px-8 py-7 transition-all active:scale-95 disabled:opacity-50">
+                  <span class="relative z-10 text-black text-base md:text-lg font-bold uppercase tracking-wider">Add To Bag</span>
+                  <div class="absolute inset-0 bg-zinc-200 translate-y-full transition-transform duration-300 group-hover:translate-y-0"></div>
+                </button>
+
+                <div class="mt-6 text-center text-sm uppercase tracking-wider text-zinc-500">
+                  <span id="helperHint">Select device model to generate preview</span>
+                </div>
+
+                <div class="mt-8 flex items-center justify-center gap-12 px-4 text-xs uppercase tracking-wider text-zinc-600 italic">
+                  NOIRID Certified · Secure Payment
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 </div>
 
-<div id="cartToast" class="pointer-events-none fixed bottom-12 left-1/2 -translate-x-1/2 z-50 flex opacity-0 transition-all duration-500 translate-y-10">
-  <div class="pointer-events-auto rounded-full bg-white px-8 py-4 flex items-center gap-8 shadow-2xl">
-    <div id="toastMessage" class="text-[10px] font-bold uppercase tracking-[0.2em] text-black">Added to selection</div>
-    <a id="toastLink" href="/cart" class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 hover:text-black transition">Open Bag →</a>
+<!-- TOAST (оставил без изменений) -->
+<div id="cartToast" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-[60] opacity-0 pointer-events-none transition-all duration-500 translate-y-8">
+  <div class="bg-white px-8 py-5 rounded-full flex items-center gap-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+    <div id="toastMessage" class="text-sm font-black uppercase tracking-wider text-black">Item Added</div>
+    <a href="/cart" class="text-sm font-bold uppercase tracking-wider text-zinc-400 hover:text-black transition-colors">View Bag →</a>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="cartToast" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-[60] opacity-0 pointer-events-none transition-all duration-500 translate-y-8">
+  <div class="bg-white px-8 py-5 rounded-full flex items-center gap-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+    <div id="toastMessage" class="text-[10px] font-black uppercase tracking-[0.2em] text-black">Item Added</div>
+    <a href="/cart" class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-black transition-colors">View Bag →</a>
   </div>
 </div>
 
@@ -129,126 +210,122 @@
   const variants = {{ variants_payload|tojson }};
   const productSlug = {{ product.slug|tojson }};
 
-  let selectedBrand = null;
-  let selectedModel = null;
-  let selectedVariant = null;
-
-  let previewUrl = null;
-  let previewAbort = null;
-  let previewTimer = null;
-  let previewPublicUrl = null; // <-- server url from X-Preview-Url
+  let selectedBrand = null, selectedModel = null, selectedVariant = null;
+  let previewAbort = null, previewTimer = null, previewPublicUrl = null;
 
   const previewSpinner = document.getElementById('previewSpinner');
   const previewBadge = document.getElementById('previewBadge');
+  const helperHint = document.getElementById('helperHint');
+  const mainImg = document.getElementById('mainProductImg');
+  const priceValue = document.getElementById('priceValue');
 
-  // Глобальный клик для закрытия
-  document.addEventListener('click', (e) => {
-    document.querySelectorAll('.custom-select').forEach(container => {
-      if (!container.contains(e.target)) {
-        const optionsList = container.querySelector('.select-options');
-        const arrow = container.querySelector('.arrow');
-        optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
-      }
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function closeAllSelects() {
+    document.querySelectorAll('.select-options').forEach(el => {
+      el.classList.add('opacity-0', 'invisible', 'translate-y-2');
+      const arrow = el.parentElement.querySelector('.arrow');
+      if (arrow) arrow.style.transform = 'rotate(0deg)';
     });
-  });
+  }
+  document.addEventListener('click', closeAllSelects);
 
   function initCustomSelect(containerId, options, onSelect) {
     const container = document.getElementById(containerId);
-    let trigger = container.querySelector('.select-trigger');
+    const trigger = container.querySelector('.select-trigger');
     const optionsList = container.querySelector('.select-options');
-
-    // Очистка старых слушателей через замену элемента
-    const newTrigger = trigger.cloneNode(true);
-    trigger.parentNode.replaceChild(newTrigger, trigger);
-    trigger = newTrigger; // Теперь работаем с актуальным триггером
-
     const label = trigger.querySelector('.selected-value');
     const arrow = trigger.querySelector('.arrow');
 
-    trigger.addEventListener('click', (e) => {
+    trigger.onclick = (e) => {
       e.stopPropagation();
-      const isOpen = !optionsList.classList.contains('opacity-0');
-
-      document.querySelectorAll('.select-options').forEach(el => {
-        if (el !== optionsList) el.classList.add('opacity-0', 'invisible', 'translate-y-2');
-      });
-
-      if (!isOpen) {
+      const isVisible = !optionsList.classList.contains('opacity-0');
+      closeAllSelects();
+      if (!isVisible) {
         optionsList.classList.remove('opacity-0', 'invisible', 'translate-y-2');
         arrow.style.transform = 'rotate(180deg)';
-      } else {
-        optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        arrow.style.transform = 'rotate(0deg)';
       }
-    });
+    };
 
     optionsList.innerHTML = options.map(opt => `
-      <div class="px-6 py-4 text-white hover:bg-white hover:text-black cursor-pointer text-sm transition-all duration-200" data-value="${opt}">${opt}</div>
+      <div class="px-6 py-4 text-zinc-300 hover:bg-white/5 hover:text-white cursor-pointer text-[12px] uppercase tracking-widest transition-all" data-value="${opt}">
+        ${opt}
+      </div>
     `).join('');
 
     optionsList.querySelectorAll('[data-value]').forEach(item => {
-      item.onclick = () => {
+      item.onclick = (e) => {
+        e.stopPropagation();
         const val = item.getAttribute('data-value');
 
-        // Обновляем текст в актуальном триггере
         label.textContent = val;
-        label.classList.remove('text-zinc-600');
+        label.classList.remove('text-zinc-400', 'italic');
         label.classList.add('text-white');
 
-        optionsList.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        arrow.style.transform = 'rotate(0deg)';
+        closeAllSelects();
         onSelect(val);
       };
     });
   }
 
-  // --- Preview Logic ---
-  function setPreviewLoading(isLoading) {
-    if (isLoading) {
-      previewSpinner.classList.remove('hidden');
-      previewSpinner.classList.add('flex');
-    } else {
-      previewSpinner.classList.add('hidden');
-      previewSpinner.classList.remove('flex');
+  function collectPersonalization({ requireAll }) {
+    const inputs = document.querySelectorAll('[data-personalization-key]');
+    const out = {};
+    let anyFilled = false;
+
+    for (const i of inputs) {
+      const key = i.getAttribute('data-personalization-key');
+      const val = (i.value || '').trim();
+      if (val) anyFilled = true;
+      if (requireAll && !val) return { ok: false, personalization: null };
+      if (val) out[key] = val;
+    }
+    if (!anyFilled) return { ok: false, personalization: null };
+    return { ok: true, personalization: out };
+  }
+
+  function updatePriceUI() {
+    if (!selectedVariant) return;
+    if (typeof selectedVariant.price === 'number' || typeof selectedVariant.price === 'string') {
+      const p = Number(selectedVariant.price);
+      if (!Number.isNaN(p)) {
+        priceValue.innerHTML = `${p.toFixed(2)} <span class="text-xs md:text-sm not-italic uppercase opacity-40">{{ product.currency }}</span>`;
+      }
     }
   }
 
-  function updateGalleryMainImage(newUrl) {
-    const firstImg = document.querySelector('#productGallery .gallery-img');
-    if (!firstImg) return;
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    previewUrl = newUrl;
-    firstImg.src = newUrl;
-    previewBadge.classList.remove('hidden');
+  function setHint(text) {
+    if (helperHint) helperHint.textContent = text;
   }
 
-  function resetPreviewState() {
-    // сбрасываем то, что может "протечь" между вариантами/текстом
-    previewPublicUrl = null;
-    previewBadge.classList.add('hidden');
+  function setPreviewLoading(isLoading) {
+    if (isLoading) {
+      previewSpinner.classList.remove('hidden');
+      previewBadge.classList.add('hidden');
+    } else {
+      previewSpinner.classList.add('hidden');
+    }
   }
 
-  async function fetchPreviewNow() {
-    if (!selectedVariant?.id) return;
-    const p = collectPersonalization();
-    if (!p.ok) return;
+  async function fetchPreviewNow({ force = false } = {}) {
+    if (!selectedVariant) return;
 
-    const startTime = Date.now();
-    const MIN_LOAD_TIME = 1000;
+    const p = collectPersonalization({ requireAll: false });
+    if (!p.ok) {
+      if (force) notify('Fill at least one field', true);
+      return;
+    }
 
     try { previewAbort?.abort(); } catch (e) {}
     previewAbort = new AbortController();
 
     setPreviewLoading(true);
+    previewPublicUrl = null;
 
     try {
-      // на старте запроса считаем превью "не готовым", чтобы Add не забрал старое
-      previewPublicUrl = null;
-
       const res = await fetch('/api/mockups/preview', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         signal: previewAbort.signal,
         body: JSON.stringify({
           product_slug: productSlug,
@@ -257,146 +334,145 @@
         })
       });
 
-      if (!res.ok) throw new Error("render_error");
-
-      // сохраняем серверный URL для корзины
-      previewPublicUrl = res.headers.get("X-Preview-Url") || null;
+      previewPublicUrl = res.headers.get("X-Preview-Url");
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      const remaining = Math.max(0, MIN_LOAD_TIME - (Date.now() - startTime));
 
-      setTimeout(() => {
-        updateGalleryMainImage(url);
-        setPreviewLoading(false);
-      }, remaining);
+      mainImg.style.opacity = '0';
+      await sleep(220);
+
+      mainImg.src = url;
+      mainImg.style.opacity = '1';
+
+      setPreviewLoading(false);
+      previewBadge.classList.remove('hidden');
+      setHint('Preview generated · ready to add to bag');
 
     } catch (e) {
-      previewPublicUrl = null;
-      if (e.name !== 'AbortError') setPreviewLoading(false);
+      if (e.name !== 'AbortError') {
+        setPreviewLoading(false);
+        if (force) notify('Preview error', true);
+      }
     }
   }
 
-  function debouncePreview(ms = 800) {
-    clearTimeout(previewTimer);
-    previewTimer = setTimeout(fetchPreviewNow, ms);
-  }
-
-  async function waitForPreviewUrl(timeoutMs = 3000) {
-    const started = Date.now();
-    while (!previewPublicUrl && (Date.now() - started) < timeoutMs) {
-      await new Promise(r => setTimeout(r, 80));
-    }
-    return previewPublicUrl;
-  }
-
-  // --- Initialization ---
   const brands = [...new Set(variants.map(v => v.brand))].sort();
-
   initCustomSelect('brandCustomSelect', brands, (brand) => {
     selectedBrand = brand;
     selectedModel = null;
     selectedVariant = null;
+    previewPublicUrl = null;
 
-    resetPreviewState();
+    setHint('Select your model to generate preview');
 
-    // Сброс визуального состояния модели
-    const modelContainer = document.getElementById('modelCustomSelect');
-    const modelLabel = modelContainer.querySelector('.selected-value');
-    modelLabel.textContent = 'Select Model';
-    modelLabel.classList.add('text-zinc-600');
-    modelLabel.classList.remove('text-white');
+    const wrap = document.getElementById('modelWrap');
+    wrap.classList.remove('opacity-20', 'pointer-events-none');
 
-    const modelWrap = document.getElementById('modelWrap');
     const models = variants.filter(v => v.brand === brand).map(v => v.model);
-
     initCustomSelect('modelCustomSelect', [...new Set(models)].sort(), (model) => {
       selectedModel = model;
       selectedVariant = variants.find(v => v.brand === selectedBrand && v.model === selectedModel);
 
-      resetPreviewState();
+      updatePriceUI();
+      setHint('Type personalization to generate preview');
       fetchPreviewNow();
     });
-
-    modelWrap.classList.remove('hidden');
-    setTimeout(() => modelWrap.classList.remove('opacity-0'), 10);
   });
 
   document.querySelectorAll('[data-personalization-key]').forEach(inp => {
     inp.addEventListener('input', () => {
-      // любое изменение текста делает старый URL невалидным
-      resetPreviewState();
-      if (selectedVariant) debouncePreview(800);
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(() => {
+        if (!selectedVariant) return;
+        setHint('Generating preview…');
+        fetchPreviewNow();
+      }, 700);
     });
   });
 
-  function collectPersonalization() {
-    const personalization = {};
-    const inputs = document.querySelectorAll('[data-personalization-key]');
-    for (const input of inputs) {
-      const key = input.getAttribute('data-personalization-key');
-      const val = input.value.trim();
-      if (!val) return { ok: false };
-      personalization[key] = val;
-    }
-    return { ok: true, personalization };
-  }
-
   function notify(msg, isError = false) {
     const toast = document.getElementById('cartToast');
-    const text = document.getElementById('toastMessage');
-    text.textContent = msg;
-    toast.querySelector('div').style.backgroundColor = isError ? '#111' : 'white';
-    toast.querySelector('div').style.border = isError ? '1px solid #333' : 'none';
-    text.style.color = isError ? 'white' : 'black';
-    document.getElementById('toastLink').style.display = isError ? 'none' : 'block';
-    toast.classList.remove('opacity-0', 'translate-y-10');
-    setTimeout(() => toast.classList.add('opacity-0', 'translate-y-10'), 4000);
+    const m = document.getElementById('toastMessage');
+    m.textContent = msg;
+    m.className = isError
+      ? 'text-[10px] font-black uppercase tracking-[0.2em] text-red-500'
+      : 'text-[10px] font-black uppercase tracking-[0.2em] text-black';
+
+    toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+    setTimeout(() => toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none'), 3000);
   }
 
-  document.getElementById('addToCartBtn').addEventListener('click', async () => {
-    if (!selectedVariant) return notify('Select Device', true);
-    const p = collectPersonalization();
-    if (!p.ok) return notify('Fill personalization', true);
+  document.getElementById('addToCartBtn').onclick = async () => {
+    if (!selectedVariant) {
+      setHint('Select device model to continue');
+      return notify('Select Device', true);
+    }
+
+    const p = collectPersonalization({ requireAll: true });
+    if (!p.ok) {
+      setHint('Fill all personalization fields');
+      return notify('Check Fields', true);
+    }
 
     const btn = document.getElementById('addToCartBtn');
     btn.disabled = true;
+    const original = btn.innerHTML;
+    btn.innerHTML = '<span class="text-black text-[11px] font-bold uppercase tracking-[0.5em] animate-pulse">Wait...</span>';
 
     try {
-      // гарантируем, что preview_url не потеряется/не будет старым
       if (!previewPublicUrl) {
-        await fetchPreviewNow();
-        await waitForPreviewUrl(3500);
+        setHint('Generating preview…');
+        await fetchPreviewNow({ force: true });
       }
-      if (!previewPublicUrl) {
-        return notify('Preview not ready', true);
+
+      let attempts = 0;
+      while (!previewPublicUrl && attempts < 15) {
+        await sleep(120);
+        attempts++;
       }
 
       const res = await fetch('/api/cart/add', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           product_id: {{ product.id }},
           variant_id: selectedVariant.id,
           qty: 1,
           personalization: p.personalization,
-          preview_url: previewPublicUrl,
+          preview_url: previewPublicUrl
         })
       });
-      if (res.ok) notify('Added to bag');
-      else notify('Error adding to bag', true);
+
+      if (res.ok) {
+        const cart = await res.json().catch(() => null)
+        window.dispatchEvent(new CustomEvent("cart:updated", { detail: cart }))
+        setHint('Added to bag · you can checkout anytime');
+        notify('Added to bag');
+      } else {
+        setHint('Could not add to bag');
+        notify('Error', true);
+      }
+
     } catch (e) {
+      setHint('Could not add to bag');
       notify('Error', true);
     } finally {
       btn.disabled = false;
+      btn.innerHTML = original;
     }
-  });
+  };
+
+  setHint('Select device model to generate preview');
 </script>
 
 <style>
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  input:focus { box-shadow: none !important; outline: none !important; }
-  .select-options { max-height: 250px; overflow-y: auto; }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .gallery-img { transition: opacity 0.4s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+  input::placeholder { transition: color 0.3s; }
+  input:focus::placeholder { color: transparent; }
 </style>
 {% endblock %}

@@ -7,7 +7,6 @@
   <title>{% block title %}NOIRID{% endblock %}</title>
 
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" as="style">
-  <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -38,7 +37,6 @@
     }
     .js-loading .reveal { opacity: 0 !important; }
 
-    /* Состояние открытого меню */
     #mobile-menu.open {
       display: flex;
       animation: fadeIn 0.3s ease forwards;
@@ -58,66 +56,221 @@
   </div>
 
   {% block header %}
-  <header class="fixed top-0 left-0 right-0 z-[60] py-6 bg-[#050505]/80 backdrop-blur-md">
+  <header class="fixed top-0 left-0 right-0 z-50 py-5 md:py-6 bg-[#050505]/90 backdrop-blur-xl transition-all duration-300" id="header">
     <div class="mx-auto max-w-7xl px-6 flex items-center justify-between">
-      <a href="/" class="text-xs tracking-[0.5em] font-light text-white/80 hover:text-white transition" aria-label="NOIRID Home">
+      <!-- Логотип -->
+      <a href="/" class="text-base md:text-lg lg:text-xl font-black tracking-[0.6em] uppercase text-white hover:text-zinc-200 transition duration-300" aria-label="NOIRID">
         NOIRID
       </a>
 
-      <nav class="hidden md:flex gap-10 text-xs uppercase tracking-[0.3em] text-zinc-400">
-        <a class="hover:text-white transition" href="/catalog">Catalog</a>
-        <a class="hover:text-white transition" href="/delivery">Delivery</a>
-        <a class="hover:text-white transition" href="/cart">Cart</a>
+      <!-- Десктоп нав -->
+      <nav class="hidden md:flex items-center gap-10 text-xs uppercase tracking-[0.35em] font-medium text-zinc-400">
+        <a href="/catalog" class="hover:text-white transition">Catalog</a>
+        <a href="/delivery" class="hover:text-white transition">Delivery</a>
+        <a href="/about" class="hover:text-white transition">Philosophy</a>
       </nav>
 
+      <!-- Корзина с текстом и бейджем -->
+      <a href="/cart" id="cart-link" class="relative flex items-center gap-2 text-zinc-300 hover:text-white transition group">
+        <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+        <span id="cart-text" class="text-xs uppercase tracking-[0.3em] group-hover:text-white">Cart</span>
+
+      </a>
+
+      <!-- Мобильный бургер -->
       <button id="menu-toggle" class="md:hidden flex flex-col gap-1.5 p-2 focus:outline-none" aria-label="Toggle Menu">
-        <span class="w-6 h-px bg-white transition-all"></span>
-        <span class="w-6 h-px bg-white transition-all"></span>
+        <span class="w-7 h-0.5 bg-white transition-all duration-300"></span>
+        <span class="w-7 h-0.5 bg-white transition-all duration-300"></span>
       </button>
     </div>
 
-    <div id="mobile-menu" class="hidden fixed inset-0 top-[72px] bg-[#050505] z-[50] flex-col items-center justify-center gap-8 text-center px-6">
-      <nav class="flex flex-col gap-8 text-sm uppercase tracking-[0.4em] text-zinc-400">
-        <a class="hover:text-white transition" href="/catalog">Catalog</a>
-        <a class="hover:text-white transition" href="/delivery">Delivery</a>
-        <a class="hover:text-white transition" href="/cart">Cart</a>
+    <!-- Мобильное меню -->
+    <div id="mobile-menu" class="fixed inset-0 top-[68px] bg-[#050505]/95 backdrop-blur-xl z-40 flex-col items-center justify-center gap-12 text-center px-6 hidden">
+      <nav class="flex flex-col gap-10 text-lg uppercase tracking-[0.4em] text-zinc-300">
+        <a href="/catalog" class="hover:text-white transition">Catalog</a>
+        <a href="/delivery" class="hover:text-white transition">Delivery</a>
+        <a href="/about" class="hover:text-white transition">Philosophy</a>
+        <a href="/cart" class="hover:text-white transition">Cart</a>
       </nav>
     </div>
   </header>
   {% endblock %}
 
-  <main class="pt-24"> {% block content %}{% endblock %}
+  <main class="pt-24">
+    {% block content %}{% endblock %}
   </main>
 
   {% block footer %}
-  <footer class="border-t border-white/10 py-16 bg-[#050505]">
-    <div class="mx-auto max-w-7xl px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-      <div class="text-xs uppercase tracking-[0.3em] text-zinc-500 text-center md:text-left">
-        © NOIRID — Discreet Identity in Texture
+  <footer class="border-t border-white/10 py-16 md:py-20 bg-[#050505]">
+    <div class="mx-auto max-w-7xl px-6 grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+
+      <!-- Left: Brand + copy -->
+      <div class="text-center md:text-left">
+        <h3 class="text-xl md:text-2xl font-black uppercase tracking-[0.5em] text-white mb-4">NOIRID</h3>
+        <p class="text-xs uppercase tracking-[0.3em] text-zinc-500">
+          © {{ current_year }} — Discreet Identity
+        </p>
       </div>
-      <nav class="flex flex-wrap justify-center gap-8 text-xs uppercase tracking-[0.3em] text-zinc-400">
-        <a href="/about" class="hover:text-white transition">Philosophy</a>
-        <a href="/check-order" class="hover:text-white transition text-zinc-200">Check Order</a> <a href="/support" class="hover:text-white transition">Support</a>
-      </nav>
+
+      <!-- Center: Trust & Policies -->
+      <div class="text-center">
+        <div class="flex flex-wrap justify-center gap-6 mb-8 text-zinc-500">
+          <a href="/privacy" class="text-xs uppercase tracking-[0.3em] hover:text-zinc-300">Privacy Policy</a>
+          <a href="/terms" class="text-xs uppercase tracking-[0.3em] hover:text-zinc-300">Terms</a>
+          <a href="/returns" class="text-xs uppercase tracking-[0.3em] hover:text-zinc-300">Returns</a>
+          <a href="/support" class="text-xs uppercase tracking-[0.3em] hover:text-zinc-300">Support</a>
+          <a href="/check-order" class="text-xs uppercase tracking-[0.3em] hover:text-zinc-300">Check Order</a>
+        </div>
+
+        <!-- Payment badges -->
+        <div class="flex justify-center gap-6 opacity-70">
+          <img src="/static/icons/visa.webp" alt="Visa" class="h-6">
+          <img src="/static/icons/mastercard.webp" alt="Mastercard" class="h-6">
+          <img src="/static/icons/paypal.webp" alt="PayPal" class="h-6">
+        </div>
+      </div>
+
+      <!-- Right: Social + Email capture -->
+      <div class="text-center md:text-right">
+        <div class="flex justify-center md:justify-end gap-6 mb-6">
+          <a href="https://instagram.com/noirid" target="_blank" class="text-zinc-400 hover:text-white">
+            <img src="/static/icons/instagram.webp" alt="instagram" class="h-6"></a>
+            <a href="https://instagram.com/noirid" target="_blank" class="text-zinc-400 hover:text-white">
+            <img src="/static/icons/facebook.webp" alt="facebook" class="h-6"></a>
+            <a href="https://instagram.com/noirid" target="_blank" class="text-zinc-400 hover:text-white">
+            <img src="/static/icons/tiktok.webp" alt="tiktok" class="h-6"></a>
+        </div>
+
+        <!-- Email capture -->
+        <form class="flex flex-col gap-3 max-w-xs mx-auto md:mx-0 md:ml-auto">
+          <input type="email" placeholder="Your email" class="bg-zinc-900 border border-zinc-700 rounded-full px-6 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 transition">
+          <button type="submit" class="bg-white text-black px-8 py-3 rounded-full text-xs uppercase tracking-[0.4em] font-medium hover:bg-zinc-200 transition">
+            Get Updates
+          </button>
+        </form>
+      </div>
     </div>
   </footer>
   {% endblock %}
 
   <script>
+    // -----------------------------
+    // Header shadow on scroll
+    // -----------------------------
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('header');
+      if (window.scrollY > 50) {
+        header.classList.add('shadow-[0_4px_20px_rgba(0,0,0,0.4)]');
+      } else {
+        header.classList.remove('shadow-[0_4px_20px_rgba(0,0,0,0.4)]');
+      }
+    });
+
+    // -----------------------------
+    // Cart indicator logic
+    // -----------------------------
+    const CART_STORAGE_KEY = "cart_summary_v1";
+
+    const cartText = document.getElementById("cart-text");
+
+
+    function updateCartDisplay(summary) {
+      if (!summary || !summary.count || summary.count <= 0) {
+        cartText.textContent = "Cart";
+
+        return;
+      }
+
+      const total = Math.round(Number(summary.total || 0));
+      const cur = summary.currency || "USD";
+      cartText.textContent = `${total} ${cur} · ${summary.count}`;
+
+    }
+
+    function saveSummaryToSession(summary) {
+      try {
+        if (!summary || !summary.count || summary.count <= 0) {
+          sessionStorage.removeItem(CART_STORAGE_KEY);
+          return;
+        }
+        sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(summary));
+      } catch {}
+    }
+
+    function loadSummaryFromSession() {
+      try {
+        const raw = sessionStorage.getItem(CART_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    // Initial seed from sessionStorage (no flicker)
+    (function seedCartIndicator() {
+      const cached = loadSummaryFromSession();
+      if (cached) {
+        updateCartDisplay(cached);
+      }
+    })();
+
+    // Fetch from server and update
+    window.updateCartIndicator = async function () {
+      try {
+        const res = await fetch("/api/cart/summary", { method: "GET" });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const summary = {
+          total: data.total,
+          currency: data.currency || "USD",
+          count: Number(data.items_count || 0),
+        };
+
+        updateCartDisplay(summary);
+        saveSummaryToSession(summary);
+      } catch (err) {
+        // Silent fail - keep cached or default
+        console.warn("Cart summary fetch failed:", err);
+      }
+    };
+
+    // Run initial sync
+    window.updateCartIndicator();
+
+    // Listen for cart updates (from add/remove/etc.)
+    window.addEventListener("cart:updated", (e) => {
+      const cart = e.detail;
+      if (!cart) return window.updateCartIndicator();
+
+      const count = (cart.items || []).reduce((s, it) => s + (Number(it.qty) || 0), 0);
+      const summary = {
+        total: cart.total,
+        currency: cart.currency || "USD",
+        count,
+      };
+
+      updateCartDisplay(summary);
+      saveSummaryToSession(summary);
+    });
+
+    // -----------------------------
+    // App init (reveal + mobile menu)
+    // -----------------------------
     const initApp = () => {
       document.documentElement.classList.remove('js-loading');
 
-      // Логика меню
       const toggleBtn = document.getElementById('menu-toggle');
       const mobileMenu = document.getElementById('mobile-menu');
 
-      toggleBtn.addEventListener('click', () => {
+      toggleBtn?.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
         mobileMenu.classList.toggle('open');
-        document.body.classList.toggle('overflow-hidden'); // Блокируем скролл при открытом меню
+        document.body.classList.toggle('overflow-hidden');
       });
 
-      // Intersection Observer
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {

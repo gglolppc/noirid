@@ -39,6 +39,8 @@ class CartOut(BaseModel):
     currency: str
     subtotal: Decimal
     total: Decimal
+    discount_amount: Decimal = Decimal("0.00")
+    discount_reason: str | None = None
 
     items: list[CartItemOut]
 

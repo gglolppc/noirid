@@ -19,7 +19,7 @@ function renderCart(cart) {
   const wrap = document.getElementById("cartWrap");
   const empty = document.getElementById("cartEmpty");
   const itemsEl = document.getElementById("items");
-
+  window.dispatchEvent(new CustomEvent("cart:updated", { detail: cart }));
   if (!cart || !cart.items || cart.items.length === 0) {
     wrap.classList.add("hidden");
     empty.classList.remove("hidden");
@@ -31,7 +31,49 @@ function renderCart(cart) {
 
   document.getElementById("subtotal").textContent = fmt(cart.subtotal);
   document.getElementById("total").textContent = fmt(cart.total || 0);
-  
+      // ---- DISCOUNT UI ----
+    const discountRow = document.getElementById("discountRow");
+    const discountEl = document.getElementById("discount");
+    const promoHint = document.getElementById("promoHint");
+
+    // Суммарное qty в корзине (пока считаем, что все items — чехлы)
+    const totalQty = (cart.items || []).reduce((acc, it) => acc + Number(it.qty || 0), 0);
+
+    const discountAmount = Number(cart.discount_amount || 0);
+    const hasDiscount = discountAmount > 0;
+
+    if (hasDiscount) {
+      discountRow?.classList.remove("hidden");
+      if (discountEl) discountEl.textContent = fmt(discountAmount);
+
+      // Текст подсказки, когда скидка уже применена
+      if (promoHint) {
+        promoHint.innerHTML = `15% discount <span class="text-white">applied</span> for 2 cases.`;
+        promoHint.className =
+          "mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-[10px] uppercase tracking-[0.35em] text-zinc-300";
+      }
+      const totalWrap = document.getElementById("total")?.parentElement;
+      totalWrap?.classList.add("animate-pulse");
+      setTimeout(() => totalWrap?.classList.remove("animate-pulse"), 900);
+    } else {
+      discountRow?.classList.add("hidden");
+      if (discountEl) discountEl.textContent = "0.00";
+
+      // Если скидки нет — мотивируем докинуть ещё один
+      if (promoHint) {
+        if (totalQty === 1) {
+          promoHint.innerHTML =
+            `Add one more case to unlock <span class="text-white">15% off</span>.`;
+        } else {
+          promoHint.innerHTML =
+            `Buy 2 cases — <span class="text-white">15% off</span>. Applied automatically.`;
+        }
+
+        promoHint.className =
+          "mt-6 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4 text-[10px] uppercase tracking-[0.35em] text-zinc-400";
+      }
+    }
+
   const currencyStr = cart.currency || "USD";
   document.querySelectorAll(".currency").forEach((el) => {
     el.textContent = currencyStr;
@@ -64,7 +106,7 @@ function renderCart(cart) {
       <div class="flex-1 min-w-0 text-center md:text-left">
         <div class="text-xl font-medium text-white mb-1">${it.title}</div>
         <div class="text-[10px] uppercase tracking-widest text-zinc-500 mb-3 italic">Ref. #00${it.id}</div>
-        
+
         ${personalizationLine}
       </div>
 
@@ -74,9 +116,9 @@ function renderCart(cart) {
           <span class="text-xs font-medium text-white w-4 text-center">${it.qty}</span>
           <button data-inc="${it.id}" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white transition transition-colors">+</button>
         </div>
-        
+
         <div class="text-right">
-          <div class="text-white font-medium">${fmt(it.line_total)} <span class="text-[10px] text-zinc-500 uppercase">${currencyStr}</span></div>
+          <div class="text-white font-medium">${fmt(it.line_total)} <span class="text-[11px] text-zinc-400 uppercase tracking-[0.25em]">${currencyStr}</span></div>
           <button data-rm="${it.id}" class="mt-1 text-[10px] uppercase tracking-widest text-zinc-600 hover:text-white transition-colors underline underline-offset-4">
             Remove
           </button>

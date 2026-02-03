@@ -1,36 +1,137 @@
 {% extends "base.html" %}
-{% block title %}About · NOIRID{% endblock %}
+{% block title %}Philosophy · NOIRID{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505]">
-  <section class="min-h-screen pt-36 pb-24 px-8">
-    <div class="mx-auto max-w-5xl">
+<div class="relative bg-[#050505] overflow-x-hidden">
+
+  <!-- HERO / INTRO -->
+  <section class="min-h-screen flex items-center pt-2 pb-24 px-6 md:px-12">
+    <div class="mx-auto max-w-5xl w-full">
       <div class="reveal">
-        <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-600">Philosophy</div>
-        <h1 class="mt-6 text-5xl md:text-7xl font-black uppercase tracking-tight text-white">About Noirid</h1>
-        <p class="mt-4 text-sm md:text-base text-zinc-400 max-w-2xl">
-          NOIRID builds discreet, minimal accessories designed for everyday essentials. Each design focuses on
-          precision fit, matte finishes, and a clean tactile feel.
+        <div class="text-[10px] md:text-xs uppercase tracking-[0.6em] text-zinc-600 font-medium">
+          Philosophy
+        </div>
+        <h1 class="mt-6 md:mt-8 text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-none text-white">
+          Identity in Silence
+        </h1>
+        <p class="mt-8 md:mt-10 text-base md:text-xl lg:text-2xl text-zinc-300 max-w-3xl leading-relaxed">
+          NOIRID is not about visibility. It is about presence without announcement.
+          Black on black, where personalization exists only in texture — raised, tactile, and visible solely to the one who holds it.
         </p>
       </div>
+    </div>
+  </section>
 
-      <div class="reveal reveal-delay-1 mt-14 grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
-          <div class="text-[11px] uppercase tracking-[0.4em] text-zinc-500">Process</div>
-          <p class="mt-4 text-sm md:text-base text-zinc-300">
-            We keep our catalog small and intentional, so every release meets our quality standard. From concept
-            to shipment, we handle every step in-house with careful attention to surface texture and fit.
+  <!-- MAIN PHILOSOPHY -->
+  <section class="py-24 md:py-32 px-6 md:px-12 border-t border-white/10">
+    <div class="mx-auto max-w-5xl">
+      <div class="reveal grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
+        <div>
+          <h2 class="text-4xl md:text-6xl font-light tracking-tight text-white">
+            No print.<br/>
+            <span class="italic font-black text-outline">Only texture.</span>
+          </h2>
+          <p class="mt-8 text-base md:text-lg text-zinc-400 leading-relaxed">
+            In an era of loud declarations, we choose subtlety. Our cases carry your initials, your symbols, your quiet mark — raised into the surface, not printed on it.
+            The texture is felt before it is seen; it disappears under direct light, yet remains yours alone in the shadows.
           </p>
         </div>
-        <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
-          <div class="text-[11px] uppercase tracking-[0.4em] text-zinc-500">Support</div>
-          <p class="mt-4 text-sm md:text-base text-zinc-300">
-            International delivery, responsive support, and a strict quality check for every unit ensure the
-            Noirid experience stays consistent from order to doorstep.
-          </p>
+
+        <div class="space-y-12 md:space-y-16">
+          <div>
+            <h3 class="text-2xl md:text-3xl font-medium text-white mb-4">Silent Minimalism</h3>
+            <p class="text-base md:text-lg text-zinc-400">
+              Less is not absence. It is intention. We strip away gloss, color, and noise to leave only the essential — a surface that invites touch, not attention.
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-2xl md:text-3xl font-medium text-white mb-4">Discreet Identity</h3>
+            <p class="text-base md:text-lg text-zinc-400">
+              Personalization should not announce itself. It should whisper to the owner and remain invisible to the world. Texture allows this paradox: present, yet hidden.
+            </p>
+          </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- CRAFT & COMMITMENT -->
+  <section class="py-24 md:py-32 px-6 md:px-12 border-t border-white/10 bg-[#030303]">
+    <div class="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
+      <!-- Craft -->
+      <div class="reveal">
+        <h2 class="text-4xl md:text-6xl font-light tracking-tight text-white mb-8">
+          Crafted in Silence
+        </h2>
+        <p class="text-base md:text-lg text-zinc-300 leading-relaxed">
+          Every NOIRID case is made to order in Moldova. We control the entire process — from material selection to final texture application — to ensure precision fit, flawless matte finish, and enduring tactile quality. No mass production. No compromise.
+        </p>
+        <ul class="mt-8 space-y-4 text-zinc-400 text-base">
+          <li class="flex items-start gap-3">
+            <span class="w-1.5 h-1.5 mt-2 rounded-full bg-zinc-500 flex-shrink-0"></span>
+            Raised texture applied with microscopic accuracy
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1.5 h-1.5 mt-2 rounded-full bg-zinc-500 flex-shrink-0"></span>
+            Fingerprint-resistant matte surface
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1.5 h-1.5 mt-2 rounded-full bg-zinc-500 flex-shrink-0"></span>
+            Model-specific precision fit
+          </li>
+        </ul>
+      </div>
+
+      <!-- Commitment -->
+      <div class="reveal reveal-delay-100">
+        <h2 class="text-4xl md:text-6xl font-light tracking-tight text-white mb-8">
+          Our Commitment
+        </h2>
+        <p class="text-base md:text-lg text-zinc-300 leading-relaxed">
+          We stand behind every piece. Free worldwide shipping, responsive support, and a remake guarantee if anything falls short of our standard. Because discretion demands perfection.
+        </p>
+        <div class="mt-8 space-y-6">
+          <div class="flex items-start gap-4">
+            <div class="text-3xl text-white/30 font-black italic">01</div>
+            <div>
+              <p class="text-base font-medium text-zinc-200">Global Delivery</p>
+              <p class="text-sm text-zinc-500">Included, tracked, no surprises.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="text-3xl text-white/30 font-black italic">02</div>
+            <div>
+              <p class="text-base font-medium text-zinc-200">Free Remake Guarantee</p>
+              <p class="text-sm text-zinc-500">If it’s not perfect — we make it right.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="text-3xl text-white/30 font-black italic">03</div>
+            <div>
+              <p class="text-base font-medium text-zinc-200">Limited Releases</p>
+              <p class="text-sm text-zinc-500">Small batches, intentional design.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="py-24 md:py-32 px-6 text-center border-t border-white/10">
+    <div class="reveal mx-auto max-w-3xl">
+      <h2 class="text-4xl md:text-5xl font-light text-white mb-8">
+        Your Identity,<br/>in Texture.
+      </h2>
+      <p class="text-base md:text-lg text-zinc-400 mb-12 max-w-xl mx-auto">
+        Step into silence. Begin with your initials.
+      </p>
+      <a href="/catalog" class="inline-flex items-center gap-3 px-12 py-5 bg-white text-black text-sm uppercase tracking-[0.4em] font-bold rounded-full hover:bg-zinc-200 transition">
+        Enter Catalog <span class="text-lg">→</span>
+      </a>
+    </div>
+  </section>
+
 </div>
 {% endblock %}

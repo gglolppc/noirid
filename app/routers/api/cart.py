@@ -79,6 +79,8 @@ def _cart_to_out(order) -> CartOut:
         order_id=order.id,
         currency=order.currency,
         subtotal=order.subtotal,
+        discount_amount=getattr(order, "discount_amount", Decimal("0.00")),
+        discount_reason=getattr(order, "discount_reason", None),
         total=order.total,
         items=items_out,
     )
@@ -275,3 +277,12 @@ async def remove_item(
 async def clear_cart(request: Request):
     request.session.pop(SESSION_ORDER_KEY, None)
     return {"ok": True}
+
+
+@router.get("/summary")
+async def cart_summary(cart = Depends(get_cart)):
+    return {
+        "items_count": sum(item.qty for item in cart.items),
+        "total": f"{cart.total:.0f}",
+        "currency": cart.currency
+    }
