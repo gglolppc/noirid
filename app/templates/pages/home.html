@@ -4,15 +4,12 @@
 {% block content %}
 <div class="relative bg-[#050505] overflow-x-hidden">
 
-  <!-- HERO -->
   <section class="min-h-[92vh] flex items-center relative px-6 py-14 md:py-0 overflow-hidden">
-    <!-- subtle glow -->
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,_rgba(255,255,255,0.04),transparent_70%)] pointer-events-none"></div>
     <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black pointer-events-none"></div>
 
     <div class="relative z-10 mx-auto max-w-7xl w-full grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
 
-      <!-- LEFT -->
       <div class="md:col-span-7 text-center md:text-left">
         <h1 class="reveal text-[16vw] md:text-[7.5rem] lg:text-[9rem] leading-none font-black tracking-tighter uppercase text-white">
           Noirid
@@ -22,33 +19,21 @@
           <p class="text-[10px] md:text-base tracking-[0.35em] md:tracking-[0.45em] font-light text-zinc-500 uppercase">
             Custom black-on-black phone cases. Made to order.
           </p>
-
           <p class="text-sm md:text-xl tracking-[0.35em] md:tracking-[0.45em] font-light text-zinc-300 uppercase">
             Personal identity. In black.
           </p>
-
-
         </div>
 
-        <!-- CTA -->
         <div class="reveal reveal-delay-200 mt-10 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-          <a
-            href="/catalog"
-            class="group relative inline-flex items-center justify-center gap-3 px-10 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-semibold text-black bg-white rounded-full hover:bg-zinc-100 transition"
-          >
+          <a href="/catalog" class="group relative inline-flex items-center justify-center gap-3 px-10 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-semibold text-black bg-white rounded-full hover:bg-zinc-100 transition">
             <span>Enter catalog</span>
             <span class="transition-transform duration-300 group-hover:translate-x-2">→</span>
           </a>
-
-          <a
-            href="#texture"
-            class="inline-flex items-center justify-center px-10 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-medium text-zinc-200 border border-white/15 rounded-full hover:bg-white/5 transition"
-          >
+          <a href="#texture" class="inline-flex items-center justify-center px-10 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-medium text-zinc-200 border border-white/15 rounded-full hover:bg-white/5 transition">
             See texture
           </a>
         </div>
 
-        <!-- TRUST (above the fold) -->
         <div class="reveal reveal-delay-300 mt-10 flex flex-col md:flex-row gap-3 md:gap-8 items-center md:items-start justify-center md:justify-start text-[10px] md:text-xs uppercase tracking-[0.3em] text-zinc-500">
           <span class="inline-flex items-center gap-2">
             <span class="w-1 h-1 rounded-full bg-white/30"></span>
@@ -67,194 +52,170 @@
         </div>
       </div>
 
-      <!-- RIGHT: HERO PRODUCT -->
-      <div class="md:col-span-5 reveal reveal-delay-200 relative">
-        <div class="relative group max-w-[420px] md:max-w-none mx-auto">
-          <div class="absolute -inset-10 md:-inset-20 bg-white/[0.02] blur-[70px] rounded-full group-hover:bg-white/[0.04] transition-all duration-700"></div>
+      <div class="md:col-span-5 reveal reveal-delay-200 relative flex items-center justify-center">
+  <div class="relative w-full max-w-[420px] md:max-w-none group">
 
-          {# Prefer featured_product image if present, otherwise fallback #}
-          {% set hero_img = "/static/img/hero-case.png" %}
-          {% if featured_product and featured_product.images and featured_product.images|length > 0 %}
-            {% set hero_img = featured_product.images[0]["url"] %}
-          {% endif %}
+    <div class="absolute inset-0 z-20 pointer-events-none"
+         style="-webkit-mask-image: url('{{ hero_img }}'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; mask-image: url('{{ hero_img }}'); mask-size: contain; mask-repeat: no-repeat; mask-position: center;">
 
-          <img
-            src="{{ hero_img }}"
-            alt="NOIRID Black-on-Black Case"
-            loading="lazy"
-            class="relative z-10 w-full h-auto object-contain drop-shadow-[0_25px_60px_rgba(0,0,0,0.65)] brightness-105 contrast-125"
-          />
-
-          <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/55 via-transparent to-transparent"></div>
-        </div>
+      <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-scan-shine"
+           style="transform: skewX(-25deg);">
       </div>
+    </div>
+
+    <img
+      src="{{ hero_img }}"
+      alt="NOIRID Case"
+      class="relative z-10 w-full h-auto object-contain brightness-110 contrast-[1.1] filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]"
+    />
+
+    <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-black/40 blur-3xl -z-10"></div>
+  </div>
+</div>
 
     </div>
 
-    <!-- scroll hint -->
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-70">
       <div class="mx-auto w-px h-20 bg-gradient-to-b from-zinc-700 to-transparent"></div>
     </div>
   </section>
 
-  <!-- TEXTURE / STORY -->
   <section id="texture" class="py-24 px-6 bg-[#030303] border-y border-white/10 relative overflow-hidden">
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,_rgba(255,255,255,0.03),transparent_65%)] pointer-events-none"></div>
 
     <div class="mx-auto max-w-7xl w-full grid grid-cols-1 md:grid-cols-12 gap-14 items-center relative z-10">
 
-      <!-- COPY -->
-      <div class="md:col-span-7">
-        <div class="reveal">
-          <h2 class="text-4xl md:text-7xl lg:text-[92px] font-light tracking-tight leading-[0.92] text-white">
-            No glossy print.<br/>
-            <span class="text-outline font-black italic">Only texture.</span><br/>
-            Pure & discreet.
-          </h2>
-        </div>
+      <div class="md:col-span-7 text-center md:text-left">
+  <div class="reveal">
+    <h2 class="text-4xl md:text-7xl lg:text-[92px] font-light tracking-tight leading-[0.92] text-white uppercase">
+      No gloss.<br/>
+      <span class="text-outline font-black italic">Only texture.</span><br/>
+      Strictly Noir.
+    </h2>
+  </div>
 
-        <div class="reveal reveal-delay-100 mt-10 grid grid-cols-1 sm:grid-cols-2 gap-10">
-          <div class="space-y-8">
-            <div class="flex items-start gap-4">
-              <div class="w-px h-12 bg-white/25"></div>
-              <div>
-                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Origin</div>
-                <div class="text-base font-light text-zinc-300">Crafted in Moldova</div>
-              </div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-px h-12 bg-white/25"></div>
-              <div>
-                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Finish</div>
-                <div class="text-base font-light text-zinc-300">Matte texture hides fingerprints</div>
-              </div>
-            </div>
-          </div>
+  <div class="reveal reveal-delay-100 mt-10 grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-x-14">
 
-          <div class="space-y-8">
-            <div class="flex items-start gap-4">
-              <div class="w-px h-12 bg-white/25"></div>
-              <div>
-                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Logistics</div>
-                <div class="text-base font-light text-zinc-300">Free worldwide shipping</div>
-              </div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-px h-12 bg-white/25"></div>
-              <div>
-                <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold mb-2">Guarantee</div>
-                <div class="text-base font-light text-zinc-300">Free remake on any issues</div>
-              </div>
-            </div>
-          </div>
+    <div class="space-y-10">
+      <div class="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
+        <div class="w-8 h-px md:w-px md:h-12 bg-white/20"></div>
+        <div class="flex flex-col">
+          <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-bold mb-1">Origin</span>
+          <span class="text-base md:text-lg font-light text-zinc-300">Crafted in Moldova</span>
         </div>
       </div>
 
-      <!-- IMAGE -->
+      <div class="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
+        <div class="w-8 h-px md:w-px md:h-12 bg-white/20"></div>
+        <div class="flex flex-col">
+          <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-bold mb-1">Finish</span>
+          <span class="text-base md:text-lg font-light text-zinc-300">Matte texture hides fingerprints</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-10">
+      <div class="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
+        <div class="w-8 h-px md:w-px md:h-12 bg-white/20"></div>
+        <div class="flex flex-col">
+          <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-bold mb-1">Logistics</span>
+          <span class="text-base md:text-lg font-light text-zinc-300">Free worldwide shipping</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
+        <div class="w-8 h-px md:w-px md:h-12 bg-white/20"></div>
+        <div class="flex flex-col">
+          <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-bold mb-1">Guarantee</span>
+          <span class="text-base md:text-lg font-light text-zinc-300">Free remake on any issues</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
       <div class="md:col-span-5 reveal reveal-delay-200">
-        <div class="relative group">
-          <div class="absolute -inset-10 md:-inset-20 bg-white/[0.02] blur-[70px] rounded-full group-hover:bg-white/[0.04] transition-all duration-700"></div>
-          <img
-            src="/static/img/texture.png"
-            alt="NOIRID Texture Example"
-            loading="lazy"
-            class="relative z-10 w-full h-auto object-contain opacity-95 drop-shadow-[0_0_40px_rgba(255,255,255,0.03)]"
-          />
-        </div>
-      </div>
+  <div class="relative w-full aspect-square flex items-center justify-center group">
+
+    <div class="absolute inset-0 z-20 pointer-events-none"
+         style="-webkit-mask-image: url('/static/img/texture.png'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; mask-image: url('/static/img/texture.png'); mask-size: contain; mask-repeat: no-repeat; mask-position: center;">
+
+      <div class="absolute inset-0 m-auto w-full h-full bg-gradient-to-br from-white/10 via-white/5 to-transparent animate-slow-pulse"></div>
+    </div>
+
+    <img
+      src="/static/img/texture.png"
+      alt="NOIRID Texture Example"
+      loading="lazy"
+      class="relative z-10 w-full h-auto object-contain opacity-80"
+    />
+
+    <div class="absolute w-1/2 h-1/2 bg-white/[0.02] blur-[80px] rounded-full -z-10"></div>
+  </div>
+</div>
 
     </div>
   </section>
 
-  <!-- FEATURED PRODUCT -->
-<section class="py-28 px-6 overflow-hidden border-t border-white/10">
-  <div class="mx-auto max-w-7xl w-full">
-
-    {% if featured_product %}
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
-
-        <!-- PRODUCT IMAGE -->
-        <div class="md:col-span-6 reveal">
-          <img
-            src="{{ featured_product.images[0]['url'] if featured_product.images else '/static/img/hero-case.png' }}"
-            alt="{{ featured_product.title }}"
-            loading="lazy"
-            class="w-full max-w-[520px] mx-auto drop-shadow-[0_30px_70px_rgba(0,0,0,0.6)] brightness-105"
-          />
-        </div>
-
-        <!-- PRODUCT INFO -->
-        <div class="md:col-span-6 reveal reveal-delay-100 text-center md:text-left">
-
-          <!-- TITLE -->
-          <h3 class="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white mb-6">
-            {{ featured_product.title }}
-          </h3>
-
-          <!-- VALUE PROPS -->
-          <div class="text-zinc-400 font-light text-lg space-y-2 mb-8">
-            <p>Discreet personalization.</p>
-            <p>Raised texture, no glossy print.</p>
-            <p>Made to order. Built to last.</p>
+  <section class="py-28 px-6 overflow-hidden border-t border-white/10">
+    <div class="mx-auto max-w-7xl w-full">
+      {% if featured_product %}
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
+          <div class="md:col-span-6 reveal">
+            <img
+              src="{{ featured_product.images[0]['url'] if featured_product.images else '/static/img/hero-case.png' }}"
+              alt="{{ featured_product.title }}"
+              loading="lazy"
+              class="w-full max-w-[520px] mx-auto drop-shadow-[0_30px_70px_rgba(0,0,0,0.6)] brightness-105"
+            />
           </div>
 
-          <!-- PRICE -->
-          <div class="mb-10 space-y-2">
-            <div class="text-xl md:text-2xl text-white font-light">
-              {% if featured_product.price_from %}
-                From <span class="font-semibold">$ {{ featured_product.base_price }}</span>
-              {% else %}
-                <span class="font-semibold">$ {{ featured_product.base_price }}</span>
-              {% endif %}
+          <div class="md:col-span-6 reveal reveal-delay-100 text-center md:text-left">
+            <h3 class="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white mb-6">
+              {{ featured_product.title }}
+            </h3>
+            <div class="text-zinc-400 font-light text-lg space-y-2 mb-8">
+              <p>Discreet personalization.</p>
+              <p>Raised texture, no glossy print.</p>
+              <p>Made to order. Built to last.</p>
             </div>
-            <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
-              Free worldwide shipping · Free remake guarantee
+            <div class="mb-10 space-y-2">
+              <div class="text-xl md:text-2xl text-white font-light">
+                {% if featured_product.price_from %}
+                  From <span class="font-semibold">$ {{ featured_product.base_price }}</span>
+                {% else %}
+                  <span class="font-semibold">$ {{ featured_product.base_price }}</span>
+                {% endif %}
+              </div>
+              <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
+                Free worldwide shipping · Free remake guarantee
+              </div>
+            </div>
+            <div class="flex flex-col md:flex-row gap-4 items-center md:items-start">
+              <a href="/p/{{ featured_product.slug }}" class="w-full md:w-auto text-center bg-white text-black px-12 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-bold rounded-md transition hover:bg-zinc-100">
+                Personalize <span class="ml-2">→</span>
+              </a>
+              <a href="/catalog" class="w-full md:w-auto text-center border border-white/15 text-zinc-200 px-12 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-medium rounded-md transition hover:bg-white/5">
+                Browse all
+              </a>
+            </div>
+            <div class="mt-6 text-[10px] uppercase tracking-[0.3em] text-zinc-500">
+              Instant preview · Customize in under a minute
             </div>
           </div>
-
-          <!-- CTA -->
-          <div class="flex flex-col md:flex-row gap-4 items-center md:items-start">
-            <a
-              href="/p/{{ featured_product.slug }}"
-              class="w-full md:w-auto text-center bg-white text-black px-12 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-bold rounded-md transition hover:bg-zinc-100"
-            >
-              Personalize <span class="ml-2">→</span>
-            </a>
-
-            <a
-              href="/catalog"
-              class="w-full md:w-auto text-center border border-white/15 text-zinc-200 px-12 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-medium rounded-md transition hover:bg-white/5"
-            >
-              Browse all
-            </a>
-          </div>
-
-          <!-- MICRO TRUST -->
-          <div class="mt-6 text-[10px] uppercase tracking-[0.3em] text-zinc-500">
-            Instant preview · Customize in under a minute
-          </div>
-
         </div>
-      </div>
+      {% else %}
+        <div class="text-center">
+          <p class="text-3xl text-zinc-500 mb-8">Featured drop coming soon.</p>
+          <a href="/catalog" class="inline-flex items-center justify-center px-12 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-semibold text-black bg-white rounded-full hover:bg-zinc-100 transition">
+            Enter catalog →
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
 
-    {% else %}
-      <!-- EMPTY STATE -->
-      <div class="text-center">
-        <p class="text-3xl text-zinc-500 mb-8">Featured drop coming soon.</p>
-        <a
-          href="/catalog"
-          class="inline-flex items-center justify-center px-12 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-semibold text-black bg-white rounded-full hover:bg-zinc-100 transition"
-        >
-          Enter catalog →
-        </a>
-      </div>
-    {% endif %}
-
-  </div>
-</section>
-
-
-  <!-- PROCESS -->
   <section class="py-24 px-6 border-t border-white/10 overflow-hidden">
     <div class="mx-auto max-w-7xl">
       <div class="reveal flex flex-col md:flex-row justify-between items-center gap-10 text-[10px] md:text-xs uppercase tracking-[0.3em] text-zinc-500 font-medium">
@@ -274,4 +235,44 @@
   </section>
 
 </div>
+
+<style>
+  /* Анимация сканирующего блика в Hero */
+  @keyframes scan-shine {
+    0% { transform: translateX(-150%) skewX(-25deg); opacity: 0; }
+    10% { opacity: 1; }
+    25% { transform: translateX(250%) skewX(-25deg); opacity: 0; }
+    100% { transform: translateX(250%) skewX(-25deg); opacity: 0; }
+  }
+
+  .animate-scan-shine {
+    animation: scan-shine 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  /* Анимация пульсации в секции текстур */
+  @keyframes slow-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.01;
+      filter: blur(50px);
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0.05;
+      filter: blur(70px);
+    }
+  }
+
+  .animate-slow-pulse {
+    will-change: transform, opacity;
+    animation: slow-pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Доп. стили для плавности ревила */
+  .text-outline {
+    -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+    color: transparent;
+  }
+</style>
+
 {% endblock %}

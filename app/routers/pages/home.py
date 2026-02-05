@@ -9,20 +9,20 @@ from app.repos.content import ContentRepo
 from app.repos.products import ProductsRepo
 from sqlalchemy import select, func
 from app.db.models.product import Product
+import random
+
+HERO_IMAGES = [
+    "/static/img/heroes/noir1.webp",
+    "/static/img/heroes/noir6.webp",
+]
 
 router = APIRouter(tags=["pages"])
 
 
 @router.get("/", include_in_schema=False)
 async def home(request: Request, session: AsyncSession = Depends(get_async_session)):
+    hero_img = random.choice(HERO_IMAGES)
 
-    # hero_block = await ContentRepo.get_by_key(session, "home_hero")
-    hero = {
-        "title": "NOIRID",
-        "subtitle": "Discreet personalization.",
-        "cta_text": "Catalog",
-        "cta_href": "/catalog",
-    }
     q = (
         select(Product)
         .where(Product.is_active.is_(True))
@@ -30,11 +30,9 @@ async def home(request: Request, session: AsyncSession = Depends(get_async_sessi
         .limit(1)
     )
     products = (await session.execute(q)).scalars().first()
-    # featured_block = await ContentRepo.get_by_key(session, "featured_products")
-    # slugs = (featured_block.payload or {}).get("slugs", []) if featured_block else []
-    # featured_products = await ProductsRepo.list_by_slugs(session, slugs)
+
 
     return templates.TemplateResponse(
         "pages/home.html",
-        {"request": request, "hero": hero, "featured_product": products},
+        {"request": request, "hero_img": hero_img, "featured_product": products},
     )
