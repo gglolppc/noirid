@@ -55,26 +55,33 @@
       <div class="md:col-span-5 reveal reveal-delay-200 relative flex items-center justify-center">
   <div class="relative w-full max-w-[420px] md:max-w-none group">
 
-    <div class="absolute inset-0 z-20 pointer-events-none"
-         style="-webkit-mask-image: url('{{ hero_img }}'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; mask-image: url('{{ hero_img }}'); mask-size: contain; mask-repeat: no-repeat; mask-position: center;">
-
-      <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-scan-shine"
-           style="transform: skewX(-25deg);">
-      </div>
-    </div>
+    <!-- BLACK SWEEP (masked by image) -->
+    <div
+  class="absolute inset-0 z-20 pointer-events-none hero-sweep-mask"
+  style="
+    -webkit-mask-image: url('{{ hero_img }}');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: url('{{ hero_img }}');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+  "
+></div>
 
     <img
       src="{{ hero_img }}"
       alt="NOIRID Case"
-      class="relative z-10 w-full h-auto object-contain brightness-110 contrast-[1.1] filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]"
+      class="relative z-10 w-full h-auto object-contain
+             brightness-110 contrast-[1.08]
+             drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]"
     />
 
     <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-black/40 blur-3xl -z-10"></div>
   </div>
 </div>
-
-    </div>
-
+</div>
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-70">
       <div class="mx-auto w-px h-20 bg-gradient-to-b from-zinc-700 to-transparent"></div>
     </div>
@@ -237,36 +244,81 @@
 </div>
 
 <style>
-  /* Анимация сканирующего блика в Hero */
-  @keyframes scan-shine {
-    0% { transform: translateX(-150%) skewX(-25deg); opacity: 0; }
-    10% { opacity: 1; }
-    25% { transform: translateX(250%) skewX(-25deg); opacity: 0; }
-    100% { transform: translateX(250%) skewX(-25deg); opacity: 0; }
+  /* Black sweep for matte texture (not "gloss") */
+@keyframes noir-sweep {
+  0% {
+    transform: translate3d(-120%, 0, 0) skewX(-20deg);
+    opacity: 0;
   }
+  10% {
+    opacity: 1;
+  }
+  40% {
+    transform: translate3d(120%, 0, 0) skewX(-20deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(120%, 0, 0) skewX(-20deg);
+    opacity: 0;
+  }
+}
 
-  .animate-scan-shine {
-    animation: scan-shine 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
+.hero-sweep-mask::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+
+  /* Используем очень темные серые тона */
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(15, 15, 15, 0) 35%,
+    rgba(40, 40, 40, 0.25) 48%,  /* Еле заметный графит */
+    rgba(50, 50, 50, 0.3) 50%,   /* Пик блика — это цвет мокрого асфальта */
+    rgba(40, 40, 40, 0.25) 52%,
+    rgba(15, 15, 15, 0) 65%,
+    transparent 100%
+  );
+
+  /* Overlay на черном почти не виден, Soft-light даст еще более мягкий тон */
+  mix-blend-mode: soft-light;
+
+  /* Увеличиваем блюр, чтобы размыть границы "полоски" */
+  filter: blur(25px);
+
+  will-change: transform;
+  animation: noir-sweep 12s ease-in-out infinite;
+}
+
+/* опционально: на мобилке можно вообще выключить */
+@media (max-width: 768px) {
+  .hero-black-sweep { animation: none; opacity: 0; }
+}
+
+/* уважение к reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-black-sweep { animation: none; opacity: 0; }
+}
 
   /* Анимация пульсации в секции текстур */
   @keyframes slow-pulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.01;
-      filter: blur(50px);
-    }
-    50% {
-      transform: scale(1.3);
-      opacity: 0.05;
-      filter: blur(70px);
-    }
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.18;
+    filter: blur(40px);
   }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.35;
+    filter: blur(70px);
+  }
+}
 
-  .animate-slow-pulse {
-    will-change: transform, opacity;
-    animation: slow-pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
+.animate-slow-pulse {
+  will-change: transform, opacity, filter;
+  animation: slow-pulse 7.5s ease-in-out infinite;
+  mix-blend-mode: screen; /* ключ: на черном это выглядит как "живой материал", а не белая клякса */
+}
 
   /* Доп. стили для плавности ревила */
   .text-outline {

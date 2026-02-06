@@ -92,15 +92,22 @@ async def get_cart(
     session: AsyncSession = Depends(get_async_session),
 ):
     order = await _ensure_draft_order(request, session)
-    if not order or not order.items:
-        raise HTTPException(status_code=404, detail="Cart is empty")
 
-    # на всякий пересчёт (если кто-то руками менял qty)
+    # Если заказа нет или в нем нет айтемов — отдаем "заглушку" пустой корзины
+    if not order or not order.items:
+        return CartOut(
+            order_id='id-1', # id заказа или 0, если заказа нет
+            currency="USD",                  # Валюта по умолчанию
+            subtotal=Decimal("0.00"),
+            total=Decimal("0.00"),
+            items=[]                         # Пустой список для фронта
+        )
+
+    # Если заказ есть и не пустой — считаем и отдаем как обычно
     CartService.recalc(order)
     await session.commit()
 
     return _cart_to_out(order)
-
 
 @router.post("/add", response_model=CartOut)
 async def add_to_cart(
