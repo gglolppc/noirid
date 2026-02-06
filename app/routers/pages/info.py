@@ -14,6 +14,18 @@ router = APIRouter(tags=["pages"])
 async def about_page(request: Request):
     return templates.TemplateResponse("pages/about.html", {"request": request})
 
+@router.get("/privacy", include_in_schema=False)
+async def about_page(request: Request):
+    return templates.TemplateResponse("pages/privacy.html", {"request": request})
+
+@router.get("/terms", include_in_schema=False)
+async def about_page(request: Request):
+    return templates.TemplateResponse("pages/terms.html", {"request": request})
+
+@router.get("/returns", include_in_schema=False)
+async def about_page(request: Request):
+    return templates.TemplateResponse("pages/returns.html", {"request": request})
+
 
 @router.get("/delivery", include_in_schema=False)
 async def delivery_page(request: Request):
