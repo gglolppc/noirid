@@ -123,21 +123,21 @@ DESIGNS: dict[str, DesignTemplate] = {
     ),
 
     # 6) oneword.jpg (одно слово сверху)
-    "one_word_top": DesignTemplate(
-        name="one_word_top",
+    "one-word": DesignTemplate(
+        name="one-word",
         style="deboss",
         ink_alpha=0.70,
         slots=[
             TextSlot(
                 key="word",
-                anchor="top_text",
-                dy=0.10,
+                anchor="bottom_text",
+                dy=-0.02,
                 font="IBM.ttf",
-                font_px=150,
+                font_px=50,
                 tracking=6,
                 align="center",
-                max_width=0.70,
-                stroke_width=1,
+                max_width=0.35,
+                stroke_width=2,
             )
         ],
     ),

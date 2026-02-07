@@ -37,19 +37,89 @@
                 </div>
               </div>
 
-              <div id="productGallery" class="flex h-full w-full items-center justify-center p-12 md:p-20">
-                {% if product.images %}
-                  <img id="mainProductImg"
-                       src="{{ product.images[0].url }}"
-                       alt="{{ product.title }}"
-                       class="gallery-img h-full w-full object-contain transition-transform duration-1000 group-hover:scale-105" />
-                {% else %}
-                  <img id="mainProductImg"
-                       src="/static/img/placeholder.webp"
-                       alt="{{ product.title }}"
-                       class="gallery-img h-full w-full object-contain transition-transform duration-1000 group-hover:scale-105" />
-                {% endif %}
+              <!-- GALLERY -->
+              <div id="productGallery" class="flex flex-col h-full w-full p-10 md:p-14 gap-6">
+
+                <!-- MAIN -->
+                <div class="relative flex-1 flex items-center justify-center">
+                  {% if product.images %}
+                    <img
+                      id="mainProductImg"
+                      src="{{ product.images[0].url }}"
+                      alt="{{ product.title }}"
+                      class="gallery-img h-full w-full object-contain group-hover:scale-105"
+                    />
+                  {% else %}
+                    <img
+                      id="mainProductImg"
+                      src="/static/img/placeholder.webp"
+                      alt="{{ product.title }}"
+                      class="gallery-img h-full w-full object-contain group-hover:scale-105"
+                    />
+                  {% endif %}
+
+                  <!-- premium sheen overlay -->
+                  <div id="gallerySheen" class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700
+                       bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_45%)]"></div>
+
+                  {% if product.images and (product.images|length > 1) %}
+                    <!-- ARROWS -->
+                    <button
+                      type="button"
+                      id="galleryPrev"
+                      class="absolute left-4 md:left-7 top-1/2 -translate-y-1/2 z-20
+                             w-11 h-11 rounded-full border border-white/10 bg-black/40 backdrop-blur
+                             flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60
+                             transition active:scale-95"
+                      aria-label="Previous image"
+                    >
+                      <span class="text-2xl leading-none -translate-y-[1px]">‹</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      id="galleryNext"
+                      class="absolute right-4 md:right-7 top-1/2 -translate-y-1/2 z-20
+                             w-11 h-11 rounded-full border border-white/10 bg-black/40 backdrop-blur
+                             flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60
+                             transition active:scale-95"
+                      aria-label="Next image"
+                    >
+                      <span class="text-2xl leading-none -translate-y-[1px]">›</span>
+                    </button>
+                  {% endif %}
+                </div>
+
+                <!-- THUMBS -->
+                <div class="flex justify-center">
+                  {% if product.images and (product.images|length > 1) %}
+                    <div
+                      id="thumbRow"
+                      class="flex gap-3 overflow-x-auto max-w-full px-1 pb-1
+                             [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    >
+                      {% for img in product.images %}
+                        <button
+                          type="button"
+                          class="thumb-btn shrink-0 rounded-2xl border border-white/10 bg-white/5 p-2
+                                 hover:bg-white/10 transition"
+                          data-src="{{ img.url }}"
+                          data-index="{{ loop.index0 }}"
+                          aria-label="Open image {{ loop.index }}"
+                        >
+                          <img
+                            src="{{ img.url }}"
+                            alt="{{ product.title }} thumbnail {{ loop.index }}"
+                            class="h-14 w-14 md:h-16 md:w-16 object-contain rounded-xl opacity-80"
+                          />
+                        </button>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+
               </div>
+              <!-- /GALLERY -->
             </div>
           </div>
         </div>
@@ -58,13 +128,10 @@
         <div class="lg:col-span-5 flex flex-col justify-center">
           <div class="reveal space-y-10">
 
-
-
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-tight text-white">
               {{ product.title }}
             </h1>
 
-            <!-- PRICE + DISCOUNT (если добавишь) -->
             <div class="mt-6 space-y-4">
               <div class="flex items-baseline gap-6">
                 <span id="priceValue" class="text-4xl md:text-5xl font-light text-white italic tracking-tight">
@@ -77,7 +144,6 @@
                 </span>
               </div>
 
-              <!-- Добавь скидку здесь, как я советовал ранее -->
               <div class="text-sm md:text-base text-zinc-400 font-light italic">
                 Buy 2+ cases – 15% off automatically at checkout
               </div>
@@ -91,7 +157,6 @@
               {{ product.description or "Premium protection with discreet personalization — visible only in the light. Raised texture, matte finish, and perfect fit for your device." }}
             </p>
 
-            <!-- FEATURES (упростил, сделал крупнее) -->
             <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 border-y border-white/5 py-10">
               <div class="flex items-center gap-4">
                 <div class="w-2 h-2 rounded-full bg-white/40"></div>
@@ -103,7 +168,6 @@
               </div>
             </div>
 
-            <!-- PERSONALIZATION + SELECTS -->
             <div class="mt-12 space-y-12">
               {% set personalization_schema = product.personalization_schema or {} %}
 
@@ -165,7 +229,6 @@
                 </div>
               </div>
 
-              <!-- CTA -->
               <div class="pt-8">
                 <button id="addToCartBtn"
                         class="group relative w-full overflow-hidden rounded-full bg-white px-8 py-7 transition-all active:scale-95 disabled:opacity-50">
@@ -182,20 +245,13 @@
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 
       </div>
     </div>
   </section>
-</div>
-
-<!-- TOAST (оставил без изменений) -->
-<div id="cartToast" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-[60] opacity-0 pointer-events-none transition-all duration-500 translate-y-8">
-  <div class="bg-white px-8 py-5 rounded-full flex items-center gap-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-    <div id="toastMessage" class="text-sm font-black uppercase tracking-wider text-black">Item Added</div>
-    <a href="/cart" class="text-sm font-bold uppercase tracking-wider text-zinc-400 hover:text-black transition-colors">View Bag →</a>
-  </div>
 </div>
 
 <!-- TOAST -->
@@ -218,6 +274,14 @@
   const helperHint = document.getElementById('helperHint');
   const mainImg = document.getElementById('mainProductImg');
   const priceValue = document.getElementById('priceValue');
+
+  const sheen = document.getElementById('gallerySheen');
+  const thumbs = Array.from(document.querySelectorAll('.thumb-btn'));
+  const prevBtn = document.getElementById('galleryPrev');
+  const nextBtn = document.getElementById('galleryNext');
+
+  let galleryIndex = 0;
+  let galleryLocked = false;
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -307,6 +371,82 @@
     }
   }
 
+  // ===== Gallery (wrap-around + premium transition) =====
+
+  function setActiveThumb(idx) {
+    thumbs.forEach((b, i) => {
+      b.classList.toggle('ring-2', i === idx);
+      b.classList.toggle('ring-white/30', i === idx);
+      b.classList.toggle('bg-white/10', i === idx);
+    });
+
+    const active = thumbs[idx];
+    if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+
+  async function setMainImageAnimated(url) {
+    if (!mainImg || !url) return;
+    if (galleryLocked) return;
+
+    galleryLocked = true;
+
+    // если юзер листает фотки — считаем что он вышел из "Live Preview"
+    previewPublicUrl = null;
+    previewBadge?.classList.add('hidden');
+
+    // leave
+    mainImg.classList.add('gallery-leave');
+    sheen?.classList.add('sheen-on');
+    await sleep(140);
+
+    // swap
+    mainImg.src = url;
+
+    // wait load (чтобы не моргало)
+    if (!mainImg.complete) {
+      await new Promise(res => {
+        mainImg.onload = () => res();
+        mainImg.onerror = () => res();
+      });
+    }
+
+    // enter
+    mainImg.classList.remove('gallery-leave');
+    mainImg.classList.add('gallery-enter');
+    await sleep(520);
+
+    sheen?.classList.remove('sheen-on');
+    mainImg.classList.remove('gallery-enter');
+
+    galleryLocked = false;
+  }
+
+  function wrapIndex(i, len) {
+    if (!len) return 0;
+    return (i % len + len) % len;
+  }
+
+  async function goToIndex(nextIdx) {
+    if (!thumbs.length) return;
+    galleryIndex = wrapIndex(nextIdx, thumbs.length);
+    const src = thumbs[galleryIndex].dataset.src;
+    setActiveThumb(galleryIndex);
+    await setMainImageAnimated(src);
+  }
+
+  // init
+  (function initGallery() {
+    if (!thumbs.length) return;
+    // если mainImg уже не равен первой — всё равно начнём с 0
+    setActiveThumb(0);
+    galleryIndex = 0;
+
+    thumbs.forEach((btn, i) => btn.addEventListener('click', () => goToIndex(i)));
+    prevBtn?.addEventListener('click', () => goToIndex(galleryIndex - 1));
+    nextBtn?.addEventListener('click', () => goToIndex(galleryIndex + 1));
+  })();
+
+  // ===== Preview generation (оставил твою логику, но с более "дорогим" переходом) =====
   async function fetchPreviewNow({ force = false } = {}) {
     if (!selectedVariant) return;
 
@@ -339,11 +479,8 @@
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
 
-      mainImg.style.opacity = '0';
-      await sleep(220);
-
-      mainImg.src = url;
-      mainImg.style.opacity = '1';
+      // премиум-переход как у галереи
+      await setMainImageAnimated(url);
 
       setPreviewLoading(false);
       previewBadge.classList.remove('hidden');
@@ -387,7 +524,7 @@
         if (!selectedVariant) return;
         setHint('Generating preview…');
         fetchPreviewNow();
-      }, 700);
+      }, 1100);
     });
   });
 
@@ -471,7 +608,30 @@
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
   }
-  .gallery-img { transition: opacity 0.4s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+
+  /* Premium transitions for main image */
+  .gallery-img {
+    will-change: transform, opacity, filter;
+    transition:
+      opacity 380ms ease,
+      filter 520ms ease,
+      transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .gallery-leave {
+    opacity: 0;
+    filter: blur(7px);
+    transform: scale(1.03);
+  }
+
+  .gallery-enter {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+
+  .sheen-on { opacity: 1; }
+
   input::placeholder { transition: color 0.3s; }
   input:focus::placeholder { color: transparent; }
 </style>

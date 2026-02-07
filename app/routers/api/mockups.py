@@ -106,7 +106,7 @@ def _build_payload_from_personalization(design_key: str, p: dict[str, Any]) -> d
         raw = g("number", "plate", "car_number").upper()
         return {"number": raw} if raw else {}
 
-    if design_key == "one_word_top":
+    if design_key == "one-word":
         raw = g("word", "text", "name").upper()
         return {"word": raw} if raw else {}
 
