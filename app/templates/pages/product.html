@@ -384,15 +384,18 @@
     if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }
 
-  async function setMainImageAnimated(url) {
-    if (!mainImg || !url) return;
-    if (galleryLocked) return;
+async function setMainImageAnimated(url, { isPreview = false } = {}) {
+  if (!mainImg || !url) return;
+  if (galleryLocked) return;
 
-    galleryLocked = true;
+  galleryLocked = true;
 
-    // если юзер листает фотки — считаем что он вышел из "Live Preview"
-    previewPublicUrl = null;
-    previewBadge?.classList.add('hidden');
+  try {
+    // Если это не превью, значит юзер листает фотки и "выходит" из Live Preview
+    if (!isPreview) {
+      previewPublicUrl = null;
+      previewBadge?.classList.add('hidden');
+    }
 
     // leave
     mainImg.classList.add('gallery-leave');
@@ -400,13 +403,23 @@
     await sleep(140);
 
     // swap
+    const prevSrc = mainImg.src;
     mainImg.src = url;
 
     // wait load (чтобы не моргало)
-    if (!mainImg.complete) {
-      await new Promise(res => {
-        mainImg.onload = () => res();
-        mainImg.onerror = () => res();
+    if (!mainImg.complete || mainImg.naturalWidth === 0) {
+      await new Promise((resolve) => {
+        const done = () => {
+          mainImg.onload = null;
+          mainImg.onerror = null;
+          resolve();
+        };
+        mainImg.onload = done;
+        mainImg.onerror = () => {
+          // если не загрузилось — откатимся обратно
+          if (prevSrc) mainImg.src = prevSrc;
+          done();
+        };
       });
     }
 
@@ -415,23 +428,20 @@
     mainImg.classList.add('gallery-enter');
     await sleep(520);
 
+  } finally {
     sheen?.classList.remove('sheen-on');
     mainImg.classList.remove('gallery-enter');
-
     galleryLocked = false;
   }
+}
 
-  function wrapIndex(i, len) {
-    if (!len) return 0;
-    return (i % len + len) % len;
-  }
 
   async function goToIndex(nextIdx) {
     if (!thumbs.length) return;
     galleryIndex = wrapIndex(nextIdx, thumbs.length);
     const src = thumbs[galleryIndex].dataset.src;
     setActiveThumb(galleryIndex);
-    await setMainImageAnimated(src);
+    await setMainImageAnimated(src, {isPreview:false});
   }
 
   // init
@@ -446,7 +456,7 @@
     nextBtn?.addEventListener('click', () => goToIndex(galleryIndex + 1));
   })();
 
-  // ===== Preview generation (оставил твою логику, но с более "дорогим" переходом) =====
+  // ===== Preview generation  =====
   async function fetchPreviewNow({ force = false } = {}) {
     if (!selectedVariant) return;
 
@@ -480,7 +490,7 @@
       const url = URL.createObjectURL(blob);
 
       // премиум-переход как у галереи
-      await setMainImageAnimated(url);
+      await setMainImageAnimated(url, {isPreview:true});
 
       setPreviewLoading(false);
       previewBadge.classList.remove('hidden');

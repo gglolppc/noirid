@@ -12,7 +12,7 @@ from app.services.auth import hash_password
 
 async def seed_admin() -> None:
     admin_username = os.getenv("ADMIN_USERNAME", "admin")
-    admin_password = os.getenv("ADMIN_PASSWORD", "admin")
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin875421")
 
     async with AsyncSessionLocal() as session:
         # не триггерим лишний autoflush, хоть тут и нечего флашить
