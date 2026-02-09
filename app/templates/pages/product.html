@@ -434,7 +434,10 @@ async function setMainImageAnimated(url, { isPreview = false } = {}) {
     galleryLocked = false;
   }
 }
-
+  function wrapIndex(i, len) {
+    if (!len) return 0;
+    return (i % len + len) % len;
+  }
 
   async function goToIndex(nextIdx) {
     if (!thumbs.length) return;
