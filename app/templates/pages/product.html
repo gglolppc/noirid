@@ -434,18 +434,35 @@ async function setMainImageAnimated(url, { isPreview = false } = {}) {
     galleryLocked = false;
   }
 }
-  function wrapIndex(i, len) {
-    if (!len) return 0;
-    return (i % len + len) % len;
+  let pendingGalleryIndex = null;
+
+function wrapIndex(i, len) {
+  if (!len) return 0;
+  return (i % len + len) % len;
+}
+
+async function goToIndex(nextIdx) {
+  if (!thumbs.length) return;
+
+  // если анимация идёт — не игнорим клик, а запоминаем "куда хотели"
+  if (galleryLocked) {
+    pendingGalleryIndex = nextIdx;
+    return;
   }
 
-  async function goToIndex(nextIdx) {
-    if (!thumbs.length) return;
-    galleryIndex = wrapIndex(nextIdx, thumbs.length);
-    const src = thumbs[galleryIndex].dataset.src;
-    setActiveThumb(galleryIndex);
-    await setMainImageAnimated(src, {isPreview:false});
+  galleryIndex = wrapIndex(nextIdx, thumbs.length);
+  const src = thumbs[galleryIndex].dataset.src;
+
+  setActiveThumb(galleryIndex);
+  await setMainImageAnimated(src, { isPreview: false });
+
+  // если пока крутилась анимация — были клики, прыгаем в последний
+  if (pendingGalleryIndex !== null) {
+    const last = pendingGalleryIndex;
+    pendingGalleryIndex = null;
+    await goToIndex(last);
   }
+}
 
   // init
   (function initGallery() {
