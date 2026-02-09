@@ -494,36 +494,63 @@ def _normalize_product_images(image_urls: list[str]) -> list[dict[str, str]]:
     return normalized
 
 
-def _parse_personalization_schema(raw_schema: str | None) -> dict[str, int]:
-    if raw_schema is None:
+from typing import Any, Dict
+import json
+from fastapi import HTTPException
+
+
+def _parse_personalization_schema(raw_schema: str | None) -> Dict[str, Dict[str, Any]]:
+    if raw_schema is None or not raw_schema.strip():
         return {}
-    if not raw_schema.strip():
-        return {}
+
     try:
         data = json.loads(raw_schema)
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=400, detail=f"Invalid personalization schema JSON: {exc.msg}") from exc
+
     if not isinstance(data, dict):
         raise HTTPException(status_code=400, detail="Personalization schema must be a JSON object")
-    parsed: dict[str, int] = {}
+
+    parsed: Dict[str, Dict[str, Any]] = {}
+
     for key, value in data.items():
         if not isinstance(key, str):
             raise HTTPException(status_code=400, detail="Personalization schema keys must be strings")
-        try:
-            limit = int(value)
-        except (TypeError, ValueError) as exc:
+
+        # Логика поддержки двух форматов
+        if isinstance(value, int):
+            # Старый формат: {"word": 5} -> превращаем в {"limit": 5, "placeholder": "Type here..."}
+            limit = value
+            placeholder = "Type here..."
+        elif isinstance(value, dict):
+            # Новый формат: {"word": {"limit": 5, "placeholder": "ex. NOIR"}}
+            limit = value.get("limit")
+            placeholder = value.get("placeholder", "Type here...")
+
+            if not isinstance(limit, int):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Limit for '{key}' must be an integer inside the object",
+                )
+        else:
             raise HTTPException(
                 status_code=400,
-                detail=f"Personalization schema value for '{key}' must be an integer",
-            ) from exc
+                detail=f"Value for '{key}' must be an integer or an object with 'limit'",
+            )
+
         if limit < 1:
             raise HTTPException(
                 status_code=400,
-                detail=f"Personalization schema value for '{key}' must be greater than 0",
+                detail=f"Limit for '{key}' must be greater than 0",
             )
-        parsed[key] = limit
-    return parsed
 
+        # Всегда возвращаем унифицированную структуру
+        parsed[key] = {
+            "limit": limit,
+            "placeholder": placeholder
+        }
+
+    return parsed
 
 async def _update_products_for_image_change(
     session: AsyncSession,

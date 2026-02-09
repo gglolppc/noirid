@@ -171,29 +171,60 @@
             <div class="mt-12 space-y-12">
               {% set personalization_schema = product.personalization_schema or {} %}
 
-              {% for key, limit in personalization_schema.items()|sort %}
-                {% set limit_value = limit.max_len if limit is mapping and limit.max_len is defined else limit %}
-                <div class="space-y-4">
-                  <label class="block text-sm uppercase tracking-wider text-zinc-400 font-medium">
-                    {{ "%02d"|format(loop.index) }}. {{ key }}
-                  </label>
+              {% for key, config in personalization_schema.items()|sort %}
+  <div class="space-y-4">
+    <label class="flex justify-between items-center text-sm uppercase tracking-wider text-zinc-400 font-medium">
+      <span>{{ "%02d"|format(loop.index) }}. {{ key }}</span>
+      <span class="text-[10px] opacity-50">{{ config.limit }} MAX</span>
+    </label>
 
-                  <div class="relative">
-                    <input type="text"
-                           class="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5
-                                  text-lg md:text-xl text-white placeholder:text-zinc-500
-                                  focus:outline-none focus:border-white/30 focus:bg-white/[0.08]
-                                  transition-all duration-300 font-light tracking-wide"
-                           placeholder="Type here…"
-                           data-personalization-key="{{ key }}"
-                           data-personalization-max="{{ limit_value }}"
-                           maxlength="{{ limit_value }}">
-                    <span class="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-zinc-500 font-mono">
-                      MAX {{ limit_value }}
-                    </span>
-                  </div>
-                </div>
-              {% endfor %}
+    {% if key == 'coords' %}
+ <div id="coordsWidget" class="space-y-4">
+  <div class="relative group">
+    <input type="text" id="locationSearch"
+           class="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5 pr-14
+                  text-lg text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 transition-all"
+           placeholder="{{ config.placeholder }}">
+    <button type="button" onclick="getCurrentLocation()"
+            class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-500 hover:text-white transition-colors">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden p-1">
+      <input type="number" id="latInput" step="0.0001" placeholder="ex. 46,8027"
+             class="flex-1 bg-transparent px-4 py-3 text-white focus:outline-none min-w-0">
+      <div class="flex flex-shrink-0 bg-black/40 rounded-xl p-1 ml-1">
+        <button type="button" onclick="toggleHem('lat', 'N')" id="btn-lat-N" class="coord-btn active">N</button>
+        <button type="button" onclick="toggleHem('lat', 'S')" id="btn-lat-S" class="coord-btn">S</button>
+      </div>
+    </div>
+
+    <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden p-1">
+      <input type="number" id="lngInput" step="0.0001" placeholder="ex. 9,8360"
+             class="flex-1 bg-transparent px-4 py-3 text-white focus:outline-none min-w-0">
+      <div class="flex flex-shrink-0 bg-black/40 rounded-xl p-1 ml-1">
+        <button type="button" onclick="toggleHem('lng', 'E')" id="btn-lng-E" class="coord-btn">E</button>
+        <button type="button" onclick="toggleHem('lng', 'W')" id="btn-lng-W" class="coord-btn active">W</button>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" id="finalCoords" data-personalization-key="coords">
+</div>
+
+    {% else %}
+      <div class="relative">
+        <input type="text"
+               class="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5"
+               placeholder="{{ config.placeholder }}"
+               data-personalization-key="{{ key }}"
+               data-personalization-max="{{ config.limit }}"
+               maxlength="{{ config.limit }}">
+      </div>
+    {% endif %}
+  </div>
+{% endfor %}
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-4">
@@ -261,7 +292,7 @@
     <a href="/cart" class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-black transition-colors">View Bag →</a>
   </div>
 </div>
-
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtGqK_F3nwTfH5QoesqQnqM23Xm0tPALY&libraries=places"></script>
 <script>
   const variants = {{ variants_payload|tojson }};
   const productSlug = {{ product.slug|tojson }};
@@ -631,14 +662,128 @@ async function goToIndex(nextIdx) {
   };
 
   setHint('Select device model to generate preview');
+
+
+let currentHems = { lat: 'N', lng: 'W' };
+
+function toggleHem(type, val) {
+    currentHems[type] = val;
+
+    // Сбрасываем все кнопки в группе
+    document.querySelectorAll(`[id^="btn-${type}-"]`).forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Активируем нужную
+    const activeBtn = document.getElementById(`btn-${type}-${val}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    syncCoords();
+}
+
+function syncCoords() {
+    const lat = document.getElementById('latInput')?.value || '0.0000';
+    const lng = document.getElementById('lngInput')?.value || '0.0000';
+    const final = `${lat}° ${currentHems.lat}\n${lng}° ${currentHems.lng}`;
+
+    const hidden = document.getElementById('finalCoords');
+    if (hidden) {
+        hidden.value = final;
+        // Запускаем обновление превью
+        if (typeof fetchPreviewNow === 'function' && selectedVariant) {
+            fetchPreviewNow();
+        }
+    }
+}
+
+// Слушаем изменения в цифрах
+document.addEventListener('input', (e) => {
+    if (e.target.id === 'latInput' || e.target.id === 'lngInput') {
+        syncCoords();
+    }
+});
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('coordsWidget')) {
+        toggleHem('lat', 'N');
+        toggleHem('lng', 'W');
+    }
+});
+
+    let autocomplete;
+
+function initAutocomplete() {
+  const input = document.getElementById('locationSearch');
+  if (!input) return;
+
+  // Настраиваем поиск только на города и адреса (чтобы экономить токены)
+  const options = {
+    fields: ["geometry", "name"],
+    types: ["geocode"],
+  };
+
+  autocomplete = new google.maps.places.Autocomplete(input, options);
+
+  // Когда пользователь выбирает место из списка
+  autocomplete.addListener("place_changed", () => {
+    const place = autocomplete.getPlace();
+
+    if (!place.geometry || !place.geometry.location) {
+      console.error("Место не найдено");
+      return;
+    }
+
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+
+    // 1. Устанавливаем полушария
+    toggleHem('lat', lat >= 0 ? 'N' : 'S');
+    toggleHem('lng', lng >= 0 ? 'E' : 'W');
+
+    // 2. Заполняем поля абсолютными значениями (без минусов)
+    document.getElementById('latInput').value = Math.abs(lat).toFixed(4);
+    document.getElementById('lngInput').value = Math.abs(lng).toFixed(4);
+
+    // 3. Синхронизируем для превью
+    syncCoords();
+  });
+}
+
+// Запускаем инициализацию при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+  // Проверяем, загрузился ли скрипт Google
+  if (typeof google !== 'undefined') {
+    initAutocomplete();
+  }
+});
 </script>
 
 <style>
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
+.coord-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #52525b; /* zinc-600 */
+  transition: all 0.2s ease;
+}
 
+.coord-btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+}
+
+/* Скрываем стрелки у числового поля */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
   /* Premium transitions for main image */
   .gallery-img {
     will-change: transform, opacity, filter;

@@ -52,52 +52,52 @@ DESIGNS: dict[str, DesignTemplate] = {
     ),
 
     # 3) coord.jpg (координаты вверху слева/центре — у тебя ближе к верху)
-    "coords_top": DesignTemplate(
-        name="coords_top",
+    "coords": DesignTemplate(
+        name="coords",
         style="deboss",
         ink_alpha=0.60,
         slots=[
             TextSlot(
                 key="coord_line1",
-                anchor="top_text",
-                dy=0.06,
+                anchor="bottom_text",
+                dy=-0.08,
                 font="IBM.ttf",
                 font_px=130,
                 tracking=2,
                 align="center",
-                max_width=0.72,
-                stroke_width=1,
+                max_width=0.3,
+                stroke_width=5,
             ),
             TextSlot(
                 key="coord_line2",
-                anchor="top_text",
-                dy=0.13,
+                anchor="bottom_text",
+                dy=0.0,
                 font="IBM.ttf",
                 font_px=130,
                 tracking=2,
                 align="center",
-                max_width=0.72,
-                stroke_width=1,
+                max_width=0.3,
+                stroke_width=5,
             ),
         ],
     ),
 
     # 4) date.jpg (дата в ряд вверху)
-    "date_top": DesignTemplate(
-        name="date_top",
+    "date": DesignTemplate(
+        name="date",
         style="deboss",
         ink_alpha=0.65,
         slots=[
             TextSlot(
                 key="date",
-                anchor="top_text",
-                dy=0.08,
+                anchor="bottom_text",
+                dy=0.01,
                 font="IBM.ttf",
                 font_px=150,
-                tracking=14,       # точки/разделители красиво выглядят с трекингом
+                tracking=10,       # точки/разделители красиво выглядят с трекингом
                 align="center",
-                max_width=0.72,
-                stroke_width=1,
+                max_width=0.36,
+                stroke_width=2,
             )
         ],
     ),

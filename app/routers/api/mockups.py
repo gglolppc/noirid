@@ -86,18 +86,32 @@ def _build_payload_from_personalization(design_key: str, p: dict[str, Any]) -> d
             return {"initials": f"{raw[0]} · {raw[1]}"}
         return {"initials": raw.replace(".", " · ")}
 
-    if design_key == "coords_top":
+    if design_key == "coords":
         c1 = g("coord_line1", "lat", "coord1")
         c2 = g("coord_line2", "lng", "coord2")
         if c1 and c2:
             return {"coord_line1": c1, "coord_line2": c2}
+
         coords = g("coords", "coord", "location")
+        if not coords:
+            return {}
+
+        # normalize line breaks (your UI sends ↵)
+        coords = coords.replace("↵", "\n")
+
+        # if user sent two lines, split them
+        lines = [ln.strip() for ln in coords.splitlines() if ln.strip()]
+        if len(lines) >= 2:
+            return {"coord_line1": lines[0], "coord_line2": lines[1]}
+
+        # support comma-separated too
         if "," in coords:
             a, b = coords.split(",", 1)
             return {"coord_line1": a.strip(), "coord_line2": b.strip()}
-        return {"coord_line1": coords, "coord_line2": ""} if coords else {}
 
-    if design_key == "date_top":
+        return {"coord_line1": lines[0] if lines else coords.strip(), "coord_line2": ""}
+
+    if design_key == "date":
         raw = g("date", "day").replace(".", " · ").replace("·", " ")
         raw = " · ".join([x for x in raw.split() if x])
         return {"date": raw} if raw else {}

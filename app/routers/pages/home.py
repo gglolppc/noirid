@@ -12,8 +12,12 @@ from app.db.models.product import Product
 import random
 
 HERO_IMAGES = [
-    "/static/img/heroes/noir1.webp",
-    "/static/img/heroes/noir6.webp",
+    "/static/images/heroes/car_plate_front.webp",
+    "/static/images/heroes/coords_front.webp",
+    "/static/images/heroes/initials_h_front.webp",
+    "/static/images/heroes/initials_v_front.webp",
+    "/static/images/heroes/one_letter_front.webp",
+    "/static/images/heroes/one_word_front.webp",
 ]
 
 router = APIRouter(tags=["pages"])

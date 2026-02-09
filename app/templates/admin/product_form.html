@@ -200,22 +200,45 @@
     }
 
     function syncSelected(preview = true) {
-      selectedImages.innerHTML = "";
-      selectedImageInputs.innerHTML = "";
-      Array.from(selectedUrls).forEach((url) => {
-        if (preview) {
-          const wrap = document.createElement("div");
-          wrap.className = "rounded-2xl border border-white/10 bg-white/5 p-2";
-          wrap.innerHTML = `<img src="${url}" alt="Selected image" class="h-24 w-full rounded-xl object-cover" />`;
-          selectedImages.appendChild(wrap);
-        }
-        const hidden = document.createElement("input");
-        hidden.type = "hidden";
-        hidden.name = "image_urls";
-        hidden.value = url;
-        selectedImageInputs.appendChild(hidden);
-      });
-    }
+    selectedImages.innerHTML = "";
+    selectedImageInputs.innerHTML = "";
+
+    Array.from(selectedUrls).forEach((url) => {
+      if (preview) {
+        const wrap = document.createElement("div");
+        wrap.className =
+          "relative rounded-2xl border border-white/10 bg-white/5 p-2 group";
+
+        wrap.innerHTML = `
+          <img src="${url}" class="h-24 w-full rounded-xl object-cover" />
+
+          <button
+            type="button"
+            data-url="${url}"
+            class="absolute top-2 right-2 hidden group-hover:flex
+                   h-6 w-6 items-center justify-center
+                   rounded-full bg-black/70 text-white text-xs
+                   hover:bg-red-600 transition">
+            ✕
+          </button>
+        `;
+
+        wrap.querySelector("button").addEventListener("click", (e) => {
+          const imgUrl = e.currentTarget.dataset.url;
+          selectedUrls.delete(imgUrl);
+          syncSelected(true);
+        });
+
+        selectedImages.appendChild(wrap);
+      }
+
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = "image_urls";
+      hidden.value = url;
+      selectedImageInputs.appendChild(hidden);
+    });
+  }
 
     document.getElementById("applyMediaBtn")?.addEventListener("click", () => {
       syncSelected(true);
