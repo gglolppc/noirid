@@ -15,7 +15,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
 
         <!-- LEFT: PREVIEW (sticky) -->
-        <div class="lg:col-span-7">
+        <div id="product-preview" class="lg:col-span-7">
           <div class="lg:sticky lg:top-32">
             <div class="relative aspect-[4/5] rounded-3xl md:rounded-4xl border border-white/5 bg-[#080808] overflow-hidden group shadow-2xl">
               <div class="pointer-events-none absolute inset-0 z-10 shadow-[inset_0_0_160px_rgba(0,0,0,0.7)]"></div>
@@ -546,6 +546,7 @@ async function goToIndex(nextIdx) {
       setPreviewLoading(false);
       previewBadge.classList.remove('hidden');
       setHint('Preview generated · ready to add to bag');
+      setTimeout(scrollToPreview, 300);
 
     } catch (e) {
       if (e.name !== 'AbortError') {
@@ -823,6 +824,19 @@ document.addEventListener('DOMContentLoaded', () => {
             maximumAge: 0
         }
     );
+}
+
+    function scrollToPreview() {
+    // Проверяем, что это мобилка (ширина экрана меньше 1024px)
+    if (window.innerWidth < 1024) {
+        const previewElement = document.getElementById('product-preview');
+        if (previewElement) {
+            previewElement.scrollIntoView({
+                behavior: 'smooth', // Плавный скролл в стиле Noirid
+                block: 'start'      // Прижать верх превью к верху экрана
+            });
+        }
+    }
 }
 </script>
 
