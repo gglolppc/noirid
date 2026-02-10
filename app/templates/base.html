@@ -12,40 +12,73 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    html, body {
-      background-color: #050505 !important;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: 'Inter', sans-serif;
-      color: #f4f4f5;
-    }
-    .reveal {
-      opacity: 0;
-      filter: blur(8px);
-      transform: translateY(30px);
-      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-                  filter 1s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .reveal.active {
-      opacity: 1;
-      filter: blur(0);
-      transform: translateY(0);
-    }
-    .js-loading .reveal { opacity: 0 !important; }
+<style>
+  html, body {
+    background-color: #050505 !important;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    color: #f4f4f5;
+  }
+  .reveal {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(30px);
+    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+  .js-loading .reveal { opacity: 0 !important; }
 
-    #mobile-menu.open {
-      display: flex;
-      animation: fadeIn 0.3s ease forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- СТИЛИ МОБИЛЬНОГО МЕНЮ (ВНЕ ANIMATION) --- */
+  #mobile-menu {
+    /* Скрываем за правой границей экрана */
+    transform: translateX(100%);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #mobile-menu.open {
+    transform: translateX(0);
+  }
+
+  /* Ссылки */
+  .mobile-link {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #mobile-menu.open .mobile-link {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Каскадная задержка для каждой ссылки */
+  #mobile-menu.open .mobile-link:nth-child(1) { transition-delay: 0.1s; }
+  #mobile-menu.open .mobile-link:nth-child(2) { transition-delay: 0.2s; }
+  #mobile-menu.open .mobile-link:nth-child(3) { transition-delay: 0.3s; }
+
+  /* Кнопка-бургер превращается в X */
+  #menu-toggle.open span:nth-child(1) {
+    transform: rotate(45deg) translateY(7px);
+  }
+  #menu-toggle.open span:nth-child(2) {
+    transform: rotate(-45deg) translateY(-7px);
+    width: 100%;
+  }
+</style>
 
   <script>document.documentElement.classList.add('js-loading');</script>
 </head>
@@ -56,47 +89,46 @@
   </div>
 
   {% block header %}
-  <header class="fixed top-0 left-0 right-0 z-50 py-5 md:py-6 bg-[#050505]/90 backdrop-blur-xl transition-all duration-300" id="header">
-    <div class="mx-auto max-w-7xl px-6 flex items-center justify-between">
-      <!-- Логотип -->
-      <a href="/" class="text-base md:text-lg lg:text-xl font-black tracking-[0.6em] uppercase text-white hover:text-zinc-200 transition duration-300" aria-label="NOIRID">
-        NOIRID
-      </a>
+<header class="fixed top-0 left-0 right-0 z-50 py-5 md:py-6 bg-[#050505]/90 backdrop-blur-xl border-b border-white/5" id="header">
+  <div class="mx-auto max-w-7xl px-6 flex items-center justify-between">
+    <a href="/" class="text-base md:text-lg lg:text-xl font-black tracking-[0.6em] uppercase text-white hover:text-zinc-200 transition duration-300" aria-label="NOIRID">
+      NOIRID
+    </a>
 
-      <!-- Десктоп нав -->
-      <nav class="hidden md:flex items-center gap-10 text-xs uppercase tracking-[0.35em] font-medium text-zinc-400">
-        <a href="/catalog" class="hover:text-white transition">Catalog</a>
-        <a href="/delivery" class="hover:text-white transition">Delivery</a>
-        <a href="/about" class="hover:text-white transition">Philosophy</a>
-      </nav>
-
-      <!-- Корзина с текстом и бейджем -->
+    <div class="flex items-center gap-6">
       <a href="/cart" id="cart-link" class="relative flex items-center gap-2 text-zinc-300 hover:text-white transition group">
-        <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
         </svg>
-        <span id="cart-text" class="text-xs uppercase tracking-[0.3em] group-hover:text-white">Cart</span>
-
+        <span id="cart-text" class="hidden sm:inline text-[10px] uppercase tracking-[0.3em] group-hover:text-white">Cart</span>
       </a>
 
-      <!-- Мобильный бургер -->
-      <button id="menu-toggle" class="md:hidden flex flex-col gap-1.5 p-2 focus:outline-none" aria-label="Toggle Menu">
-        <span class="w-7 h-0.5 bg-white transition-all duration-300"></span>
-        <span class="w-7 h-0.5 bg-white transition-all duration-300"></span>
+      <button id="menu-toggle" class="md:hidden relative z-50 w-8 h-8 flex flex-col items-end justify-center gap-1.5 focus:outline-none group" aria-label="Toggle Menu">
+        <span class="w-full h-px bg-white transition-all duration-300 group-[.open]:rotate-45 group-[.open]:translate-y-[3.5px]"></span>
+        <span class="w-2/3 h-px bg-white transition-all duration-300 group-[.open]:-rotate-45 group-[.open]:-translate-y-[3.5px] group-[.open]:w-full"></span>
       </button>
     </div>
 
-    <!-- Мобильное меню -->
-    <div id="mobile-menu" class="fixed inset-0 top-[68px] bg-[#050505]/95 backdrop-blur-xl z-40 flex-col items-center justify-center gap-12 text-center px-6 hidden">
-      <nav class="flex flex-col gap-10 text-lg uppercase tracking-[0.4em] text-zinc-300">
-        <a href="/catalog" class="hover:text-white transition">Catalog</a>
-        <a href="/delivery" class="hover:text-white transition">Delivery</a>
-        <a href="/about" class="hover:text-white transition">Philosophy</a>
-        <a href="/cart" class="hover:text-white transition">Cart</a>
-      </nav>
+    <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-10 text-[10px] uppercase tracking-[0.35em] font-medium text-zinc-400">
+      <a href="/catalog" class="hover:text-white transition">Catalog</a>
+      <a href="/delivery" class="hover:text-white transition">Delivery</a>
+      <a href="/about" class="hover:text-white transition">Philosophy</a>
+    </nav>
+  </div>
+
+  <div id="mobile-menu" class="fixed inset-0 h-screen bg-[#050505] z-40 flex flex-col items-center justify-center translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+    <nav class="flex flex-col gap-12 text-center">
+      <a href="/catalog" class="mobile-link text-2xl uppercase tracking-[0.5em] text-white font-light opacity-0 translate-y-4">Catalog</a>
+      <a href="/delivery" class="mobile-link text-2xl uppercase tracking-[0.5em] text-white font-light opacity-0 translate-y-4">Delivery</a>
+      <a href="/about" class="mobile-link text-2xl uppercase tracking-[0.5em] text-white font-light opacity-0 translate-y-4">Philosophy</a>
+    </nav>
+
+    <div class="absolute bottom-12 text-[10px] uppercase tracking-[0.4em] text-zinc-600">
+      Noirid · Discreet Identity
     </div>
-  </header>
-  {% endblock %}
+  </div>
+</header>
+{% endblock %}
 
   <main class="pt-24">
     {% block content %}{% endblock %}
@@ -260,16 +292,27 @@
     // App init (reveal + mobile menu)
     // -----------------------------
     const initApp = () => {
-      document.documentElement.classList.remove('js-loading');
+          document.documentElement.classList.remove('js-loading');
 
-      const toggleBtn = document.getElementById('menu-toggle');
-      const mobileMenu = document.getElementById('mobile-menu');
+          const toggleBtn = document.getElementById('menu-toggle');
+          const mobileMenu = document.getElementById('mobile-menu');
 
-      toggleBtn?.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-        mobileMenu.classList.toggle('open');
-        document.body.classList.toggle('overflow-hidden');
-      });
+          toggleBtn?.addEventListener('click', () => {
+            // Переключаем класс .open и на кнопке, и на меню
+            toggleBtn.classList.toggle('open');
+            mobileMenu.classList.toggle('open');
+            // Блокируем скролл основной страницы при открытом меню
+            document.body.classList.toggle('overflow-hidden');
+          });
+
+          // Закрытие меню при клике на ссылку
+          document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+              toggleBtn.classList.remove('open');
+              mobileMenu.classList.remove('open');
+              document.body.classList.remove('overflow-hidden');
+            });
+          });
 
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
