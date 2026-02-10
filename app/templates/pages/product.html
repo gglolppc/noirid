@@ -590,16 +590,31 @@ async function goToIndex(nextIdx) {
   });
 
   function notify(msg, isError = false) {
-    const toast = document.getElementById('cartToast');
-    const m = document.getElementById('toastMessage');
-    m.textContent = msg;
-    m.className = isError
-      ? 'text-[10px] font-black uppercase tracking-[0.2em] text-red-500'
-      : 'text-[10px] font-black uppercase tracking-[0.2em] text-black';
+  const toast = document.getElementById('cartToast');
+  const m = document.getElementById('toastMessage');
+  const viewBagLink = toast.querySelector('a[href="/cart"]'); // Находим ссылку на корзину
 
-    toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
-    setTimeout(() => toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none'), 3000);
+  m.textContent = msg;
+
+  // Меняем цвет текста в зависимости от типа сообщения
+  m.className = isError
+    ? 'text-[10px] font-black uppercase tracking-[0.2em] text-red-500'
+    : 'text-[10px] font-black uppercase tracking-[0.2em] text-black';
+
+  // Логика: если сообщение не про корзину, скрываем ссылку "View Bag"
+  if (viewBagLink) {
+    if (msg.toLowerCase().includes('bag') || msg.toLowerCase().includes('корзин')) {
+      viewBagLink.style.display = 'block';
+    } else {
+      viewBagLink.style.display = 'none';
+    }
   }
+
+  toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+  setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+  }, 3000);
+}
 
   document.getElementById('addToCartBtn').onclick = async () => {
     if (!selectedVariant) {
@@ -757,6 +772,58 @@ document.addEventListener('DOMContentLoaded', () => {
     initAutocomplete();
   }
 });
+
+    function getCurrentLocation() {
+    if (!navigator.geolocation) {
+        notify('Геолокация не поддерживается вашим браузером', true);
+        return;
+    }
+
+    // Добавляем визуальный фидбек на кнопку, пока ищем
+    const btn = document.querySelector('button[onclick="getCurrentLocation()"]');
+    const originalIcon = btn.innerHTML;
+    btn.classList.add('animate-pulse');
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // 1. Устанавливаем полушария (N/S, E/W)
+            toggleHem('lat', lat >= 0 ? 'N' : 'S');
+            toggleHem('lng', lng >= 0 ? 'E' : 'W');
+
+            // 2. Заполняем инпуты абсолютными значениями
+            const latInput = document.getElementById('latInput');
+            const lngInput = document.getElementById('lngInput');
+
+            if (latInput && lngInput) {
+                latInput.value = Math.abs(lat).toFixed(4);
+                lngInput.value = Math.abs(lng).toFixed(4);
+            }
+
+            // 3. Синхронизируем для скрытого поля и вызываем превью
+            syncCoords();
+
+            // Очищаем поле поиска адреса, так как мы юзаем координаты напрямую
+            const searchInput = document.getElementById('locationSearch');
+            if (searchInput) searchInput.value = "Current Location";
+
+            btn.classList.remove('animate-pulse');
+            notify('Coordinates updated');
+        },
+        (error) => {
+            btn.classList.remove('animate-pulse');
+            console.error("Geolocation error:", error);
+            notify('Coordinates update error', true);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        }
+    );
+}
 </script>
 
 <style>
