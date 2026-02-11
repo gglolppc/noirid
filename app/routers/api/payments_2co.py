@@ -79,7 +79,7 @@ async def start_2co_payment(
         cfg,
         order_id=order.order_number,
         total=Decimal(order.total),
-        currency=order.currency,
+        currency="EUR",
         title=f"NOIRID — Custom Black-on-Black Case",
     )
 
