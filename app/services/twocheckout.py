@@ -37,6 +37,7 @@ class TwoCOService:
             "li_0_quantity": 1,
             "li_0_price": f"{total:.2f}",
             "li_0_tangible": "Y",
+            "fixed": "Y",
         }
         if cfg.demo:
             params["demo"] = "Y"
