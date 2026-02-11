@@ -27,7 +27,7 @@ async def checkout_page(request: Request, session: AsyncSession = Depends(get_as
         order = None
 
     if order and order.status != "draft":
-        draft = await CartRepo.create_order(session, currency=order.currency or "USD")
+        draft = await CartRepo.create_order(session, currency=order.currency or "EUR")
         await CartRepo.clone_items(session, order, draft)
         request.session[SESSION_ORDER_KEY] = draft.id
         order = draft
@@ -43,6 +43,6 @@ async def checkout_page(request: Request, session: AsyncSession = Depends(get_as
             "order": order,
             "subtotal": (order.subtotal if order else Decimal("0.00")),
             "total": (order.total if order else Decimal("0.00")),
-            "currency": (order.currency if order else "USD"),
+            "currency": (order.currency if order else "EUR"),
         },
     )

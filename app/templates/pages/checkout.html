@@ -126,7 +126,7 @@
                         <div class="text-[9px] uppercase tracking-widest text-zinc-600 mt-1 italic">Quantity: {{ it.qty }}</div>
                       </div>
                       <div class="text-sm text-white/80 italic shrink-0">
-                        {{ "%.2f"|format(it.unit_price) }} <span class="text-[10px] text-zinc-600 uppercase">{{ currency }}</span>
+                        {{ "%.2f"|format(it.unit_price) }} <span class="text-[10px] text-zinc-600 uppercase">€</span>
                       </div>
                     </div>
                   {% endfor %}
@@ -135,12 +135,12 @@
                 <div class="pt-6 border-t border-white/10 space-y-4">
                   <div class="flex justify-between text-sm">
                     <span class="text-zinc-500 font-light">Subtotal</span>
-                    <span class="text-white font-medium">{{ "%.2f"|format(subtotal) }} {{ currency }}</span>
+                    <span class="text-white font-medium">{{ "%.2f"|format(subtotal) }} €</span>
                   </div>
                   <div class="flex justify-between items-end">
                     <span class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-1">Total Amount</span>
                     <span class="text-3xl font-bold text-white tracking-tight">
-                      {{ "%.2f"|format(total) }} <span class="text-sm font-normal text-zinc-400 uppercase ml-1">{{ currency }}</span>
+                      {{ "%.2f"|format(total) }} <span class="text-sm font-normal text-zinc-400 uppercase ml-1">€</span>
                     </span>
                   </div>
                 </div>

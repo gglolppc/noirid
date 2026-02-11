@@ -216,8 +216,8 @@
       }
 
       const total = Math.round(Number(summary.total || 0));
-      const cur = summary.currency || "USD";
-      cartText.textContent = `${total} ${cur} · ${summary.count}`;
+      const cur = summary.currency || "EUR";
+      cartText.textContent = `${total} € · ${summary.count}`;
 
     }
 
@@ -257,7 +257,7 @@
         const data = await res.json();
         const summary = {
           total: data.total,
-          currency: data.currency || "USD",
+          currency: data.currency || "EUR",
           count: Number(data.items_count || 0),
         };
 
@@ -280,7 +280,7 @@
       const count = (cart.items || []).reduce((s, it) => s + (Number(it.qty) || 0), 0);
       const summary = {
         total: cart.total,
-        currency: cart.currency || "USD",
+        currency: cart.currency || "EUR",
         count,
       };
 

@@ -23,7 +23,7 @@ class CartRepo:
         return res.scalars().unique().first()
 
     @staticmethod
-    async def create_order(session: AsyncSession, currency: str = "USD") -> Order:
+    async def create_order(session: AsyncSession, currency: str = "EUR") -> Order:
         # Явно задаем items=[], чтобы коллекция не была в состоянии "не загружена"
         order = Order(currency=currency, status="draft", items=[])
         session.add(order)

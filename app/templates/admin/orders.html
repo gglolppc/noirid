@@ -55,7 +55,7 @@
 
             <th class="text-left px-4 py-3">{{ order.status or "" }}</th>
             <td class="px-4 py-3">{{ order.payment_status }}</td>
-            <td class="px-4 py-3">{{ order.total }} {{ order.currency }}</td>
+            <td class="px-4 py-3">{{ order.total }} €</td>
             <td class="px-4 py-3">{{ order.created_at }}</td>
               <td class="px-4 py-3 text-right">
               {% if order.status == "paid" and not order.tracking_number %}

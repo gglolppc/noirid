@@ -37,20 +37,20 @@ async def _ensure_draft_order(
     order = await _load_order_any(request, session)
     if not order:
         if create_if_missing:
-            order = await CartRepo.create_order(session, currency="USD")
+            order = await CartRepo.create_order(session, currency="EUR")
             request.session[SESSION_ORDER_KEY] = order.id
         return order
 
     if order.payment_status == "paid":
         request.session.pop(SESSION_ORDER_KEY, None)
         if create_if_missing:
-            order = await CartRepo.create_order(session, currency=order.currency or "USD")
+            order = await CartRepo.create_order(session, currency=order.currency or "EUR")
             request.session[SESSION_ORDER_KEY] = order.id
             return order
         return None
 
     if order.status != "draft":
-        draft = await CartRepo.create_order(session, currency=order.currency or "USD")
+        draft = await CartRepo.create_order(session, currency=order.currency or "EUR")
         await CartRepo.clone_items(session, order, draft)
         request.session[SESSION_ORDER_KEY] = draft.id
         return draft
@@ -97,7 +97,7 @@ async def get_cart(
     if not order or not order.items:
         return CartOut(
             order_id='id-1', # id заказа или 0, если заказа нет
-            currency="USD",                  # Валюта по умолчанию
+            currency="EUR",                  # Валюта по умолчанию
             subtotal=Decimal("0.00"),
             total=Decimal("0.00"),
             items=[]                         # Пустой список для фронта
@@ -198,7 +198,7 @@ async def update_qty(
     if order.status != "draft":
         source_order = order
         source_item = next((x for x in source_order.items if x.id == payload.item_id), None)
-        order = await CartRepo.create_order(session, currency=source_order.currency or "USD")
+        order = await CartRepo.create_order(session, currency=source_order.currency or "EUR")
         await CartRepo.clone_items(session, source_order, order)
         request.session[SESSION_ORDER_KEY] = order.id
 
@@ -247,7 +247,7 @@ async def remove_item(
     if order.status != "draft":
         source_order = order
         source_item = next((x for x in source_order.items if x.id == payload.item_id), None)
-        order = await CartRepo.create_order(session, currency=source_order.currency or "USD")
+        order = await CartRepo.create_order(session, currency=source_order.currency or "EUR")
         await CartRepo.clone_items(session, source_order, order)
         request.session[SESSION_ORDER_KEY] = order.id
 

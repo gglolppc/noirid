@@ -65,7 +65,7 @@ async def start_2co_payment(
         provider="2checkout",
         status="created",
         amount=order.total,
-        currency=order.currency,
+        currency="EUR",
     )
     await PaymentRepo.create(session, payment)
     log.info(

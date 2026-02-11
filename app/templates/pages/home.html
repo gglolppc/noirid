@@ -190,9 +190,9 @@
             <div class="mb-10 space-y-2">
               <div class="text-xl md:text-2xl text-white font-light">
                 {% if featured_product.price_from %}
-                  From <span class="font-semibold">$ {{ featured_product.base_price }}</span>
+                  From <span class="font-semibold">{{ featured_product.base_price }} €</span>
                 {% else %}
-                  <span class="font-semibold">$ {{ featured_product.base_price }}</span>
+                  <span class="font-semibold">{{ featured_product.base_price }} €</span>
                 {% endif %}
               </div>
               <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500">

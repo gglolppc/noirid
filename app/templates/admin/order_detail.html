@@ -25,7 +25,7 @@
         </div>
         <div>
           <dt class="text-zinc-400">Currency</dt>
-          <dd class="font-semibold">{{ order.currency }}</dd>
+          <dd class="font-semibold">EUR (€)</dd>
         </div>
         <div>
           <dt class="text-zinc-400">Subtotal</dt>
@@ -33,7 +33,7 @@
         </div>
         <div>
           <dt class="text-zinc-400">Total</dt>
-          <dd class="font-semibold">{{ order.total }}</dd>
+          <dd class="font-semibold">{{ order.total }} €</dd>
         </div>
         <div>
           <dt class="text-zinc-400">Customer name</dt>
@@ -80,7 +80,7 @@
         {% for item in order.items %}
           <div class="rounded-lg border border-white/5 p-4 text-sm">
             <div class="font-semibold">{{ item.title_snapshot }}</div>
-            <div class="text-zinc-400">Qty: {{ item.qty }} · Price: {{ item.unit_price }}</div>
+            <div class="text-zinc-400">Qty: {{ item.qty }} · Price: {{ item.unit_price }} €</div>
             <div class="text-zinc-500 text-xs">Product ID: {{ item.product_id }} · Variant ID: {{ item.variant_id or "—" }}</div>
             <div class="text-zinc-500 text-xs">Personalization: {{ item.personalization_json }}</div>
             {% if item.preview_url %}
@@ -133,7 +133,7 @@
             </div>
             <div>
               <div class="text-zinc-400">Amount</div>
-              <div class="font-semibold">{{ payment.amount }} {{ payment.currency }}</div>
+              <div class="font-semibold">{{ payment.amount }} €</div>
             </div>
             <div>
               <div class="text-zinc-400">Provider order #</div>

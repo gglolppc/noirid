@@ -35,7 +35,7 @@
                 <span class="rounded-full bg-white/10 px-2 py-1 text-xs text-zinc-300">Draft</span>
               {% endif %}
             </td>
-            <td class="px-5 py-3 text-zinc-200">{{ product.currency }} {{ "%.2f"|format(product.base_price) }}</td>
+            <td class="px-5 py-3 text-zinc-200">{{ "%.2f"|format(product.base_price) }} €</td>
             <td class="px-5 py-3">
               <div class="flex items-center gap-3">
                 <a href="/admin/products/{{ product.id }}/edit" class="text-xs text-zinc-300 hover:text-white">Edit</a>

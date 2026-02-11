@@ -38,7 +38,7 @@ async def create_order(
         raise HTTPException(status_code=400, detail="Cart is empty")
 
     if order.status != "draft":
-        draft = await CartRepo.create_order(session, currency=order.currency or "USD")
+        draft = await CartRepo.create_order(session, currency=order.currency or "EUR")
         await CartRepo.clone_items(session, order, draft)
         request.session[SESSION_ORDER_KEY] = draft.id
         order = draft

@@ -74,9 +74,9 @@ function renderCart(cart) {
       }
     }
 
-  const currencyStr = cart.currency || "USD";
+  const currencyStr = cart.currency || "EUR";
   document.querySelectorAll(".currency").forEach((el) => {
-    el.textContent = currencyStr;
+    el.textContent = "€";
   });
 
   itemsEl.innerHTML = "";
@@ -118,7 +118,7 @@ function renderCart(cart) {
         </div>
 
         <div class="text-right">
-          <div class="text-white font-medium">${fmt(it.line_total)} <span class="text-[11px] text-zinc-400 uppercase tracking-[0.25em]">${currencyStr}</span></div>
+          <div class="text-white font-medium">${fmt(it.line_total)} <span class="text-[11px] text-zinc-400 uppercase tracking-[0.25em]">€</span></div>
           <button data-rm="${it.id}" class="mt-1 text-[10px] uppercase tracking-widest text-zinc-600 hover:text-white transition-colors underline underline-offset-4">
             Remove
           </button>

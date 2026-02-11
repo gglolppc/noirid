@@ -116,7 +116,7 @@
                     {{ p.title }}
                   </h2>
                   <span class="text-lg font-light text-white italic tracking-tighter whitespace-nowrap">
-                    {% if p.base_price %}${{ p.base_price }}{% else %}TBD{% endif %}
+                    {% if p.base_price %}{{ p.base_price }} €{% else %}TBD{% endif %}
                   </span>
                 </div>
 

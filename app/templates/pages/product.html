@@ -136,7 +136,7 @@
               <div class="flex items-baseline gap-6">
                 <span id="priceValue" class="text-4xl md:text-5xl font-light text-white italic tracking-tight">
                   {{ "%.2f"|format(product.base_price) }}
-                  <span class="text-base md:text-lg not-italic uppercase opacity-60 ml-2">{{ product.currency }}</span>
+                  <span class="text-base md:text-lg not-italic uppercase opacity-60 ml-2">€</span>
                 </span>
 
                 <span class="text-sm md:text-base uppercase tracking-wider text-zinc-400 font-light">
@@ -384,7 +384,7 @@
     if (typeof selectedVariant.price === 'number' || typeof selectedVariant.price === 'string') {
       const p = Number(selectedVariant.price);
       if (!Number.isNaN(p)) {
-        priceValue.innerHTML = `${p.toFixed(2)} <span class="text-xs md:text-sm not-italic uppercase opacity-40">{{ product.currency }}</span>`;
+        priceValue.innerHTML = `${p.toFixed(2)} <span class="text-xs md:text-sm not-italic uppercase opacity-40">€</span>`;
       }
     }
   }

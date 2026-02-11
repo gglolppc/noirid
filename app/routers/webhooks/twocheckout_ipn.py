@@ -42,7 +42,7 @@ SENSITIVE_KEYS = {
     "token",
 }
 
-AMOUNT_TOLERANCE = Decimal("0.10")  # +/- $1
+AMOUNT_TOLERANCE = Decimal("0.10")  # +/- 0.10 EUR
 
 
 def _sanitize(payload: dict[str, Any]) -> dict[str, Any]:
@@ -193,6 +193,9 @@ async def ipn_listener(
 
     if expected_currency is None and order is not None:
         expected_currency = (getattr(order, "currency", None) or "").upper().strip() or None
+
+    if expected_currency is None:
+        expected_currency = "EUR"
 
     amount_ok = True
     currency_ok = True
