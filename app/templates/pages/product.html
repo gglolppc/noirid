@@ -556,28 +556,84 @@ async function goToIndex(nextIdx) {
     }
   }
 
-  const brands = [...new Set(variants.map(v => v.brand))].sort();
-  initCustomSelect('brandCustomSelect', brands, (brand) => {
-    selectedBrand = brand;
-    selectedModel = null;
-    selectedVariant = null;
-    previewPublicUrl = null;
+// ===== Model sorting helpers =====
 
-    setHint('Select your model to generate preview');
+function normalizeModelName(s) {
+  return String(s || '').trim().toLowerCase();
+}
 
-    const wrap = document.getElementById('modelWrap');
-    wrap.classList.remove('opacity-20', 'pointer-events-none');
+function parseModel(s) {
+  const t = normalizeModelName(s);
 
-    const models = variants.filter(v => v.brand === brand).map(v => v.model);
-    initCustomSelect('modelCustomSelect', [...new Set(models)].sort(), (model) => {
-      selectedModel = model;
-      selectedVariant = variants.find(v => v.brand === selectedBrand && v.model === selectedModel);
+  // Вытащим номер поколения (16, 17, 23 и т.д.)
+  const numMatch = t.match(/\b(\d{1,2})\b/);
+  const num = numMatch ? Number(numMatch[1]) : -1;
 
-      updatePriceUI();
-      setHint('Type personalization to generate preview');
-      fetchPreviewNow();
-    });
+  // Приоритет версии
+  let tier = 0;
+  if (/\bultra\b/.test(t)) tier = 50;
+  else if (/\bpro\s*max\b/.test(t)) tier = 45;
+  else if (/\bpro\b/.test(t)) tier = 40;
+  else if (/\bplus\b/.test(t)) tier = 30;
+  else if (/\bedge\b/.test(t)) tier = 25;
+  else if (/\bair\b/.test(t)) tier = 20;
+  else tier = 10; // базовая версия
+
+  return { num, tier };
+}
+
+function modelCompare(a, b) {
+  const A = parseModel(a);
+  const B = parseModel(b);
+
+  // 1. Сначала по поколению (больше выше)
+  if (A.num !== B.num) return B.num - A.num;
+
+  // 2. Потом по версии (Pro/Ultra выше)
+  if (A.tier !== B.tier) return B.tier - A.tier;
+
+  // 3. Потом алфавит
+  return normalizeModelName(a).localeCompare(normalizeModelName(b));
+}
+
+
+// ===== Brand → Model logic =====
+
+const brands = [...new Set(variants.map(v => v.brand))].sort();
+
+initCustomSelect('brandCustomSelect', brands, (brand) => {
+
+  selectedBrand = brand;
+  selectedModel = null;
+  selectedVariant = null;
+  previewPublicUrl = null;
+
+  setHint('Select your model to generate preview');
+
+  const wrap = document.getElementById('modelWrap');
+  wrap.classList.remove('opacity-20', 'pointer-events-none');
+
+  const models = variants
+    .filter(v => v.brand === brand)
+    .map(v => v.model);
+
+  const uniqueSortedModels = [...new Set(models)].sort(modelCompare);
+
+  initCustomSelect('modelCustomSelect', uniqueSortedModels, (model) => {
+
+    selectedModel = model;
+
+    selectedVariant = variants.find(
+      v => v.brand === selectedBrand && v.model === selectedModel
+    );
+
+    updatePriceUI();
+    setHint('Type personalization to generate preview');
+    fetchPreviewNow();
   });
+
+});
+
 
   document.querySelectorAll('[data-personalization-key]').forEach(inp => {
     inp.addEventListener('input', () => {

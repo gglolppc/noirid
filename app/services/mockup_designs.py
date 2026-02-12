@@ -6,14 +6,14 @@ DESIGNS: dict[str, DesignTemplate] = {
     "black-on-black-initials": DesignTemplate(
         name="black-on-black-initials",
         style="deboss",
-        ink_alpha=0.70,
+        ink_alpha=0.60,
         slots=[
             TextSlot(
                 key="line1",
                 anchor="center",
-                dy=-0.02,
+                dy=+0.02,
                 font="IBM.ttf",
-                font_px=350,
+                font_px=280,
                 tracking=0,
                 align="center",
                 stroke_width=6,
@@ -23,7 +23,7 @@ DESIGNS: dict[str, DesignTemplate] = {
                 anchor="center",
                 dy=+0.20,
                 font="IBM.ttf",
-                font_px=350,
+                font_px=280,
                 tracking=0,
                 align="center",
                 stroke_width=6,
@@ -35,15 +35,15 @@ DESIGNS: dict[str, DesignTemplate] = {
     "black-on-black-initials-dot": DesignTemplate(
         name="black-on-black-initials-dot",
         style="deboss",
-        ink_alpha=0.65,
+        ink_alpha=0.60,
         slots=[
             TextSlot(
                 key="initials",             # ожидаем "A · K" или "A.K"
                 anchor="bottom_text",
-                dy=-0.10,
+                dy=-0.08,
                 font="IBM.ttf",
-                font_px=160,
-                tracking=8,
+                font_px=195,
+                tracking=25,
                 align="center",
                 max_width=0.70,
                 stroke_width=6,
@@ -55,29 +55,31 @@ DESIGNS: dict[str, DesignTemplate] = {
     "coords": DesignTemplate(
         name="coords",
         style="deboss",
-        ink_alpha=0.60,
+        ink_alpha=0.70,
         slots=[
             TextSlot(
                 key="coord_line1",
                 anchor="bottom_text",
-                dy=-0.08,
+                dy=-0.06,
+                dx=-0.17,
                 font="IBM.ttf",
-                font_px=130,
-                tracking=2,
-                align="center",
+                font_px=50,
+                tracking=8,
+                align="left",
                 max_width=0.3,
-                stroke_width=5,
+                stroke_width=2,
             ),
             TextSlot(
                 key="coord_line2",
                 anchor="bottom_text",
                 dy=0.0,
+                dx=-0.17,
                 font="IBM.ttf",
-                font_px=130,
-                tracking=2,
-                align="center",
+                font_px=50,
+                tracking=8,
+                align="left",
                 max_width=0.3,
-                stroke_width=5,
+                stroke_width=2,
             ),
         ],
     ),
@@ -103,21 +105,21 @@ DESIGNS: dict[str, DesignTemplate] = {
     ),
 
     # 5) number.jpg (номер снизу)
-    "number_bottom": DesignTemplate(
-        name="number_bottom",
+    "car-plate": DesignTemplate(
+        name="car-plate",
         style="deboss",
-        ink_alpha=0.70,
+        ink_alpha=0.63,
         slots=[
             TextSlot(
                 key="number",
                 anchor="bottom_text",
-                dy=0.00,
+                dy=-0.02,
                 font="IBM.ttf",
-                font_px=170,
-                tracking=8,
+                font_px=90,
+                tracking=12,
                 align="center",
-                max_width=0.78,
-                stroke_width=1,
+                max_width=0.35,
+                stroke_width=3,
             )
         ],
     ),
@@ -126,18 +128,36 @@ DESIGNS: dict[str, DesignTemplate] = {
     "one-word": DesignTemplate(
         name="one-word",
         style="deboss",
-        ink_alpha=0.70,
+        ink_alpha=0.50,
         slots=[
             TextSlot(
                 key="word",
                 anchor="bottom_text",
                 dy=-0.02,
                 font="IBM.ttf",
-                font_px=80,
-                tracking=6,
+                font_px=60,
+                tracking=13,
                 align="center",
                 max_width=0.35,
-                stroke_width=2,
+                stroke_width=3,
+            )
+        ],
+    ),
+    "letter": DesignTemplate(
+        name="letter",
+        style="deboss",
+        ink_alpha=0.59,
+        slots=[
+            TextSlot(
+                key="word",
+                anchor="bottom_text",
+                dy=-0.14,
+                font="IBM.ttf",
+                font_px=360,
+                tracking=13,
+                align="center",
+                max_width=0.35,
+                stroke_width=8,
             )
         ],
     ),

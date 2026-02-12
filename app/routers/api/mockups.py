@@ -83,7 +83,7 @@ def _build_payload_from_personalization(design_key: str, p: dict[str, Any]) -> d
         raw = g("initials", "letters", "text").upper().replace(" ", "")
         raw = raw.replace("·", ".")
         if len(raw) == 2 and raw.isalpha():
-            return {"initials": f"{raw[0]} · {raw[1]}"}
+            return {"initials": f"{raw[0]}·{raw[1]}"}
         return {"initials": raw.replace(".", " · ")}
 
     if design_key == "coords":
@@ -116,12 +116,16 @@ def _build_payload_from_personalization(design_key: str, p: dict[str, Any]) -> d
         raw = " · ".join([x for x in raw.split() if x])
         return {"date": raw} if raw else {}
 
-    if design_key == "number_bottom":
-        raw = g("number", "plate", "car_number").upper()
+    if design_key == "car-plate":
+        raw = g("number", "plate", "Car number").upper()
         return {"number": raw} if raw else {}
 
     if design_key == "one-word":
         raw = g("word", "text", "name").upper()
+        return {"word": raw} if raw else {}
+
+    if design_key == "letter":
+        raw = g("letter", "text", "symbol").upper()
         return {"word": raw} if raw else {}
 
     # fallback: если вдруг добавишь новые дизайны

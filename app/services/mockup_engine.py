@@ -66,7 +66,7 @@ class DesignTemplate(BaseModel):
     name: str
     style: Style = "deboss"
     slots: list[TextSlot]
-    highlight_alpha: float = 0.10
+    highlight_alpha: float = 0.02
     shadow_alpha: float = 0.32
     press_alpha: float = 0.10
     ink_alpha: float = 0.60
@@ -185,7 +185,7 @@ def render_mockup_from_config(
 
         _draw_tracked_text(dmask, x0, y0, text, font, slot.tracking, 255, slot.stroke_width)
 
-    mask_soft = mask.filter(ImageFilter.GaussianBlur(0.6))
+    mask_soft = mask.filter(ImageFilter.GaussianBlur(0.4))
 
     # 3. Сборка эффектов в один слой (overlay)
     overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -196,7 +196,7 @@ def render_mockup_from_config(
         overlay = Image.composite(ink_layer, overlay, mask_soft)
     else:
         # Emboss / Deboss
-        off = 2 if design.style == "emboss" else 3
+        off = 1 if design.style == "emboss" else 2
 
         # Shadow
         sh_m = ImageChops.offset(mask_soft, off, off).filter(ImageFilter.GaussianBlur(2.0))
@@ -205,7 +205,7 @@ def render_mockup_from_config(
 
         # Highlight
         hi_m = ImageChops.offset(mask_soft, -off, -off).filter(ImageFilter.GaussianBlur(1.5))
-        hi_layer = Image.new("RGBA", (W, H), (255, 255, 255, int(255 * design.highlight_alpha)))
+        hi_layer = Image.new("RGBA", (W, H), (190, 190, 190, int(255 * design.highlight_alpha)))
         overlay = Image.composite(hi_layer, overlay, hi_m)
 
         # Ink + Press (объединяем в один проход)
