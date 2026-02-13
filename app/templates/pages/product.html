@@ -297,9 +297,146 @@
   const variants = {{ variants_payload|tojson }};
   const productSlug = {{ product.slug|tojson }};
 
-  let selectedBrand = null, selectedModel = null, selectedVariant = null;
-  let previewAbort = null, previewTimer = null, previewPublicUrl = null;
+  // ✅ 1. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ — ДО ВСЕГО ОСТАЛЬНОГО
+  function normalizeModelName(s) {
+    return String(s || '').trim().toLowerCase();
+  }
 
+  function parseModel(s) {
+    const t = normalizeModelName(s);
+
+    // Вытащим номер поколения (16, 17, 23 и т.д.)
+    const numMatch = t.match(/\b(\d{1,2})\b/);
+    const num = numMatch ? Number(numMatch[1]) : -1;
+
+    // Приоритет версии
+    let tier = 0;
+    if (/\bultra\b/.test(t)) tier = 50;
+    else if (/\bpro\s*max\b/.test(t)) tier = 45;
+    else if (/\bpro\b/.test(t)) tier = 40;
+    else if (/\bplus\b/.test(t)) tier = 30;
+    else if (/\bedge\b/.test(t)) tier = 25;
+    else if (/\bair\b/.test(t)) tier = 20;
+    else tier = 10; // базовая версия
+
+    return { num, tier };
+  }
+
+  function modelCompare(a, b) {
+    const A = parseModel(a);
+    const B = parseModel(b);
+
+    // 1. Сначала по поколению (больше выше)
+    if (A.num !== B.num) return B.num - A.num;
+
+    // 2. Потом по версии (Pro/Ultra выше)
+    if (A.tier !== B.tier) return B.tier - A.tier;
+
+    // 3. Потом алфавит
+    return normalizeModelName(a).localeCompare(normalizeModelName(b));
+  }
+
+  // === CONFIG & STATE ===
+  const previewState = {
+    abort: null,
+    isRunning: false,
+    lastPersonalizationHash: '',
+    previewUrl: null,
+  };
+
+  // Helper: generate stable hash from personalization object
+  function getPersonalizationHash(p) {
+    if (!p || typeof p !== 'object') return '';
+    const keys = Object.keys(p).sort();
+    return keys.map(k => `${k}=${JSON.stringify(p[k])}`).join('|');
+  }
+
+  // Helper: skip preview for trivial changes (empty, whitespace-only, same as before)
+  function shouldSkipPreview(newP) {
+    const hash = getPersonalizationHash(newP);
+    if (hash === previewState.lastPersonalizationHash) return true;
+    if (!hash) return true;
+    // Skip if only whitespace or single char (too early to render)
+    const values = Object.values(newP).map(v => String(v || '').trim());
+    const totalLen = values.join('').length;
+    if (totalLen < 2) return true;
+    return false;
+  }
+
+  // === DEBOUNCED & SAFE PREVIEW TRIGGER ===
+  let previewDebounceTimer = null;
+
+  function debouncedPreview({ force = false } = {}) {
+    // Cancel pending timer
+    clearTimeout(previewDebounceTimer);
+
+    // Cancel ongoing fetch
+    if (previewState.abort) {
+      try { previewState.abort.abort(); } catch (e) {}
+      previewState.abort = null;
+    }
+
+    // If forced, run immediately (no debounce)
+    if (force) {
+      doPreview({ force: true });
+      return;
+    }
+
+    // Debounce: wait 900ms after last input
+    previewDebounceTimer = setTimeout(() => doPreview({ force: false }), 900);
+  }
+
+  async function doPreview({ force = false } = {}) {
+    if (previewState.isRunning) return;
+    if (!selectedVariant) return;
+
+    const p = collectPersonalization({ requireAll: false });
+    if (!p.ok) return;
+
+    if (!force && shouldSkipPreview(p.personalization)) return;
+
+    previewState.isRunning = true;
+    previewState.lastPersonalizationHash = getPersonalizationHash(p.personalization);
+
+    setPreviewLoading(true);
+    setHint('Generating preview…');
+
+    try {
+      previewState.abort = new AbortController();
+
+      const res = await fetch('/api/mockups/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: previewState.abort.signal,
+        body: JSON.stringify({
+          product_slug: productSlug,
+          variant_id: selectedVariant.id,
+          personalization: p.personalization,
+        }),
+      });
+
+      previewState.previewUrl = res.headers.get("X-Preview-Url");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      await setMainImageAnimated(url, { isPreview: true });
+      previewBadge.classList.remove('hidden');
+      setHint('Preview ready · customize further or add to bag');
+      scrollToPreview();
+
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        console.warn('Preview fetch failed:', e);
+        setHint('Preview failed — try again');
+      }
+    } finally {
+      previewState.isRunning = false;
+      previewState.abort = null;
+      setPreviewLoading(false);
+    }
+  }
+
+  // === GALLERY HELPERS ===
   const previewSpinner = document.getElementById('previewSpinner');
   const previewBadge = document.getElementById('previewBadge');
   const helperHint = document.getElementById('helperHint');
@@ -314,16 +451,143 @@
   let galleryIndex = 0;
   let galleryLocked = false;
 
-  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-  function closeAllSelects() {
-    document.querySelectorAll('.select-options').forEach(el => {
-      el.classList.add('opacity-0', 'invisible', 'translate-y-2');
-      const arrow = el.parentElement.querySelector('.arrow');
-      if (arrow) arrow.style.transform = 'rotate(0deg)';
-    });
+  function setPreviewLoading(isLoading) {
+    if (isLoading) {
+      previewSpinner.classList.remove('hidden');
+      previewBadge.classList.add('hidden');
+    } else {
+      previewSpinner.classList.add('hidden');
+    }
   }
-  document.addEventListener('click', closeAllSelects);
+
+  function setHint(text) {
+    if (helperHint) helperHint.textContent = text;
+  }
+
+  // ===== Gallery (wrap-around + premium transition) =====
+  function setActiveThumb(idx) {
+    thumbs.forEach((b, i) => {
+      b.classList.toggle('ring-2', i === idx);
+      b.classList.toggle('ring-white/30', i === idx);
+      b.classList.toggle('bg-white/10', i === idx);
+    });
+
+    const active = thumbs[idx];
+    if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+
+  async function setMainImageAnimated(url, { isPreview = false } = {}) {
+    if (!mainImg || !url) return;
+    if (galleryLocked) return;
+
+    galleryLocked = true;
+
+    try {
+      if (!isPreview) {
+        previewState.previewUrl = null;
+        previewBadge?.classList.add('hidden');
+      }
+
+      mainImg.classList.add('gallery-leave');
+      sheen?.classList.add('sheen-on');
+      await new Promise(r => setTimeout(r, 140));
+
+      const prevSrc = mainImg.src;
+      mainImg.src = url;
+
+      if (!mainImg.complete || mainImg.naturalWidth === 0) {
+        await new Promise((resolve) => {
+          const done = () => {
+            mainImg.onload = null;
+            mainImg.onerror = null;
+            resolve();
+          };
+          mainImg.onload = done;
+          mainImg.onerror = () => {
+            if (prevSrc) mainImg.src = prevSrc;
+            done();
+          };
+        });
+      }
+
+      mainImg.classList.remove('gallery-leave');
+      mainImg.classList.add('gallery-enter');
+      await new Promise(r => setTimeout(r, 520));
+
+    } finally {
+      sheen?.classList.remove('sheen-on');
+      mainImg.classList.remove('gallery-enter');
+      galleryLocked = false;
+    }
+  }
+
+  let pendingGalleryIndex = null;
+
+  function wrapIndex(i, len) {
+    if (!len) return 0;
+    return (i % len + len) % len;
+  }
+
+  async function goToIndex(nextIdx) {
+    if (!thumbs.length) return;
+
+    if (galleryLocked) {
+      pendingGalleryIndex = nextIdx;
+      return;
+    }
+
+    galleryIndex = wrapIndex(nextIdx, thumbs.length);
+    const src = thumbs[galleryIndex].dataset.src;
+
+    setActiveThumb(galleryIndex);
+    await setMainImageAnimated(src, { isPreview: false });
+
+    if (pendingGalleryIndex !== null) {
+      const last = pendingGalleryIndex;
+      pendingGalleryIndex = null;
+      await goToIndex(last);
+    }
+  }
+
+  (function initGallery() {
+    if (!thumbs.length) return;
+    setActiveThumb(0);
+    galleryIndex = 0;
+
+    thumbs.forEach((btn, i) => btn.addEventListener('click', () => goToIndex(i)));
+    prevBtn?.addEventListener('click', () => goToIndex(galleryIndex - 1));
+    nextBtn?.addEventListener('click', () => goToIndex(galleryIndex + 1));
+  })();
+
+  // ===== Personalization collection =====
+  function collectPersonalization({ requireAll }) {
+    const inputs = document.querySelectorAll('[data-personalization-key]');
+    const out = {};
+    let anyFilled = false;
+
+    for (const i of inputs) {
+      const key = i.getAttribute('data-personalization-key');
+      const val = (i.value || '').trim();
+      if (val) anyFilled = true;
+      if (requireAll && !val) return { ok: false, personalization: null };
+      if (val) out[key] = val;
+    }
+    if (!anyFilled) return { ok: false, personalization: null };
+    return { ok: true, personalization: out };
+  }
+
+  // ===== Model & Brand logic =====
+  let selectedBrand = null;
+  let selectedModel = null;
+  let selectedVariant = null;
+
+  function updatePriceUI() {
+    if (!selectedVariant) return;
+    const p = Number(selectedVariant.price);
+    if (!Number.isNaN(p)) {
+      priceValue.innerHTML = `${p.toFixed(2)} <span class="text-xs md:text-sm not-italic uppercase opacity-40">€</span>`;
+    }
+  }
 
   function initCustomSelect(containerId, options, onSelect) {
     const container = document.getElementById(containerId);
@@ -352,327 +616,175 @@
       item.onclick = (e) => {
         e.stopPropagation();
         const val = item.getAttribute('data-value');
-
         label.textContent = val;
         label.classList.remove('text-zinc-400', 'italic');
         label.classList.add('text-white');
-
         closeAllSelects();
         onSelect(val);
       };
     });
   }
 
-  function collectPersonalization({ requireAll }) {
-    const inputs = document.querySelectorAll('[data-personalization-key]');
-    const out = {};
-    let anyFilled = false;
-
-    for (const i of inputs) {
-      const key = i.getAttribute('data-personalization-key');
-      const val = (i.value || '').trim();
-      if (val) anyFilled = true;
-      if (requireAll && !val) return { ok: false, personalization: null };
-      if (val) out[key] = val;
-    }
-    if (!anyFilled) return { ok: false, personalization: null };
-    return { ok: true, personalization: out };
-  }
-
-  function updatePriceUI() {
-    if (!selectedVariant) return;
-    if (typeof selectedVariant.price === 'number' || typeof selectedVariant.price === 'string') {
-      const p = Number(selectedVariant.price);
-      if (!Number.isNaN(p)) {
-        priceValue.innerHTML = `${p.toFixed(2)} <span class="text-xs md:text-sm not-italic uppercase opacity-40">€</span>`;
-      }
-    }
-  }
-
-  function setHint(text) {
-    if (helperHint) helperHint.textContent = text;
-  }
-
-  function setPreviewLoading(isLoading) {
-    if (isLoading) {
-      previewSpinner.classList.remove('hidden');
-      previewBadge.classList.add('hidden');
-    } else {
-      previewSpinner.classList.add('hidden');
-    }
-  }
-
-  // ===== Gallery (wrap-around + premium transition) =====
-
-  function setActiveThumb(idx) {
-    thumbs.forEach((b, i) => {
-      b.classList.toggle('ring-2', i === idx);
-      b.classList.toggle('ring-white/30', i === idx);
-      b.classList.toggle('bg-white/10', i === idx);
+  function closeAllSelects() {
+    document.querySelectorAll('.select-options').forEach(el => {
+      el.classList.add('opacity-0', 'invisible', 'translate-y-2');
+      const arrow = el.parentElement.querySelector('.arrow');
+      if (arrow) arrow.style.transform = 'rotate(0deg)';
     });
+  }
+  document.addEventListener('click', closeAllSelects);
 
-    const active = thumbs[idx];
-    if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  // ===== BRAND → MODEL =====
+  const brands = [...new Set(variants.map(v => v.brand))].sort();
+
+  initCustomSelect('brandCustomSelect', brands, (brand) => {
+    selectedBrand = brand;
+    selectedModel = null;
+    selectedVariant = null;
+    previewState.previewUrl = null;
+
+    setHint('Select your model to generate preview');
+
+    const wrap = document.getElementById('modelWrap');
+    wrap.classList.remove('opacity-20', 'pointer-events-none');
+
+    const models = variants
+      .filter(v => v.brand === brand)
+      .map(v => v.model);
+
+    const uniqueSortedModels = [...new Set(models)].sort(modelCompare);
+
+    initCustomSelect('modelCustomSelect', uniqueSortedModels, (model) => {
+      selectedModel = model;
+      selectedVariant = variants.find(
+        v => v.brand === selectedBrand && v.model === selectedModel
+      );
+      updatePriceUI();
+      setHint('Type personalization to generate preview');
+      debouncedPreview();
+    });
+  });
+
+  // ===== INPUT LISTENERS =====
+  document.querySelectorAll('[data-personalization-key]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      debouncedPreview();
+    });
+  });
+
+  // ===== COORDS WIDGET =====
+  let currentHems = { lat: 'N', lng: 'W' };
+
+  function toggleHem(type, val) {
+    currentHems[type] = val;
+    document.querySelectorAll(`[id^="btn-${type}-"]`).forEach(btn => {
+      btn.classList.remove('active');
+    });
+    const activeBtn = document.getElementById(`btn-${type}-${val}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    syncCoords();
   }
 
-async function setMainImageAnimated(url, { isPreview = false } = {}) {
-  if (!mainImg || !url) return;
-  if (galleryLocked) return;
+  function syncCoords() {
+    const lat = document.getElementById('latInput')?.value?.trim() || '0.0000';
+    const lng = document.getElementById('lngInput')?.value?.trim() || '0.0000';
+    const final = `${lat}° ${currentHems.lat}\n${lng}° ${currentHems.lng}`;
 
-  galleryLocked = true;
-
-  try {
-    // Если это не превью, значит юзер листает фотки и "выходит" из Live Preview
-    if (!isPreview) {
-      previewPublicUrl = null;
-      previewBadge?.classList.add('hidden');
+    const hidden = document.getElementById('finalCoords');
+    if (hidden) {
+      hidden.value = final;
+      debouncedPreview();
     }
+  }
 
-    // leave
-    mainImg.classList.add('gallery-leave');
-    sheen?.classList.add('sheen-on');
-    await sleep(140);
-
-    // swap
-    const prevSrc = mainImg.src;
-    mainImg.src = url;
-
-    // wait load (чтобы не моргало)
-    if (!mainImg.complete || mainImg.naturalWidth === 0) {
-      await new Promise((resolve) => {
-        const done = () => {
-          mainImg.onload = null;
-          mainImg.onerror = null;
-          resolve();
-        };
-        mainImg.onload = done;
-        mainImg.onerror = () => {
-          // если не загрузилось — откатимся обратно
-          if (prevSrc) mainImg.src = prevSrc;
-          done();
-        };
-      });
+  // Input listeners for coords
+  ['latInput', 'lngInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => syncCoords());
+      el.addEventListener('change', () => syncCoords()); // for paste
     }
+  });
 
-    // enter
-    mainImg.classList.remove('gallery-leave');
-    mainImg.classList.add('gallery-enter');
-    await sleep(520);
+  // Init hemispheres
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('coordsWidget')) {
+      toggleHem('lat', 'N');
+      toggleHem('lng', 'W');
+    }
+  });
 
-  } finally {
-    sheen?.classList.remove('sheen-on');
-    mainImg.classList.remove('gallery-enter');
-    galleryLocked = false;
+  // ===== GOOGLE MAPS AUTOCOMPLETE =====
+  let autocomplete;
+
+  function initAutocomplete() {
+    const input = document.getElementById('locationSearch');
+    if (!input) return;
+
+    const options = {
+      fields: ["geometry", "name"],
+      types: ["geocode"],
+    };
+
+    autocomplete = new google.maps.places.Autocomplete(input, options);
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (!place.geometry || !place.geometry.location) return;
+
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+
+      toggleHem('lat', lat >= 0 ? 'N' : 'S');
+      toggleHem('lng', lng >= 0 ? 'E' : 'W');
+
+      document.getElementById('latInput').value = Math.abs(lat).toFixed(4);
+      document.getElementById('lngInput').value = Math.abs(lng).toFixed(4);
+      syncCoords();
+    });
   }
-}
-  let pendingGalleryIndex = null;
 
-function wrapIndex(i, len) {
-  if (!len) return 0;
-  return (i % len + len) % len;
-}
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof google !== 'undefined') {
+      initAutocomplete();
+    }
+  });
 
-async function goToIndex(nextIdx) {
-  if (!thumbs.length) return;
-
-  // если анимация идёт — не игнорим клик, а запоминаем "куда хотели"
-  if (galleryLocked) {
-    pendingGalleryIndex = nextIdx;
-    return;
-  }
-
-  galleryIndex = wrapIndex(nextIdx, thumbs.length);
-  const src = thumbs[galleryIndex].dataset.src;
-
-  setActiveThumb(galleryIndex);
-  await setMainImageAnimated(src, { isPreview: false });
-
-  // если пока крутилась анимация — были клики, прыгаем в последний
-  if (pendingGalleryIndex !== null) {
-    const last = pendingGalleryIndex;
-    pendingGalleryIndex = null;
-    await goToIndex(last);
-  }
-}
-
-  // init
-  (function initGallery() {
-    if (!thumbs.length) return;
-    // если mainImg уже не равен первой — всё равно начнём с 0
-    setActiveThumb(0);
-    galleryIndex = 0;
-
-    thumbs.forEach((btn, i) => btn.addEventListener('click', () => goToIndex(i)));
-    prevBtn?.addEventListener('click', () => goToIndex(galleryIndex - 1));
-    nextBtn?.addEventListener('click', () => goToIndex(galleryIndex + 1));
-  })();
-
-  // ===== Preview generation  =====
-  async function fetchPreviewNow({ force = false } = {}) {
-    if (!selectedVariant) return;
-
-    const p = collectPersonalization({ requireAll: false });
-    if (!p.ok) {
-      if (force) notify('Fill at least one field', true);
+  // ===== GEOLOCATION =====
+  function getCurrentLocation() {
+    if (!navigator.geolocation) {
+      notify('Geolocation not supported', true);
       return;
     }
 
-    try { previewAbort?.abort(); } catch (e) {}
-    previewAbort = new AbortController();
+    const btn = document.querySelector('button[onclick="getCurrentLocation()"]');
+    if (btn) btn.classList.add('animate-pulse');
 
-    setPreviewLoading(true);
-    previewPublicUrl = null;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude: lat, longitude: lng } = position.coords;
+        toggleHem('lat', lat >= 0 ? 'N' : 'S');
+        toggleHem('lng', lng >= 0 ? 'E' : 'W');
+        document.getElementById('latInput').value = Math.abs(lat).toFixed(4);
+        document.getElementById('lngInput').value = Math.abs(lng).toFixed(4);
+        syncCoords();
 
-    try {
-      const res = await fetch('/api/mockups/preview', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: previewAbort.signal,
-        body: JSON.stringify({
-          product_slug: productSlug,
-          variant_id: selectedVariant.id,
-          personalization: p.personalization
-        })
-      });
+        const searchInput = document.getElementById('locationSearch');
+        if (searchInput) searchInput.value = 'Current Location';
 
-      previewPublicUrl = res.headers.get("X-Preview-Url");
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
-      // премиум-переход как у галереи
-      await setMainImageAnimated(url, {isPreview:true});
-
-      setPreviewLoading(false);
-      previewBadge.classList.remove('hidden');
-      setHint('Preview generated · ready to add to bag');
-      setTimeout(scrollToPreview, 300);
-
-    } catch (e) {
-      if (e.name !== 'AbortError') {
-        setPreviewLoading(false);
-        if (force) notify('Preview error', true);
-      }
-    }
-  }
-
-// ===== Model sorting helpers =====
-
-function normalizeModelName(s) {
-  return String(s || '').trim().toLowerCase();
-}
-
-function parseModel(s) {
-  const t = normalizeModelName(s);
-
-  // Вытащим номер поколения (16, 17, 23 и т.д.)
-  const numMatch = t.match(/\b(\d{1,2})\b/);
-  const num = numMatch ? Number(numMatch[1]) : -1;
-
-  // Приоритет версии
-  let tier = 0;
-  if (/\bultra\b/.test(t)) tier = 50;
-  else if (/\bpro\s*max\b/.test(t)) tier = 45;
-  else if (/\bpro\b/.test(t)) tier = 40;
-  else if (/\bplus\b/.test(t)) tier = 30;
-  else if (/\bedge\b/.test(t)) tier = 25;
-  else if (/\bair\b/.test(t)) tier = 20;
-  else tier = 10; // базовая версия
-
-  return { num, tier };
-}
-
-function modelCompare(a, b) {
-  const A = parseModel(a);
-  const B = parseModel(b);
-
-  // 1. Сначала по поколению (больше выше)
-  if (A.num !== B.num) return B.num - A.num;
-
-  // 2. Потом по версии (Pro/Ultra выше)
-  if (A.tier !== B.tier) return B.tier - A.tier;
-
-  // 3. Потом алфавит
-  return normalizeModelName(a).localeCompare(normalizeModelName(b));
-}
-
-
-// ===== Brand → Model logic =====
-
-const brands = [...new Set(variants.map(v => v.brand))].sort();
-
-initCustomSelect('brandCustomSelect', brands, (brand) => {
-
-  selectedBrand = brand;
-  selectedModel = null;
-  selectedVariant = null;
-  previewPublicUrl = null;
-
-  setHint('Select your model to generate preview');
-
-  const wrap = document.getElementById('modelWrap');
-  wrap.classList.remove('opacity-20', 'pointer-events-none');
-
-  const models = variants
-    .filter(v => v.brand === brand)
-    .map(v => v.model);
-
-  const uniqueSortedModels = [...new Set(models)].sort(modelCompare);
-
-  initCustomSelect('modelCustomSelect', uniqueSortedModels, (model) => {
-
-    selectedModel = model;
-
-    selectedVariant = variants.find(
-      v => v.brand === selectedBrand && v.model === selectedModel
+        if (btn) btn.classList.remove('animate-pulse');
+        notify('Coordinates updated');
+      },
+      (error) => {
+        if (btn) btn.classList.remove('animate-pulse');
+        console.error('Geolocation error:', error);
+        notify('Failed to get location', true);
+      },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
-
-    updatePriceUI();
-    setHint('Type personalization to generate preview');
-    fetchPreviewNow();
-  });
-
-});
-
-
-  document.querySelectorAll('[data-personalization-key]').forEach(inp => {
-    inp.addEventListener('input', () => {
-      clearTimeout(previewTimer);
-      previewTimer = setTimeout(() => {
-        if (!selectedVariant) return;
-        setHint('Generating preview…');
-        fetchPreviewNow();
-      }, 1100);
-    });
-  });
-
-  function notify(msg, isError = false) {
-  const toast = document.getElementById('cartToast');
-  const m = document.getElementById('toastMessage');
-  const viewBagLink = toast.querySelector('a[href="/cart"]'); // Находим ссылку на корзину
-
-  m.textContent = msg;
-
-  // Меняем цвет текста в зависимости от типа сообщения
-  m.className = isError
-    ? 'text-[10px] font-black uppercase tracking-[0.2em] text-red-500'
-    : 'text-[10px] font-black uppercase tracking-[0.2em] text-black';
-
-  // Логика: если сообщение не про корзину, скрываем ссылку "View Bag"
-  if (viewBagLink) {
-    if (msg.toLowerCase().includes('bag') || msg.toLowerCase().includes('корзин')) {
-      viewBagLink.style.display = 'block';
-    } else {
-      viewBagLink.style.display = 'none';
-    }
   }
 
-  toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
-  setTimeout(() => {
-    toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
-  }, 3000);
-}
-
+  // ===== ADD TO CART =====
   document.getElementById('addToCartBtn').onclick = async () => {
     if (!selectedVariant) {
       setHint('Select device model to continue');
@@ -691,15 +803,21 @@ initCustomSelect('brandCustomSelect', brands, (brand) => {
     btn.innerHTML = '<span class="text-black text-[11px] font-bold uppercase tracking-[0.5em] animate-pulse">Wait...</span>';
 
     try {
-      if (!previewPublicUrl) {
-        setHint('Generating preview…');
-        await fetchPreviewNow({ force: true });
+      // Ensure preview is up-to-date — force with cleanup
+      if (!previewState.previewUrl) {
+        await new Promise(r => setTimeout(r, 100));
+        await debouncedPreview({ force: true });
       }
 
+      // Wait max 3 sec for previewUrl
       let attempts = 0;
-      while (!previewPublicUrl && attempts < 15) {
-        await sleep(120);
+      while (!previewState.previewUrl && attempts < 30) {
+        await new Promise(r => setTimeout(r, 100));
         attempts++;
+      }
+
+      if (!previewState.previewUrl) {
+        throw new Error('Preview generation timed out');
       }
 
       const res = await fetch('/api/cart/add', {
@@ -710,21 +828,21 @@ initCustomSelect('brandCustomSelect', brands, (brand) => {
           variant_id: selectedVariant.id,
           qty: 1,
           personalization: p.personalization,
-          preview_url: previewPublicUrl
-        })
+          preview_url: previewState.previewUrl,
+        }),
       });
 
       if (res.ok) {
-        const cart = await res.json().catch(() => null)
-        window.dispatchEvent(new CustomEvent("cart:updated", { detail: cart }))
+        const cart = await res.json().catch(() => null);
+        window.dispatchEvent(new CustomEvent("cart:updated", { detail: cart }));
         setHint('Added to bag · you can checkout anytime');
         notify('Added to bag');
       } else {
-        setHint('Could not add to bag');
-        notify('Error', true);
+        throw new Error('Add to cart failed');
       }
 
     } catch (e) {
+      console.error('Cart add error:', e);
       setHint('Could not add to bag');
       notify('Error', true);
     } finally {
@@ -733,168 +851,41 @@ initCustomSelect('brandCustomSelect', brands, (brand) => {
     }
   };
 
+  // ===== TOAST UTIL =====
+  function notify(msg, isError = false) {
+    const toast = document.getElementById('cartToast');
+    const m = document.getElementById('toastMessage');
+    const viewBagLink = toast.querySelector('a[href="/cart"]');
+
+    m.textContent = msg;
+    m.className = isError
+      ? 'text-[10px] font-black uppercase tracking-[0.2em] text-red-500'
+      : 'text-[10px] font-black uppercase tracking-[0.2em] text-black';
+
+    if (viewBagLink) {
+      viewBagLink.style.display = msg.toLowerCase().includes('bag') ? 'block' : 'none';
+    }
+
+    toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+    }, 3000);
+  }
+
+  // ===== INIT =====
   setHint('Select device model to generate preview');
 
-
-let currentHems = { lat: 'N', lng: 'W' };
-
-function toggleHem(type, val) {
-    currentHems[type] = val;
-
-    // Сбрасываем все кнопки в группе
-    document.querySelectorAll(`[id^="btn-${type}-"]`).forEach(btn => {
-        btn.classList.remove('active');
-    });
-
-    // Активируем нужную
-    const activeBtn = document.getElementById(`btn-${type}-${val}`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    syncCoords();
-}
-
-function syncCoords() {
-    const lat = document.getElementById('latInput')?.value || '0.0000';
-    const lng = document.getElementById('lngInput')?.value || '0.0000';
-    const final = `${lat}° ${currentHems.lat}\n${lng}° ${currentHems.lng}`;
-
-    const hidden = document.getElementById('finalCoords');
-    if (hidden) {
-        hidden.value = final;
-        // Запускаем обновление превью
-        if (typeof fetchPreviewNow === 'function' && selectedVariant) {
-            fetchPreviewNow();
-        }
-    }
-}
-
-// Слушаем изменения в цифрах
-document.addEventListener('input', (e) => {
-    if (e.target.id === 'latInput' || e.target.id === 'lngInput') {
-        syncCoords();
-    }
-});
-
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('coordsWidget')) {
-        toggleHem('lat', 'N');
-        toggleHem('lng', 'W');
-    }
-});
-
-    let autocomplete;
-
-function initAutocomplete() {
-  const input = document.getElementById('locationSearch');
-  if (!input) return;
-
-  // Настраиваем поиск только на города и адреса (чтобы экономить токены)
-  const options = {
-    fields: ["geometry", "name"],
-    types: ["geocode"],
-  };
-
-  autocomplete = new google.maps.places.Autocomplete(input, options);
-
-  // Когда пользователь выбирает место из списка
-  autocomplete.addListener("place_changed", () => {
-    const place = autocomplete.getPlace();
-
-    if (!place.geometry || !place.geometry.location) {
-      console.error("Место не найдено");
-      return;
-    }
-
-    const lat = place.geometry.location.lat();
-    const lng = place.geometry.location.lng();
-
-    // 1. Устанавливаем полушария
-    toggleHem('lat', lat >= 0 ? 'N' : 'S');
-    toggleHem('lng', lng >= 0 ? 'E' : 'W');
-
-    // 2. Заполняем поля абсолютными значениями (без минусов)
-    document.getElementById('latInput').value = Math.abs(lat).toFixed(4);
-    document.getElementById('lngInput').value = Math.abs(lng).toFixed(4);
-
-    // 3. Синхронизируем для превью
-    syncCoords();
-  });
-}
-
-// Запускаем инициализацию при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-  // Проверяем, загрузился ли скрипт Google
-  if (typeof google !== 'undefined') {
-    initAutocomplete();
-  }
-});
-
-    function getCurrentLocation() {
-    if (!navigator.geolocation) {
-        notify('Геолокация не поддерживается вашим браузером', true);
-        return;
-    }
-
-    // Добавляем визуальный фидбек на кнопку, пока ищем
-    const btn = document.querySelector('button[onclick="getCurrentLocation()"]');
-    const originalIcon = btn.innerHTML;
-    btn.classList.add('animate-pulse');
-
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
-            // 1. Устанавливаем полушария (N/S, E/W)
-            toggleHem('lat', lat >= 0 ? 'N' : 'S');
-            toggleHem('lng', lng >= 0 ? 'E' : 'W');
-
-            // 2. Заполняем инпуты абсолютными значениями
-            const latInput = document.getElementById('latInput');
-            const lngInput = document.getElementById('lngInput');
-
-            if (latInput && lngInput) {
-                latInput.value = Math.abs(lat).toFixed(4);
-                lngInput.value = Math.abs(lng).toFixed(4);
-            }
-
-            // 3. Синхронизируем для скрытого поля и вызываем превью
-            syncCoords();
-
-            // Очищаем поле поиска адреса, так как мы юзаем координаты напрямую
-            const searchInput = document.getElementById('locationSearch');
-            if (searchInput) searchInput.value = "Current Location";
-
-            btn.classList.remove('animate-pulse');
-            notify('Coordinates updated');
-        },
-        (error) => {
-            btn.classList.remove('animate-pulse');
-            console.error("Geolocation error:", error);
-            notify('Coordinates update error', true);
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-        }
-    );
-}
-
-    function scrollToPreview() {
-    // Проверяем, что это мобилка (ширина экрана меньше 1024px)
+  // Scroll helper
+  function scrollToPreview() {
     if (window.innerWidth < 1024) {
-        const previewElement = document.getElementById('product-preview');
-        if (previewElement) {
-            previewElement.scrollIntoView({
-                behavior: 'smooth', // Плавный скролл в стиле Noirid
-                block: 'start'      // Прижать верх превью к верху экрана
-            });
-        }
+      const previewElement = document.getElementById('product-preview');
+      if (previewElement) {
+        previewElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
-}
+  }
 </script>
+
 
 <style>
 .coord-btn {
