@@ -21,10 +21,11 @@
               <div class="pointer-events-none absolute inset-0 z-10 shadow-[inset_0_0_160px_rgba(0,0,0,0.7)]"></div>
 
               <div id="previewBadge"
-                   class="hidden absolute top-8 left-8 z-20 rounded-full bg-white/5 backdrop-blur-lg px-6 py-3
-                          text-sm uppercase tracking-wider text-white/80 border border-white/10">
-                Live Preview
-              </div>
+                     class="hidden absolute z-20 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 text-white/80 uppercase tracking-wider
+                            left-3 top-3 px-3 py-1.5 text-[11px] max-w-[70%] truncate
+                            md:left-8 md:top-8 md:px-6 md:py-3 md:text-sm md:max-w-none">
+                  Live Preview
+                </div>
 
               <div id="previewSpinner" class="hidden flex absolute inset-0 z-30 items-center justify-center bg-black/30 backdrop-blur-sm">
                 <div class="flex flex-col items-center gap-6">
@@ -153,7 +154,7 @@
               </div>
             </div>
 
-            <p class="text-base md:text-lg text-zinc-300 leading-relaxed max-w-xl font-light">
+            <p class="text-base md:text-lg text-zinc-300 leading-relaxed max-w-xl font-light whitespace-pre-line">
               {{ product.description or "Premium protection with discreet personalization — visible only in the light. Raised texture, matte finish, and perfect fit for your device." }}
             </p>
 
@@ -292,7 +293,7 @@
     <a href="/cart" class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-black transition-colors">View Bag →</a>
   </div>
 </div>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtGqK_F3nwTfH5QoesqQnqM23Xm0tPALY&libraries=places"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtGqK_F3nwTfH5QoesqQnqM23Xm0tPALY&libraries=places"></script>
 <script>
   window.PRODUCT_DATA = {
     variants: {{ variants_payload|tojson }},
