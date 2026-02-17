@@ -311,6 +311,68 @@
 
 
 <style>
+    /* Основной контейнер выпадающего списка */
+.pac-container {
+  background-color: #0c0c0c !important; /* Глубокий черный, чуть светлее фона */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1.25rem !important; /* Округлые края в стиле твоих инпутов */
+  margin-top: 8px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+  font-family: inherit !important;
+  z-index: 9999 !important;
+}
+
+/* Удаление стандартной тонкой линии сверху */
+.pac-container:after {
+  display: none !important;
+}
+
+/* Каждый пункт (адрес) в списке */
+.pac-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 12px 20px !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  color: #71717a !important; /* zinc-400 */
+  transition: all 0.2s ease !important;
+}
+
+.pac-item:first-child {
+  border-top: none !important;
+}
+
+/* Эффект при наведении */
+.pac-item:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+/* Основной текст города/места (жирный) */
+.pac-item-query {
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  padding-right: 5px !important;
+}
+
+/* Вторичный текст (страна, область) */
+.pac-matched {
+  /* Текст, который совпал с вводом */
+  color: #ffffff !important;
+}
+
+/* Иконка локации слева */
+.pac-icon {
+  filter: invert(1) brightness(0.7) !important; /* Делаем иконку светлой */
+  margin-right: 10px !important;
+}
+
+/* Логотип "Powered by Google" (делаем его серым, чтобы не кричал) */
+.hdpi .pac-logo:after {
+  filter: grayscale(1) invert(1) opacity(0.3) !important;
+}
 .coord-btn {
   width: 42px;
   height: 42px;
@@ -360,5 +422,6 @@ input::-webkit-inner-spin-button {
 
   input::placeholder { transition: color 0.3s; }
   input:focus::placeholder { color: transparent; }
+
 </style>
 {% endblock %}
