@@ -491,33 +491,59 @@
   // ===== GOOGLE AUTOCOMPLETE =====
   let autocomplete;
 
-  function initAutocomplete() {
+  // ===== GOOGLE AUTOCOMPLETE (REWRITTEN) =====
+  async function initAutocomplete() {
     const input = document.getElementById('locationSearch');
     if (!input) return;
 
-    const options = {
-      fields: ['geometry', 'name'],
-      types: ['geocode'],
-    };
+    try {
+      // Явно импортируем библиотеку мест
+      const { Autocomplete } = await google.maps.importLibrary("places");
 
-    if (!window.google?.maps?.places?.Autocomplete) return;
+      const options = {
+        fields: ['geometry', 'name'],
+        types: ['geocode'],
+      };
 
-    autocomplete = new google.maps.places.Autocomplete(input, options);
+      autocomplete = new Autocomplete(input, options);
 
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      if (!place.geometry || !place.geometry.location) return;
+      // Предотвращаем отправку формы по Enter в поиске
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') e.preventDefault();
+      });
 
-      const lat = place.geometry.location.lat();
-      const lng = place.geometry.location.lng();
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
 
-      toggleHem('lat', lat >= 0 ? 'N' : 'S');
-      toggleHem('lng', lng >= 0 ? 'E' : 'W');
+        if (!place.geometry || !place.geometry.location) {
+          notify('Location details not found', true);
+          return;
+        }
 
-      document.getElementById('latInput').value = Math.abs(lat).toFixed(4);
-      document.getElementById('lngInput').value = Math.abs(lng).toFixed(4);
-      syncCoords();
-    });
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+
+        // Обновляем полушария
+        toggleHem('lat', lat >= 0 ? 'N' : 'S');
+        toggleHem('lng', lng >= 0 ? 'E' : 'W');
+
+        // Заполняем инпуты
+        const latInput = document.getElementById('latInput');
+        const lngInput = document.getElementById('lngInput');
+
+        if (latInput) latInput.value = Math.abs(lat).toFixed(4);
+        if (lngInput) lngInput.value = Math.abs(lng).toFixed(4);
+
+        // Синхронизируем и запускаем превью
+        syncCoords();
+
+        // Очищаем поиск после выбора, чтобы не мешал
+        input.value = place.name || '';
+      });
+
+    } catch (e) {
+      console.error("Autocomplete failed:", e);
+    }
   }
 
   // ===== GEOLOCATION =====
