@@ -16,6 +16,10 @@
     mainImg: null,
     priceValue: null,
 
+    mobileStickyBar: null,
+    mobilePriceValue: null,
+    addToCartBtnMobile: null,
+
     sheen: null,
     thumbs: [],
     prevBtn: null,
@@ -28,7 +32,64 @@
     modelWrap: null,
   };
 
+  function openMobileSheet(options, onSelect) {
+      const sheet = document.getElementById('mobileSelectSheet');
+      const content = document.getElementById('sheetContent');
+      const list = document.getElementById('sheetOptions');
+      setStickyVisible(false);
+
+
+      list.innerHTML = options.map(opt => `
+        <div class="py-4 px-4 text-white text-base
+                    border-b border-white/5
+                    active:bg-white/10"
+             data-value="${opt}">
+          ${opt}
+        </div>
+      `).join('');
+
+      list.querySelectorAll('[data-value]').forEach(item => {
+        item.onclick = () => {
+          onSelect(item.dataset.value);
+          closeMobileSheet();
+        };
+      });
+
+      sheet.classList.remove('opacity-0', 'pointer-events-none');
+      content.classList.remove('translate-y-full');
+    }
+
+    function closeMobileSheet() {
+      const sheet = document.getElementById('mobileSelectSheet');
+      const content = document.getElementById('sheetContent');
+
+      sheet.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.add('translate-y-full');
+      setStickyVisible(true);
+    }
+
+    function updatePriceUI() {
+      // desktop price
+      if (selectedVariant && els.priceValue) {
+        const p = Number(selectedVariant.price);
+        if (!Number.isNaN(p)) {
+          els.priceValue.innerHTML = `${p.toFixed(2)} <span class="text-xs md:text-sm not-italic uppercase opacity-40">€</span>`;
+        }
+      }
+
+      // mobile price
+      if (selectedVariant && els.mobilePriceValue) {
+        const p = Number(selectedVariant.price);
+        if (!Number.isNaN(p)) {
+          els.mobilePriceValue.textContent = `${p.toFixed(2)} €`;
+        }
+      }
+    }
+
   function hydrateDomRefs() {
+    els.mobileStickyBar = $('mobileStickyBar');
+    els.mobilePriceValue = $('mobilePriceValue');
+    els.addToCartBtnMobile = $('addToCartBtnMobile');
     els.previewSpinner = $('previewSpinner');
     els.previewBadge = $('previewBadge');
     els.helperHint = $('helperHint');
@@ -66,6 +127,14 @@
   let previewDebounceTimer = null;
 
   // ===== UTIL =====
+
+  function setStickyVisible(isVisible) {
+      if (!els.mobileStickyBar) return;
+      els.mobileStickyBar.classList.toggle('translate-y-full', !isVisible);
+      els.mobileStickyBar.classList.toggle('opacity-0', !isVisible);
+      els.mobileStickyBar.classList.toggle('pointer-events-none', !isVisible);
+    }
+
   function setHint(text) {
     if (els.helperHint) els.helperHint.textContent = text;
   }
@@ -161,6 +230,20 @@
 
     trigger.onclick = (e) => {
       e.stopPropagation();
+
+      // 📱 MOBILE → open bottom sheet instead of dropdown
+      if (window.innerWidth < 768) {
+        openMobileSheet(options, (val) => {
+          label.textContent = val;
+          label.classList.remove('text-zinc-400', 'italic');
+          label.classList.add('text-white');
+          onSelect(val);
+
+        });
+        return;
+      }
+
+      // 🖥 DESKTOP → default dropdown
       const isVisible = !optionsList.classList.contains('opacity-0');
       closeAllSelects();
       if (!isVisible) {
@@ -168,6 +251,7 @@
         if (arrow) arrow.style.transform = 'rotate(180deg)';
       }
     };
+
 
     optionsList.innerHTML = options.map(opt => `
       <div class="px-6 py-4 text-zinc-300 hover:bg-white/5 hover:text-white cursor-pointer text-[12px] uppercase tracking-widest transition-all" data-value="${String(opt).replace(/"/g, '&quot;')}">
@@ -390,19 +474,37 @@
   }
 
   // ===== SCROLL =====
-  function scrollToPreview() {
-    if (window.innerWidth < 1024) {
-      const previewElement = document.getElementById('product-preview');
-      previewElement?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+function scrollToPreview() {
+  if (window.innerWidth < 1024) {
+    const previewElement = document.getElementById('product-preview');
+
+    if (previewElement) {
+      const yOffset = -100; // на 100px выше
+      const y = previewElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth'
+      });
     }
   }
+}
 
   // ===== INPUT LISTENERS =====
-  function initPersonalizationListeners() {
-    document.querySelectorAll('[data-personalization-key]').forEach(inp => {
-      inp.addEventListener('input', () => debouncedPreview());
+ function initPersonalizationListeners() {
+  document.querySelectorAll('[data-personalization-key]').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      // убрать подсветку ошибки
+      e.target.classList.remove(
+        'border-white/50',
+        'ring-1',
+        'ring-white/40'
+      );
+
+      debouncedPreview();
     });
-  }
+  });
+}
 
   // ===== BRAND → MODEL =====
   function initBrandModel() {
@@ -415,6 +517,8 @@
       previewState.previewUrl = null;
 
       setHint('Select your model to generate preview');
+
+
 
       if (els.modelWrap) {
         els.modelWrap.classList.remove('opacity-20', 'pointer-events-none');
@@ -584,71 +688,110 @@
 
   // ===== ADD TO CART =====
   function initAddToCart() {
-    if (!els.addToCartBtn) return;
+      const btnDesktop = els.addToCartBtn;
+      const btnMobile = els.addToCartBtnMobile;
 
-    els.addToCartBtn.onclick = async () => {
-      if (!selectedVariant) {
-        setHint('Select device model to continue');
-        return notify('Select Device', true);
-      }
+      if (!btnDesktop && !btnMobile) return;
 
-      const p = collectPersonalization({ requireAll: true });
-      if (!p.ok) {
-        setHint('Fill all personalization fields');
-        return notify('Check Fields', true);
-      }
+      const setButtonsDisabled = (disabled, html = null) => {
+        [btnDesktop, btnMobile].forEach(btn => {
+          if (!btn) return;
+          btn.disabled = disabled;
+          if (html !== null) btn.innerHTML = html;
+        });
+      };
 
-      const btn = els.addToCartBtn;
-      btn.disabled = true;
-      const original = btn.innerHTML;
-      btn.innerHTML = '<span class="text-black text-[11px] font-bold uppercase tracking-[0.5em] animate-pulse">Wait...</span>';
+      const originalDesktop = btnDesktop ? btnDesktop.innerHTML : null;
+      const originalMobile = btnMobile ? btnMobile.innerHTML : null;
 
-      try {
-        // ensure preview exists
-        if (!previewState.previewUrl) {
-          await new Promise(r => setTimeout(r, 100));
-          debouncedPreview({ force: true });
+      const onClick = async () => {
+        if (!selectedVariant) {
+          setHint('Select device model to continue');
+          return notify('Select Device', true);
         }
 
-        let attempts = 0;
-        while (!previewState.previewUrl && attempts < 30) {
-          await new Promise(r => setTimeout(r, 100));
-          attempts++;
-        }
+        // 1) validate personalization + highlight empty fields
+        const inputs = document.querySelectorAll('[data-personalization-key]');
+        let hasError = false;
 
-        if (!previewState.previewUrl) throw new Error('Preview generation timed out');
-
-        const res = await fetch('/api/cart/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            product_id: productId,
-            variant_id: selectedVariant.id,
-            qty: 1,
-            personalization: p.personalization,
-            preview_url: previewState.previewUrl,
-          }),
+        inputs.forEach(input => {
+          const empty = !input.value.trim();
+          if (empty) {
+            hasError = true;
+            input.classList.add('border-white/50', 'ring-1', 'ring-white/40');
+          } else {
+            input.classList.remove('border-white/50', 'ring-1', 'ring-white/40');
+          }
         });
 
-        if (res.ok) {
-          const cart = await res.json().catch(() => null);
-          window.dispatchEvent(new CustomEvent('cart:updated', { detail: cart }));
-          setHint('Added to bag · you can checkout anytime');
-          notify('Added to bag');
-        } else {
-          throw new Error('Add to cart failed');
+        if (hasError) {
+          setHint('Fill all personalization fields');
+          return notify('FILL FIELDS', true);
         }
 
-      } catch (e) {
-        console.error('Cart add error:', e);
-        setHint('Could not add to bag');
-        notify('Error', true);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = original;
-      }
-    };
-  }
+        // 2) collect personalization (BUGFIX: p was missing)
+        const p = collectPersonalization({ requireAll: true });
+        if (!p.ok) {
+          setHint('Fill all personalization fields');
+          return notify('FILL FIELDS', true);
+        }
+
+        // 3) loading state
+        const loadingHtml = '<span class="text-black text-[11px] font-bold uppercase tracking-[0.5em] animate-pulse">Wait...</span>';
+        setButtonsDisabled(true, loadingHtml);
+
+        try {
+          // ensure preview exists
+          if (!previewState.previewUrl) {
+            await new Promise(r => setTimeout(r, 100));
+            debouncedPreview({ force: true });
+          }
+
+          let attempts = 0;
+          while (!previewState.previewUrl && attempts < 30) {
+            await new Promise(r => setTimeout(r, 100));
+            attempts++;
+          }
+
+          if (!previewState.previewUrl) throw new Error('Preview generation timed out');
+
+          const res = await fetch('/api/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product_id: productId,
+              variant_id: selectedVariant.id,
+              qty: 1,
+              personalization: p.personalization,
+              preview_url: previewState.previewUrl,
+            }),
+          });
+
+          if (res.ok) {
+            const cart = await res.json().catch(() => null);
+            window.dispatchEvent(new CustomEvent('cart:updated', { detail: cart }));
+            setHint('Added to bag · you can checkout anytime');
+            notify('Added to bag');
+          } else {
+            throw new Error('Add to cart failed');
+          }
+
+        } catch (e) {
+          console.error('Cart add error:', e);
+          setHint('Could not add to bag');
+          notify('Error', true);
+        } finally {
+          // restore buttons
+          if (btnDesktop) btnDesktop.innerHTML = originalDesktop;
+          if (btnMobile) btnMobile.innerHTML = originalMobile;
+          setButtonsDisabled(false, null);
+        }
+      };
+
+      if (btnDesktop) btnDesktop.onclick = onClick;
+      if (btnMobile) btnMobile.onclick = onClick;
+    }
+
 
   // ===== INIT =====
   function initGlobalListeners() {
@@ -676,3 +819,4 @@
 
   document.addEventListener('DOMContentLoaded', init);
 })();
+

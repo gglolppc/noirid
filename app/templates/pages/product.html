@@ -3,7 +3,7 @@
 {% block title %}{{ product.title }} · NOIRID{% endblock %}
 
 {% block content %}
-<div class="relative bg-[#050505] selection:bg-white selection:text-black min-h-screen text-zinc-300">
+<div class="relative bg-[#050505] selection:bg-white selection:text-black min-h-screen text-zinc-300 pb-28 lg:pb-0">
   <nav class="absolute top-8 left-6 md:left-12 z-40">
     <a href="/catalog" class="group flex items-center gap-3 text-sm md:text-base uppercase tracking-wider text-zinc-400 hover:text-white transition-colors">
       <span class="transition-transform group-hover:-translate-x-1">←</span> Back to Catalog
@@ -126,164 +126,243 @@
         </div>
 
         <!-- RIGHT: INFO + CONFIG -->
-        <div class="lg:col-span-5 flex flex-col justify-center">
-          <div class="reveal space-y-10">
+<!-- RIGHT: INFO + CONFIG -->
+<div class="lg:col-span-5 flex flex-col justify-center">
+  <div class="reveal space-y-10">
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-tight text-white">
-              {{ product.title }}
-            </h1>
+    <h1 class="text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-tight text-white">
+      {{ product.title }}
+    </h1>
 
-            <div class="mt-6 space-y-4">
-              <div class="flex items-baseline gap-6">
-                <span id="priceValue" class="text-4xl md:text-5xl font-light text-white italic tracking-tight">
-                  {{ "%.2f"|format(product.base_price) }}
-                  <span class="text-base md:text-lg not-italic uppercase opacity-60 ml-2">€</span>
-                </span>
+    <div class="mt-6 space-y-4">
+      <div class="flex items-baseline gap-6">
+        <span id="priceValue" class="text-4xl md:text-5xl font-light text-white italic tracking-tight">
+          {{ "%.2f"|format(product.base_price) }}
+          <span class="text-base md:text-lg not-italic uppercase opacity-60 ml-2">€</span>
+        </span>
 
-                <span class="text-sm md:text-base uppercase tracking-wider text-zinc-400 font-light">
-                  Free worldwide shipping
-                </span>
-              </div>
+        <span class="text-sm md:text-base uppercase tracking-wider text-zinc-400 font-light">
+          Free worldwide shipping
+        </span>
+      </div>
 
-              <div class="text-sm md:text-base text-zinc-400 font-light italic">
-                Buy 2+ cases – 15% off automatically at checkout
-              </div>
+      <div class="text-sm md:text-base text-zinc-400 font-light italic">
+        Buy 2+ cases – 15% off automatically at checkout
+      </div>
 
-              <div class="text-sm uppercase tracking-wider text-zinc-500">
-                Free remake guarantee · Secure checkout
-              </div>
-            </div>
-
-
-            <p class="text-base md:text-lg text-zinc-300 leading-relaxed max-w-xl font-light whitespace-pre-line [font-family:'SuisseIntl',sans-serif]">
-  {{ product.description or "Line one.\n\nLine two.\nLine three." }}
-</p>
-
-            <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 border-y border-white/5 py-10">
-              <div class="flex items-center gap-4">
-                <div class="w-2 h-2 rounded-full bg-white/40"></div>
-                <span class="text-xs md:text-sm uppercase tracking-[0.15em] font-light text-zinc-300">Made to order</span>
-              </div>
-              <div class="flex items-center gap-4">
-                <div class="w-2 h-2 rounded-full bg-white/40"></div>
-                <span class="text-xs md:text-sm uppercase tracking-[0.15em] font-light text-zinc-300">MATTE FINISH</span>
-              </div>
-            </div>
-
-            <div class="mt-12 space-y-12">
-              {% set personalization_schema = product.personalization_schema or {} %}
-
-              {% for key, config in personalization_schema.items()|sort %}
-  <div class="space-y-4">
-    <label class="flex justify-between items-center text-sm uppercase tracking-wider text-zinc-400 font-medium">
-      <span>{{ "%02d"|format(loop.index) }}. {{ key }}</span>
-      <span class="text-[10px] opacity-50">{{ config.limit }} MAX</span>
-    </label>
-
-    {% if key == 'coords' %}
- <div id="coordsWidget" class="space-y-4">
-  <div class="relative group">
-    <input type="text" id="locationSearch"
-           class="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5 pr-14
-                  text-lg text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 transition-all"
-           placeholder="{{ config.placeholder }}">
-    <button type="button" onclick="getCurrentLocation()"
-            class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-500 hover:text-white transition-colors">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-    </button>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden p-1">
-      <input type="number" id="latInput" step="0.0001" placeholder="ex. 46,8027"
-             class="flex-1 bg-transparent px-4 py-3 text-white focus:outline-none min-w-0">
-      <div class="flex flex-shrink-0 bg-black/40 rounded-xl p-1 ml-1">
-        <button type="button" onclick="toggleHem('lat', 'N')" id="btn-lat-N" class="coord-btn active">N</button>
-        <button type="button" onclick="toggleHem('lat', 'S')" id="btn-lat-S" class="coord-btn">S</button>
+      <div class="text-sm uppercase tracking-wider text-zinc-500">
+        Free remake guarantee · Secure checkout
       </div>
     </div>
 
-    <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden p-1">
-      <input type="number" id="lngInput" step="0.0001" placeholder="ex. 9,8360"
-             class="flex-1 bg-transparent px-4 py-3 text-white focus:outline-none min-w-0">
-      <div class="flex flex-shrink-0 bg-black/40 rounded-xl p-1 ml-1">
-        <button type="button" onclick="toggleHem('lng', 'E')" id="btn-lng-E" class="coord-btn">E</button>
-        <button type="button" onclick="toggleHem('lng', 'W')" id="btn-lng-W" class="coord-btn active">W</button>
+    <p class="text-base md:text-lg text-zinc-300 leading-relaxed max-w-xl font-light whitespace-pre-line [font-family:'SuisseIntl',sans-serif]">
+      {{ product.description or "Line one.\n\nLine two.\nLine three." }}
+    </p>
+
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 border-y border-white/5 py-10">
+      <div class="flex items-center gap-4">
+        <div class="w-2 h-2 rounded-full bg-white/40"></div>
+        <span class="text-xs md:text-sm uppercase tracking-[0.15em] font-light text-zinc-300">Made to order</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="w-2 h-2 rounded-full bg-white/40"></div>
+        <span class="text-xs md:text-sm uppercase tracking-[0.15em] font-light text-zinc-300">Matte finish</span>
       </div>
     </div>
-  </div>
-  <input type="hidden" id="finalCoords" data-personalization-key="coords">
-</div>
 
-    {% else %}
-      <div class="relative">
-        <input type="text"
-               class="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5"
-               placeholder="{{ config.placeholder }}"
-               data-personalization-key="{{ key }}"
-               data-personalization-max="{{ config.limit }}"
-               maxlength="{{ config.limit }}">
-      </div>
-    {% endif %}
-  </div>
-{% endfor %}
+    <!-- CONFIGURATOR CARD -->
+    <div class="mt-12 rounded-3xl border border-white/10 bg-[#0B0B0B] p-8 md:p-10 relative overflow-hidden
+                shadow-[0_0_80px_rgba(255,255,255,0.03)]">
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="space-y-4">
-                  <label class="block text-sm uppercase tracking-wider text-zinc-400 font-medium">Brand</label>
+      <!-- subtle top sheen -->
+      <div class="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none"></div>
 
-                  <div id="brandCustomSelect" class="custom-select relative">
-                    <div class="select-trigger w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5
-                                text-lg text-white font-light cursor-pointer flex justify-between items-center
-                                hover:bg-white/[0.08] transition-all">
-                      <span class="selected-value text-zinc-400 italic">Select…</span>
-                      <span class="arrow opacity-50 text-sm transition-transform duration-500">▼</span>
-                    </div>
-
-                    <div class="select-options absolute top-full left-0 w-full z-50 mt-3 bg-[#0F0F0F] border border-white/10
-                                rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-300 translate-y-2 shadow-2xl"></div>
-                  </div>
-                </div>
-
-                <div id="modelWrap" class="space-y-4 opacity-20 pointer-events-none transition-all duration-500">
-                  <label class="block text-sm uppercase tracking-wider text-zinc-400 font-medium">Model</label>
-
-                  <div id="modelCustomSelect" class="custom-select relative">
-                    <div class="select-trigger w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5
-                                text-lg text-white font-light cursor-pointer flex justify-between items-center
-                                hover:bg-white/[0.08] transition-all">
-                      <span class="selected-value text-zinc-400 italic">Select…</span>
-                      <span class="arrow opacity-50 text-sm transition-transform duration-500">▼</span>
-                    </div>
-
-                    <div class="select-options absolute top-full left-0 w-full z-50 mt-3 bg-[#0F0F0F] border border-white/10
-                                rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-300 translate-y-2 shadow-2xl"></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-8">
-                <button id="addToCartBtn"
-                        class="group relative w-full overflow-hidden rounded-full bg-white px-8 py-7 transition-all active:scale-95 disabled:opacity-50">
-                  <span class="relative z-10 text-black text-base md:text-lg font-bold uppercase tracking-wider">Add To Bag</span>
-                  <div class="absolute inset-0 bg-zinc-200 translate-y-full transition-transform duration-300 group-hover:translate-y-0"></div>
-                </button>
-
-                <div class="mt-6 text-center text-sm uppercase tracking-wider text-zinc-500">
-                  <span id="helperHint">Select device model to generate preview</span>
-                </div>
-
-                <div class="mt-8 flex items-center justify-center gap-12 px-4 text-xs uppercase tracking-wider text-zinc-600 italic">
-                  NOIRID Certified · Secure Payment
-                </div>
-              </div>
-            </div>
-
+      <div class="relative space-y-12">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs uppercase tracking-[0.35em] text-zinc-500">
+            Configure
+          </h3>
+          <div class="text-[10px] uppercase tracking-wider text-zinc-600">
+            Customization
           </div>
         </div>
 
+        {% set personalization_schema = product.personalization_schema or {} %}
+
+        <!-- PERSONALIZATION FIELDS -->
+        <div class="space-y-10">
+          {% for key, config in personalization_schema.items()|sort %}
+            <div class="space-y-4">
+              <label class="flex justify-between items-center text-sm uppercase tracking-wider text-zinc-400 font-medium">
+                <span>{{ "%02d"|format(loop.index) }}. {{ key }}</span>
+                <span class="text-[10px] opacity-50">{{ config.limit }} MAX</span>
+              </label>
+
+              {% if key == 'coords' %}
+                <div id="coordsWidget" class="space-y-4">
+                  <div class="relative group">
+                    <input type="text" id="locationSearch"
+                           class="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5 pr-14
+                                  text-lg text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 transition-all"
+                           placeholder="{{ config.placeholder }}">
+                    <button type="button" onclick="getCurrentLocation()"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-500 hover:text-white transition-colors">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden p-1">
+                      <input type="number" id="latInput" step="0.0001" placeholder="ex. 46,8027"
+                             class="flex-1 bg-transparent px-4 py-3 text-white focus:outline-none min-w-0">
+                      <div class="flex flex-shrink-0 bg-black/40 rounded-xl p-1 ml-1">
+                        <button type="button" onclick="toggleHem('lat', 'N')" id="btn-lat-N" class="coord-btn active">N</button>
+                        <button type="button" onclick="toggleHem('lat', 'S')" id="btn-lat-S" class="coord-btn">S</button>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden p-1">
+                      <input type="number" id="lngInput" step="0.0001" placeholder="ex. 9,8360"
+                             class="flex-1 bg-transparent px-4 py-3 text-white focus:outline-none min-w-0">
+                      <div class="flex flex-shrink-0 bg-black/40 rounded-xl p-1 ml-1">
+                        <button type="button" onclick="toggleHem('lng', 'E')" id="btn-lng-E" class="coord-btn">E</button>
+                        <button type="button" onclick="toggleHem('lng', 'W')" id="btn-lng-W" class="coord-btn active">W</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <input type="hidden" id="finalCoords" data-personalization-key="coords">
+                </div>
+              {% else %}
+                <div class="relative">
+                  <input type="text"
+                         class="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5 text-white placeholder:text-zinc-500
+                                focus:outline-none focus:border-white/30 transition-all"
+                         placeholder="{{ config.placeholder }}"
+                         data-personalization-key="{{ key }}"
+                         data-personalization-max="{{ config.limit }}"
+                         maxlength="{{ config.limit }}">
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- DEVICE SELECTS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+          <div class="space-y-4">
+            <label class="block text-sm uppercase tracking-wider text-zinc-400 font-medium">Brand</label>
+
+            <div id="brandCustomSelect" class="custom-select relative">
+              <div class="select-trigger w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5
+                          text-lg text-white font-light cursor-pointer flex justify-between items-center
+                          hover:bg-white/[0.08] transition-all">
+                <span class="selected-value text-zinc-400 italic">Select…</span>
+                <span class="arrow opacity-50 text-sm transition-transform duration-500">▼</span>
+              </div>
+
+              <div class="select-options absolute top-full left-0 w-full z-50 mt-3 bg-[#0F0F0F] border border-white/10
+                          rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-300 translate-y-2 shadow-2xl"></div>
+            </div>
+          </div>
+
+          <div id="modelWrap" class="space-y-4 opacity-20 pointer-events-none transition-all duration-500">
+            <label class="block text-sm uppercase tracking-wider text-zinc-400 font-medium">Model</label>
+
+            <div id="modelCustomSelect" class="custom-select relative">
+              <div class="select-trigger w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-5
+                          text-lg text-white font-light cursor-pointer flex justify-between items-center
+                          hover:bg-white/[0.08] transition-all">
+                <span class="selected-value text-zinc-400 italic">Select…</span>
+                <span class="arrow opacity-50 text-sm transition-transform duration-500">▼</span>
+              </div>
+
+              <div class="select-options absolute top-full left-0 w-full z-50 mt-3 bg-[#0F0F0F] border border-white/10
+                          rounded-2xl overflow-hidden opacity-0 invisible transition-all duration-300 translate-y-2 shadow-2xl"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="pt-2">
+          <button id="addToCartBtn"
+                  class="group relative w-full overflow-hidden rounded-full bg-white px-8 py-7 transition-all active:scale-95 disabled:opacity-50">
+            <span class="relative z-10 text-black text-base md:text-lg font-bold uppercase tracking-wider">Add To Bag</span>
+            <div class="absolute inset-0 bg-zinc-200 translate-y-full transition-transform duration-300 group-hover:translate-y-0"></div>
+          </button>
+
+          <div class="mt-6 text-center text-sm uppercase tracking-wider text-zinc-500">
+            <span id="helperHint"
+                  class="text-white/80 tracking-wider
+                         drop-shadow-[0_0_12px_rgba(255,255,255,0.25)]">
+              Select device model to generate preview
+            </span>
+          </div>
+
+          <div class="mt-8 flex items-center justify-center gap-12 px-4 text-xs uppercase tracking-wider text-zinc-600 italic">
+            NOIRID Certified · Secure Payment
+          </div>
+        </div>
       </div>
     </div>
+    <!-- /CONFIGURATOR CARD -->
+
+  </div>
+</div>
+
+
+      </div>
+    </div>
+    <div id="mobileSelectSheet"
+     class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm
+            opacity-0 pointer-events-none transition-all duration-300">
+
+  <div id="sheetContent"
+       class="absolute bottom-0 left-0 w-full bg-[#0F0F0F]
+              rounded-t-3xl p-6 max-h-[80vh]
+              translate-y-full transition-transform duration-300 overflow-y-auto">
+
+    <div class="mb-6 text-center text-sm uppercase tracking-wider text-zinc-400">
+      Select Model
+    </div>
+
+    <div id="sheetOptions" class="space-y-1"></div>
+  </div>
+</div>
+
+
+    <!-- MOBILE STICKY BAR -->
+<div id="mobileStickyBar"
+     class="lg:hidden fixed bottom-0 left-0 w-full z-50
+            transition-all duration-300
+            border-t border-white/10 bg-[#0B0B0B]/92 backdrop-blur-xl
+            px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+  <div class="mx-auto max-w-7xl flex items-center gap-3">
+    <div class="min-w-[92px]">
+      <div id="mobilePriceValue" class="text-white/90 text-lg font-light tracking-tight">
+        {{ "%.2f"|format(product.base_price) }} €
+      </div>
+      <div class="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+        Shipping included
+      </div>
+    </div>
+
+    <button id="addToCartBtnMobile"
+            class="flex-1 relative overflow-hidden rounded-full bg-white px-6 py-4
+                   transition-all active:scale-95 disabled:opacity-50">
+      <span class="relative z-10 text-black text-sm font-black uppercase tracking-wider">
+        Add To Bag
+      </span>
+      <div class="absolute inset-0 bg-zinc-200 translate-y-full transition-transform duration-300
+                  group-hover:translate-y-0"></div>
+    </button>
+  </div>
+</div>
+
+
   </section>
 </div>
 
@@ -311,7 +390,7 @@
 
 
 <style>
-    /* Основной контейнер выпадающего списка */
+
 .pac-container {
   background-color: #0c0c0c !important; /* Глубокий черный, чуть светлее фона */
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -322,12 +401,12 @@
   z-index: 9999 !important;
 }
 
-/* Удаление стандартной тонкой линии сверху */
+
 .pac-container:after {
   display: none !important;
 }
 
-/* Каждый пункт (адрес) в списке */
+
 .pac-item {
   border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
   padding: 12px 20px !important;
@@ -343,13 +422,13 @@
   border-top: none !important;
 }
 
-/* Эффект при наведении */
+
 .pac-item:hover {
   background-color: rgba(255, 255, 255, 0.05) !important;
   color: #ffffff !important;
 }
 
-/* Основной текст города/места (жирный) */
+
 .pac-item-query {
   color: #ffffff !important;
   font-size: 14px !important;
@@ -357,19 +436,19 @@
   padding-right: 5px !important;
 }
 
-/* Вторичный текст (страна, область) */
+
 .pac-matched {
-  /* Текст, который совпал с вводом */
+
   color: #ffffff !important;
 }
 
-/* Иконка локации слева */
+
 .pac-icon {
-  filter: invert(1) brightness(0.7) !important; /* Делаем иконку светлой */
+  filter: invert(1) brightness(0.7) !important;
   margin-right: 10px !important;
 }
 
-/* Логотип "Powered by Google" (делаем его серым, чтобы не кричал) */
+
 .hdpi .pac-logo:after {
   filter: grayscale(1) invert(1) opacity(0.3) !important;
 }
