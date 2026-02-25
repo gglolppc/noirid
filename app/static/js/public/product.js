@@ -32,11 +32,32 @@
     modelWrap: null,
   };
 
+    let scrollY = 0;
+
+    function lockBodyScroll() {
+      scrollY = window.scrollY;
+
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+    }
+
+    function unlockBodyScroll() {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+
+      window.scrollTo(0, scrollY);
+    }
+
   function openMobileSheet(options, onSelect) {
       const sheet = document.getElementById('mobileSelectSheet');
       const content = document.getElementById('sheetContent');
       const list = document.getElementById('sheetOptions');
       setStickyVisible(false);
+      lockBodyScroll();
 
 
       list.innerHTML = options.map(opt => `
@@ -66,6 +87,7 @@
       sheet.classList.add('opacity-0', 'pointer-events-none');
       content.classList.add('translate-y-full');
       setStickyVisible(true);
+      unlockBodyScroll();
     }
 
     function updatePriceUI() {
