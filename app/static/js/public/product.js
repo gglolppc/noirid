@@ -233,7 +233,7 @@
   // ===== SELECT UI =====
   function closeAllSelects() {
     document.querySelectorAll('.select-options').forEach(el => {
-      el.classList.add('opacity-0', 'invisible', 'translate-y-2');
+      el.classList.add('opacity-0', 'invisible');
       const arrow = el.parentElement?.querySelector?.('.arrow');
       if (arrow) arrow.style.transform = 'rotate(0deg)';
     });
@@ -269,17 +269,18 @@
       const isVisible = !optionsList.classList.contains('opacity-0');
       closeAllSelects();
       if (!isVisible) {
-        optionsList.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+        optionsList.classList.remove('opacity-0', 'invisible');
         if (arrow) arrow.style.transform = 'rotate(180deg)';
       }
     };
 
 
     optionsList.innerHTML = options.map(opt => `
-      <div class="px-6 py-4 text-zinc-300 hover:bg-white/5 hover:text-white cursor-pointer text-[12px] uppercase tracking-widest transition-all" data-value="${String(opt).replace(/"/g, '&quot;')}">
-        ${opt}
-      </div>
-    `).join('');
+    <div class="select-item px-6 py-4 text-zinc-400 hover:text-white cursor-pointer text-[12px] uppercase tracking-widest transition-all"
+         data-value="${String(opt).replace(/"/g, '&quot;')}">
+      ${opt}
+    </div>
+  `).join('');
 
     optionsList.querySelectorAll('[data-value]').forEach(item => {
       item.onclick = (e) => {

@@ -506,5 +506,50 @@ input::-webkit-inner-spin-button {
   input::placeholder { transition: color 0.3s; }
   input:focus::placeholder { color: transparent; }
 
+@media (min-width: 768px) {
+  /* Переключаем на открытие вверх */
+  .custom-select .select-options {
+    top: auto !important;
+    bottom: 100% !important; /* Позиционируем над кнопкой */
+    margin-top: 0 !important;
+    margin-bottom: 12px !important; /* Отступ от кнопки снизу */
+
+    /* Меняем направление анимации: теперь он будет прятаться чуть ниже своего положения */
+    transform: translateY(10px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  /* Состояние, когда список открыт */
+  .custom-select .select-options:not(.invisible) {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+  }
+
+  /* Маска затухания (теперь актуальнее, так как смотрим снизу вверх) */
+  .select-options {
+    max-height: 380px !important;
+    overflow-y: auto;
+    -webkit-mask-image: linear-gradient(to bottom,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent
+    );
+    mask-image: linear-gradient(to bottom,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent
+    );
+  }
+
+  /* Тонкий скролл */
+  .select-options::-webkit-scrollbar { width: 3px; }
+  .select-options::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+}
+
 </style>
 {% endblock %}
