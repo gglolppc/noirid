@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.templates import templates
 from app.db.session import get_async_session
 from app.repos.support import SupportRepo
-
+from fastapi.responses import JSONResponse
+from fastapi import Header
 router = APIRouter(tags=["pages"])
 
 
@@ -45,6 +46,7 @@ async def support_submit(
     email: str = Form(...),
     order_id: str | None = Form(default=None),
     question: str = Form(...),
+    x_requested_with: str | None = Header(default=None),
 ):
     await SupportRepo.create(
         session,
@@ -54,6 +56,12 @@ async def support_submit(
         question=question.strip(),
     )
     await session.commit()
+
+    # fetch путь
+    if x_requested_with == "fetch":
+        return JSONResponse({"success": True})
+
+    # обычный путь
     return templates.TemplateResponse("pages/support.html", {"request": request, "success": True})
 
 

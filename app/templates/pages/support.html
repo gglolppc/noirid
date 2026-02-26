@@ -39,7 +39,7 @@
               <div>
                 <h3 class="text-lg md:text-xl text-white font-medium mb-3">International delivery times?</h3>
                 <p class="text-base md:text-lg text-zinc-300 leading-relaxed font-light">
-                  Typically 7–21 working days. See full details in our <a href="/delivery" class="text-zinc-100 underline underline-offset-4 hover:text-white transition">shipping flow</a>.
+                  Typically 5–17 working days. See full details in our <a href="/delivery" class="text-zinc-100 underline underline-offset-4 hover:text-white transition">shipping flow</a>.
                 </p>
               </div>
               <div>
@@ -57,7 +57,7 @@
               Direct Mail
             </h2>
             <p class="text-xl md:text-2xl text-white font-light tracking-tight mb-4">
-              studio@noirid.md
+              support@noirid.md
             </p>
             <p class="text-base md:text-lg text-zinc-400 leading-relaxed">
               Preferred for detailed inquiries, order changes, or custom requests.
@@ -67,7 +67,7 @@
 
         <!-- RIGHT: Form -->
         <div class="reveal reveal-delay-200">
-          <form method="post" class="space-y-12">
+          <form id="supportForm" method="post" action="/support" class="space-y-12">
             <h2 class="text-xs md:text-sm uppercase tracking-[0.5em] text-zinc-500 mb-8 flex items-center gap-4 font-medium">
               Submit Inquiry <span class="h-px flex-1 bg-white/5"></span>
             </h2>
@@ -91,7 +91,7 @@
                 <label class="block text-xs md:text-sm uppercase tracking-[0.4em] text-zinc-400 mb-3">Order ID (Optional)</label>
                 <input name="order_id" type="text"
                        class="w-full bg-transparent border-b border-white/20 py-4 text-base md:text-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition"
-                       placeholder="e.g. #00123">
+                       placeholder="e.g. NRD-826">
               </div>
 
               <div>
@@ -112,6 +112,48 @@
 
     </div>
   </section>
+<!-- LUX OVERLAY -->
+<div id="supportOverlay"
+     class="fixed inset-0 z-[9999] hidden items-center justify-center p-6">
 
+  <!-- backdrop -->
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-2xl"></div>
+
+  <!-- modal -->
+  <div class="relative w-full max-w-xl rounded-3xl border border-white/10 bg-white/[0.06] shadow-2xl">
+    <div class="p-10 md:p-12">
+      <div class="text-xs uppercase tracking-[0.55em] text-zinc-400 font-medium">
+        Message received
+      </div>
+
+      <h3 class="mt-6 text-2xl md:text-3xl font-light tracking-tight text-white">
+        We heard you.
+      </h3>
+
+      <p class="mt-4 text-base md:text-lg text-zinc-300 leading-relaxed font-light">
+        Your inquiry has been sent. Our team will respond within 24 hours — often faster.
+      </p>
+
+      <div class="mt-10 flex flex-col sm:flex-row gap-3">
+        <button type="button" id="supportOverlayClose"
+                class="w-full sm:w-auto rounded-full bg-white text-black px-8 py-4 text-xs md:text-sm uppercase tracking-[0.45em] font-bold hover:bg-zinc-200 active:scale-[0.98] transition">
+          Close
+        </button>
+
+        <a href="/check-order"
+           class="w-full sm:w-auto text-center rounded-full border border-white/15 bg-white/[0.03] px-8 py-4 text-xs md:text-sm uppercase tracking-[0.45em] font-medium text-zinc-200 hover:border-white/25 hover:text-white transition">
+          Track order
+        </a>
+      </div>
+    </div>
+
+    <div class="h-px w-full bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
+
+    <div class="px-10 md:px-12 py-6 text-xs text-zinc-500 tracking-wide">
+      Tip: include your Order ID for faster help.
+    </div>
+  </div>
 </div>
+</div>
+<script src="{{ url_for('static', path='js/public/support.js') }}"></script>
 {% endblock %}

@@ -30,6 +30,7 @@ from app.routers.api import mockups
 
 
 
+
 setup_logging(settings.env)
 
 app = FastAPI(title=settings.app_name)

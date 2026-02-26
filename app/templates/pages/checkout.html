@@ -134,15 +134,27 @@
 
                 <div class="pt-6 border-t border-white/10 space-y-4">
                   <div class="flex justify-between text-sm">
-                    <span class="text-zinc-500 font-light">Subtotal</span>
-                    <span class="text-white font-medium">{{ "%.2f"|format(subtotal) }} €</span>
-                  </div>
-                  <div class="flex justify-between items-end">
-                    <span class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-1">Total Amount</span>
-                    <span class="text-3xl font-bold text-white tracking-tight">
-                      {{ "%.2f"|format(total) }} <span class="text-sm font-normal text-zinc-400 uppercase ml-1">€</span>
-                    </span>
-                  </div>
+                      <span class="text-zinc-500 font-light">Subtotal</span>
+                      <span class="text-white font-medium">{{ "%.2f"|format(subtotal) }} €</span>
+                    </div>
+
+                    <div class="flex justify-between text-sm">
+                      <span class="text-zinc-500 font-light">Import VAT / Duties</span>
+                      <span class="text-green-500/80 font-medium">Included*</span>
+                    </div>
+
+                    <div class="flex justify-between items-end">
+                      <span class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-1">Total Amount</span>
+                      <span class="text-3xl font-bold text-white tracking-tight">
+                        {{ "%.2f"|format(total) }} <span class="text-sm font-normal text-zinc-400 uppercase ml-1">€</span>
+                      </span>
+                    </div>
+
+                    <div class="mt-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+                      <p class="text-[10px] text-zinc-500 leading-relaxed italic">
+                        *<span class="text-zinc-300">Zero-Tax Guarantee:</span> Noirid covers all EU import taxes. If you're charged by customs, we refund the full amount in 24h.
+                      </p>
+                    </div>
                 </div>
               </div>
 
