@@ -93,7 +93,7 @@ DESIGNS: dict[str, DesignTemplate] = {
             TextSlot(
                 key="date",
                 anchor="bottom_text",
-                dy=0.01,
+                dy=-0.01,
                 font="IBM.ttf",
                 font_px=150,
                 tracking=10,       # точки/разделители красиво выглядят с трекингом
