@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="NOIRID: Custom black-on-black phone cases. Personal identity in texture." />
   <title>{% block title %}NOIRID{% endblock %}</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TG47K1XLQ6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    // 1. Устанавливаем запрет по умолчанию
+    gtag('consent', 'default', {
+      'analytics_storage': 'denied',
+      'ad_storage': 'denied'
+    });
+
+    gtag('js', new Date());
+    gtag('config', 'G-TG47K1XLQ6');
+  </script>
 
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" as="style">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -191,6 +206,67 @@
       </div>
     </div>
   </footer>
+
+  <div id="cookie-bar" class="fixed bottom-0 left-0 w-full z-[10000] hidden border-t border-white/10 bg-[#050505]/90 backdrop-blur-xl">
+    <div class="mx-auto max-w-7xl px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-6">
+
+        <div class="flex items-center gap-4">
+            <div class="hidden md:block w-2 h-2 rounded-full bg-zinc-600"></div>
+            <p class="text-[11px] md:text-xs text-zinc-400 font-light tracking-wide uppercase leading-relaxed">
+                By continuing to explore NOIRID, you agree to our
+                <a href="/privacy" class="text-white underline underline-offset-4 hover:text-zinc-500 transition">Privacy Policy</a>.
+            </p>
+        </div>
+
+        <button id="accept-cookies" class="whitespace-nowrap bg-white text-black px-10 py-3 text-[10px] uppercase tracking-[0.4em] font-black hover:bg-zinc-200 active:scale-[0.95] transition-all">
+            Accept
+        </button>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const bar = document.getElementById('cookie-bar');
+        const btn = document.getElementById('accept-cookies');
+
+        // Функция для активации Google Analytics
+        function grantConsent() {
+            if (typeof gtag === 'function') {
+                gtag('consent', 'update', {
+                    'analytics_storage': 'granted',
+                    'ad_storage': 'granted'
+                });
+            }
+        }
+
+        if (!localStorage.getItem('cookies-accepted')) {
+            bar.classList.remove('hidden');
+            bar.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                bar.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                bar.style.transform = 'translateY(0)';
+            }, 500);
+        } else {
+            // Если уже принимали ранее — активируем сразу
+            grantConsent();
+        }
+
+        btn.addEventListener('click', function() {
+            localStorage.setItem('cookies-accepted', 'true');
+
+            // Активируем Google Analytics при клике
+            grantConsent();
+
+            bar.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                bar.classList.add('hidden');
+            }, 600);
+        });
+    });
+</script>
+
+
   <script src="{{ url_for('static', path='js/public/subscribe.js') }}"></script>
   {% endblock %}
 

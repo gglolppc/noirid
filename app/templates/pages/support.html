@@ -4,7 +4,6 @@
 {% block content %}
 <div class="relative bg-[#050505] overflow-x-hidden">
 
-  <!-- HERO -->
   <section class="min-h-screen flex items-center pt-32 pb-32 px-6 md:px-12">
     <div class="mx-auto max-w-6xl w-full">
       <div class="reveal">
@@ -22,9 +21,9 @@
       <div class="mt-16 h-px w-full bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
 
       <div class="reveal reveal-delay-100 mt-16 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-        <!-- LEFT: Quick Solutions + Email -->
+
         <div class="space-y-16">
-          <!-- Quick Solutions -->
+
           <section>
             <h2 class="text-xs md:text-sm uppercase tracking-[0.5em] text-zinc-500 mb-8 flex items-center gap-4 font-medium">
               Quick Solutions <span class="h-px flex-1 bg-white/5"></span>
@@ -33,39 +32,53 @@
               <div>
                 <h3 class="text-lg md:text-xl text-white font-medium mb-3">How do I track my order?</h3>
                 <p class="text-base md:text-lg text-zinc-300 leading-relaxed font-light">
-                  Use your unique order ID in our <a href="/check-order" class="text-zinc-100 underline underline-offset-4 hover:text-white transition">tracking tool</a>. The ID was emailed upon dispatch.
-                </p>
-              </div>
-              <div>
-                <h3 class="text-lg md:text-xl text-white font-medium mb-3">International delivery times?</h3>
-                <p class="text-base md:text-lg text-zinc-300 leading-relaxed font-light">
-                  Typically 5–17 working days. See full details in our <a href="/delivery" class="text-zinc-100 underline underline-offset-4 hover:text-white transition">shipping flow</a>.
+                  Use your unique order ID in our <a href="/check-order" class="text-zinc-100 underline underline-offset-4 hover:text-white transition">tracking tool</a>.
                 </p>
               </div>
               <div>
                 <h3 class="text-lg md:text-xl text-white font-medium mb-3">Can I change personalization?</h3>
                 <p class="text-base md:text-lg text-zinc-300 leading-relaxed font-light">
-                  Modifications are possible only within 12 hours of order confirmation. Contact us immediately to review options.
+                  Modifications are possible only within 12 hours. Contact us immediately to review options.
                 </p>
               </div>
             </div>
           </section>
 
-          <!-- Direct Mail -->
-          <section class="rounded-3xl border border-white/10 bg-white/[0.03] p-10 md:p-12">
-            <h2 class="text-xs md:text-sm uppercase tracking-[0.5em] text-zinc-500 mb-6 font-medium">
-              Direct Mail
-            </h2>
-            <p class="text-xl md:text-2xl text-white font-light tracking-tight mb-4">
-              support@noirid.md
-            </p>
-            <p class="text-base md:text-lg text-zinc-400 leading-relaxed">
-              Preferred for detailed inquiries, order changes, or custom requests.
-            </p>
+          <section class="rounded-3xl border border-white/10 bg-white/[0.03] p-10 md:p-12 space-y-10">
+
+            <div>
+              <h2 class="text-xs uppercase tracking-[0.5em] text-zinc-500 mb-4 font-medium">
+                Studio Address
+              </h2>
+              <p class="text-lg md:text-xl text-white font-light tracking-tight leading-snug">
+                Kiev street 14/1, Chisinau, Republic Of Moldova
+              </p>
+            </div>
+
+            <div>
+              <h2 class="text-xs uppercase tracking-[0.5em] text-zinc-500 mb-4 font-medium">
+                Phone Support
+              </h2>
+              <p class="text-lg md:text-xl text-white font-light tracking-tight">
+                +373 6810 9777
+              </p>
+            </div>
+
+            <div>
+              <h2 class="text-xs uppercase tracking-[0.5em] text-zinc-500 mb-4 font-medium">
+                Direct Mail
+              </h2>
+              <p class="text-lg md:text-xl text-white font-light tracking-tight mb-2">
+                support@noirid.com
+              </p>
+              <p class="text-xs text-zinc-500 uppercase tracking-widest">
+                Mon – Fri / 09:00 – 18:00 (GMT+2)
+              </p>
+            </div>
+
           </section>
         </div>
 
-        <!-- RIGHT: Form -->
         <div class="reveal reveal-delay-200">
           <form id="supportForm" method="post" action="/support" class="space-y-12">
             <h2 class="text-xs md:text-sm uppercase tracking-[0.5em] text-zinc-500 mb-8 flex items-center gap-4 font-medium">
@@ -88,13 +101,6 @@
               </div>
 
               <div>
-                <label class="block text-xs md:text-sm uppercase tracking-[0.4em] text-zinc-400 mb-3">Order ID (Optional)</label>
-                <input name="order_id" type="text"
-                       class="w-full bg-transparent border-b border-white/20 py-4 text-base md:text-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition"
-                       placeholder="e.g. NRD-826">
-              </div>
-
-              <div>
                 <label class="block text-xs md:text-sm uppercase tracking-[0.4em] text-zinc-400 mb-3">Inquiry / Question</label>
                 <textarea name="question" rows="5" required
                           class="w-full bg-transparent border-b border-white/20 py-4 text-base md:text-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white resize-none transition"
@@ -109,51 +115,24 @@
           </form>
         </div>
       </div>
-
     </div>
   </section>
-<!-- LUX OVERLAY -->
-<div id="supportOverlay"
-     class="fixed inset-0 z-[9999] hidden items-center justify-center p-6">
 
-  <!-- backdrop -->
-  <div class="absolute inset-0 bg-black/70 backdrop-blur-2xl"></div>
-
-  <!-- modal -->
-  <div class="relative w-full max-w-xl rounded-3xl border border-white/10 bg-white/[0.06] shadow-2xl">
-    <div class="p-10 md:p-12">
-      <div class="text-xs uppercase tracking-[0.55em] text-zinc-400 font-medium">
-        Message received
-      </div>
-
-      <h3 class="mt-6 text-2xl md:text-3xl font-light tracking-tight text-white">
-        We heard you.
-      </h3>
-
-      <p class="mt-4 text-base md:text-lg text-zinc-300 leading-relaxed font-light">
-        Your inquiry has been sent. Our team will respond within 24 hours — often faster.
-      </p>
-
-      <div class="mt-10 flex flex-col sm:flex-row gap-3">
+  <div id="supportOverlay" class="fixed inset-0 z-[9999] hidden items-center justify-center p-6">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-2xl"></div>
+    <div class="relative w-full max-w-xl rounded-3xl border border-white/10 bg-white/[0.06] shadow-2xl">
+      <div class="p-10 md:p-12 text-center">
+        <div class="text-xs uppercase tracking-[0.55em] text-zinc-400 font-medium">Message received</div>
+        <h3 class="mt-6 text-2xl md:text-3xl font-light tracking-tight text-white">We heard you.</h3>
+        <p class="mt-4 text-base md:text-lg text-zinc-300 leading-relaxed font-light">Your inquiry has been sent. Our team will respond within 24 hours.</p>
         <button type="button" id="supportOverlayClose"
-                class="w-full sm:w-auto rounded-full bg-white text-black px-8 py-4 text-xs md:text-sm uppercase tracking-[0.45em] font-bold hover:bg-zinc-200 active:scale-[0.98] transition">
+                class="mt-10 w-full sm:w-auto rounded-full bg-white text-black px-12 py-4 text-xs md:text-sm uppercase tracking-[0.45em] font-bold hover:bg-zinc-200 transition">
           Close
         </button>
-
-        <a href="/check-order"
-           class="w-full sm:w-auto text-center rounded-full border border-white/15 bg-white/[0.03] px-8 py-4 text-xs md:text-sm uppercase tracking-[0.45em] font-medium text-zinc-200 hover:border-white/25 hover:text-white transition">
-          Track order
-        </a>
       </div>
     </div>
-
-    <div class="h-px w-full bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
-
-    <div class="px-10 md:px-12 py-6 text-xs text-zinc-500 tracking-wide">
-      Tip: include your Order ID for faster help.
-    </div>
   </div>
-</div>
+
 </div>
 <script src="{{ url_for('static', path='js/public/support.js') }}"></script>
 {% endblock %}
