@@ -178,16 +178,23 @@
         </div>
 
         <!-- Email capture -->
-        <form class="flex flex-col gap-3 max-w-xs mx-auto md:mx-0 md:ml-auto">
-          <input type="email" placeholder="Your email" class="bg-zinc-900 border border-zinc-700 rounded-full px-6 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 transition">
+        <form id="subscribe-form" class="flex flex-col gap-3 max-w-xs mx-auto md:mx-0 md:ml-auto">
+          <input name="email" type="email" required placeholder="Your email" class="bg-zinc-900 border border-zinc-700 rounded-full px-6 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 transition">
           <button type="submit" class="bg-white text-black px-8 py-3 rounded-full text-xs uppercase tracking-[0.4em] font-medium hover:bg-zinc-200 transition">
             Get Updates
           </button>
         </form>
+          <p id="subscribe-success"
+               class="hidden text-sm text-zinc-400 mt-2">
+               You're on the list.
+            </p>
       </div>
     </div>
   </footer>
+  <script src="{{ url_for('static', path='js/public/subscribe.js') }}"></script>
   {% endblock %}
+
+
 
   <script>
     // -----------------------------

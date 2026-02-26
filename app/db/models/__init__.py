@@ -4,6 +4,7 @@ from app.db.models.order import Order, OrderItem
 from app.db.models.payment import Payment
 from app.db.models.user import User
 from app.db.models.support import SupportQuestion
+from app.db.models.subscription import EmailSubscription
 
 __all__ = [
     "Product",
@@ -14,4 +15,5 @@ __all__ = [
     "Payment",
     "User",
     "SupportQuestion",
+    "EmailSubscription"
 ]
