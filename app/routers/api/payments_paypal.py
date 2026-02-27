@@ -28,8 +28,24 @@ async def get_paypal_token():
         return res.json()["access_token"]
 
 
+from pydantic import BaseModel
+from typing import Optional
+
+
+# Модель для приема данных из формы
+class PayPalCreateRequest(BaseModel):
+    country: Optional[str] = "RO"
+    city: Optional[str] = ""
+    line1: Optional[str] = ""
+    postal_code: Optional[str] = ""
+
+
 @router.post("/create")
-async def create_order(request: Request, session: AsyncSession = Depends(get_async_session)):
+async def create_order(
+        request: Request,
+        data: PayPalCreateRequest,  # Добавляем этот аргумент
+        session: AsyncSession = Depends(get_async_session)
+):
     try:
         order_id = request.session.get("order_id")
         if not order_id:
@@ -39,20 +55,18 @@ async def create_order(request: Request, session: AsyncSession = Depends(get_asy
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
 
-        # 1. Создаем запись о платеже
-        payment = Payment(
-            order_id=order.id,
-            provider="paypal",
-            status="created",
-            amount=order.total,
-            currency="EUR",
-        )
-        # Добавляем в сессию
-        session.add(payment)
-        # Делаем flush, чтобы получить ID платежа, если нужно, но пока просто идем дальше
+        # ВАЖНО: Обновляем адрес в заказе данными, которые только что пришли из формы
+        # Это гарантирует, что PayPal получит актуальную страну (RO, MD и т.д.)
+        country_code = data.country.upper() if data.country else "RO"
 
-        addr = order.shipping_address or {}
-        country_code = addr.get("country", "MD").upper()
+        # Обновляем объект в базе (чтобы в админке тоже было верно)
+        order.shipping_address = {
+            "country": country_code,
+            "city": data.city,
+            "line1": data.line1,
+            "postal_code": data.postal_code
+        }
+        session.add(order)
 
         token = await get_paypal_token()
 
@@ -63,22 +77,37 @@ async def create_order(request: Request, session: AsyncSession = Depends(get_asy
                     "reference_id": str(order.id),
                     "amount": {
                         "currency_code": "EUR",
-                        "value": f"{order.total:.2f}"
+                        "value": f"{order.total:.2f}",
                     },
                     "shipping": {
-                        "name": {"full_name": order.customer_name},
+                        "name": {"full_name": order.customer_name or "NOIRID Customer"},
                         "address": {
-                            "address_line_1": addr.get("line1", ""),
-                            "admin_area_2": addr.get("city", ""),
-                            "postal_code": addr.get("postal_code", ""),
-                            "country_code": country_code
-                        }
-                    }
+                            "address_line_1": data.line1 or "—",
+                            "admin_area_2": data.city or "—",
+                            "postal_code": (data.postal_code or "")[:20],
+                            "country_code": country_code,
+                        },
+                    },
                 }],
+                "payer": {
+                    "name": {
+                        "given_name": (order.customer_name or "Customer").split(" ")[0][:140],
+                        "surname": (order.customer_name or "NOIRID").split(" ")[-1][:140],
+                    },
+                    "email_address": order.customer_email,
+                    "address": {
+                        "address_line_1": data.line1 or "—",
+                        "admin_area_2": data.city or "—",
+                        "postal_code": (data.postal_code or "")[:20],
+                        "country_code": country_code,
+                    },
+                },
                 "application_context": {
-                    "shipping_preference": "SET_PROVIDED_ADDRESS",
+                    "brand_name": "NOIRID",
                     "user_action": "PAY_NOW",
-                    "brand_name": "NOIRID"
+                    "shipping_preference": "SET_PROVIDED_ADDRESS",
+                    "landing_page": "BILLING",  # часто уменьшает “PayPal-way”
+                    "locale": "en-GB",  # чтоб не тянул US по умолчанию
                 }
             }
 
@@ -94,9 +123,17 @@ async def create_order(request: Request, session: AsyncSession = Depends(get_asy
 
             paypal_data = res.json()
 
-            # 2. ВАЖНО: Привязываем ID заказа PayPal к нашему платежу и сохраняем
-            payment.provider_order_number = paypal_data.get("id")
-            await session.commit()  # ТЕПЕРЬ ОНО ТОЧНО В БАЗЕ
+            # Привязываем ID PayPal к платежу
+            payment = Payment(
+                order_id=order.id,
+                provider="paypal",
+                provider_order_number=paypal_data.get("id"),
+                status="created",
+                amount=order.total,
+                currency="EUR",
+            )
+            session.add(payment)
+            await session.commit()
 
             return paypal_data
 

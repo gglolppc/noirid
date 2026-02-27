@@ -1,6 +1,22 @@
 /**
- * NOIRID - Checkout Core Logic (Direct Flow)
+ * NOIRID - Checkout Core Logic (Direct Flow + Loader)
  */
+
+const loader = {
+  get el() { return document.getElementById("global-loader"); },
+  start: function() {
+    if (this.el) {
+      this.el.classList.remove("hidden");
+      document.body.style.overflow = "hidden"; // Блокируем скролл
+    }
+  },
+  stop: function() {
+    if (this.el) {
+      this.el.classList.add("hidden");
+      document.body.style.overflow = ""; // Возвращаем скролл
+    }
+  }
+};
 
 async function postJSON(url, body) {
   const res = await fetch(url, {
@@ -27,9 +43,6 @@ function clearError() {
   if (el) el.classList.add("hidden");
 }
 
-/**
- * Валидация формы стандартными средствами браузера
- */
 function isFormValid() {
   const form = document.getElementById("checkoutForm");
   if (!form.checkValidity()) {
@@ -39,9 +52,6 @@ function isFormValid() {
   return true;
 }
 
-/**
- * Инициализация кнопок PayPal
- */
 function renderPayPalButtons() {
   const container = document.getElementById("paypal-button-container");
   if (!container) return;
@@ -49,13 +59,12 @@ function renderPayPalButtons() {
   paypal.Buttons({
     style: {
       layout: 'vertical',
-      color: 'black', // Noirid Minimalist
+      color: 'black',
       shape: 'rect',
       label: 'pay',
       height: 50
     },
 
-    // 1. Проверка формы перед открытием окна PayPal
     onClick: (data, actions) => {
       clearError();
       if (isFormValid()) {
@@ -65,72 +74,86 @@ function renderPayPalButtons() {
       }
     },
 
-    // 2. Создание заказа в нашей БД + создание заказа в PayPal
     createOrder: async () => {
+      loader.start(); // ВКЛЮЧАЕМ ЛОАДЕР ПРИ КЛИКЕ
       try {
         const form = document.getElementById("checkoutForm");
         const fd = new FormData(form);
 
-        const payload = {
-          email: fd.get("email"),
-          name: fd.get("name"),
-          phone: fd.get("phone") || null,
-          shipping_address: {
-            country: fd.get("country"),
-            city: fd.get("city"),
-            line1: fd.get("line1"),
-            line2: fd.get("line2") || null,
-            postal_code: fd.get("postal_code") || null,
-            notes: fd.get("notes") || null,
-          }
+        const country = (
+          fd.get("country") ||
+          document.getElementById("country-select")?.value ||
+          ""
+        ).toString().trim().toUpperCase();
+
+        if (!country) throw new Error("Please select a shipping country.");
+
+        const city = (fd.get("city") || "").toString().trim();
+        const line1 = (fd.get("line1") || "").toString().trim();
+        const postal = (fd.get("postal_code") || "").toString().trim();
+
+        const payload = { country, city, line1, postal_code: postal };
+
+        const orderData = {
+          email: (fd.get("email") || "").toString().trim(),
+          name: (fd.get("name") || "").toString().trim(),
+          phone: ((fd.get("phone") || "").toString().trim() || null),
+          shipping_address: { country, city, line1, postal_code: postal || null }
         };
 
-        // Сохраняем данные клиента и создаем запись в БД
-        await postJSON("/api/checkout/create-order", payload);
+        await postJSON("/api/checkout/create-order", orderData);
 
-        // Запрашиваем создание заказа у PayPal (наш бэк создаст и Payment в базе)
-        const res = await fetch("/api/payments/paypal/create", { method: "POST" });
-        const paypalOrder = await res.json();
+        const res = await fetch("/api/payments/paypal/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-        if (!paypalOrder.id) throw new Error("PayPal initiation failed");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.detail || "PayPal Error");
 
-        return paypalOrder.id;
+        loader.stop(); // ВЫКЛЮЧАЕМ, КОГДА ОКНО ПЭЙПАЛА ГОТОВО К ОТКРЫТИЮ
+        return data.id;
+
       } catch (err) {
-        showError(err.message);
-        throw err; // Останавливает процесс PayPal
+        loader.stop(); // ВЫКЛЮЧАЕМ ПРИ ОШИБКЕ
+        showError(err.message || "Checkout error");
+        throw err;
       }
     },
 
-    // 3. Подтверждение оплаты (Capture)
     onApprove: async (data, actions) => {
+      loader.start(); // ВКЛЮЧАЕМ ЛОАДЕР СНОВА НА ВРЕМЯ CAPTURE
       try {
-        const res = await fetch(`/api/payments/paypal/capture/${data.orderID}`, {
+        const response = await fetch(`/api/payments/paypal/capture/${data.orderID}`, {
           method: "POST"
         });
-        const result = await res.json();
+        const result = await response.json();
 
         if (result.status === "success") {
-          // Редирект на страницу заказа по его номеру NRD-...
           window.location.href = `/order/${result.order_number}`;
         } else {
-          showError("Payment failed. Please check your balance or try another method.");
+          loader.stop();
+          showError("Payment confirmation failed.");
         }
       } catch (err) {
-        console.error("Capture error:", err);
-        showError("System error during payment confirmation.");
+        loader.stop();
+        showError("System error during payment.");
       }
+    },
+
+    onCancel: () => {
+      loader.stop(); // ВЫКЛЮЧАЕМ, ЕСЛИ ЗАКРЫЛИ ОКНО ОПЛАТЫ
     },
 
     onError: (err) => {
-      console.error("PayPal Error:", err);
-      showError("PayPal is currently unavailable. Please refresh or try later.");
+      loader.stop(); // ВЫКЛЮЧАЕМ ПРИ ГЛОБАЛЬНОЙ ОШИБКЕ
+      console.error("PayPal Global Error:", err);
+      showError("PayPal is temporarily unavailable.");
     }
   }).render('#paypal-button-container');
 }
 
-/**
- * Настройка селекта стран с поиском (Choices.js)
- */
 function initCountrySelect() {
   const countries = [
     { code: 'RO', name: 'Romania', group: 1 },
@@ -168,11 +191,10 @@ function initCountrySelect() {
     itemSelectText: '',
     shouldSort: false,
     placeholder: true,
-    placeholderValue: 'Select country',
+    placeholderValue: 'Select shipping country...',
   });
 }
 
-// Запуск при загрузке
 document.addEventListener('DOMContentLoaded', () => {
   initCountrySelect();
   renderPayPalButtons();

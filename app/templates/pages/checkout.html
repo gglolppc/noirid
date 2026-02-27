@@ -4,6 +4,25 @@
 {% block content %}
 <script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=EUR"></script>
 
+<div id="global-loader" class="fixed inset-0 z-[9999] hidden flex items-center justify-center bg-black/60 backdrop-blur-md transition-opacity duration-300">
+  <div class="flex flex-col items-center">
+    <div class="w-48 h-[2px] bg-zinc-900 overflow-hidden relative">
+      <div class="absolute inset-0 bg-white w-1/2 animate-[loading_1.5s_infinite_ease-in-out]"></div>
+    </div>
+    <div class="mt-6 text-[10px] uppercase tracking-[0.5em] text-white font-medium animate-pulse">
+      Processing Order
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes loading {
+  0% { transform: translateX(-150%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(250%); }
+}
+</style>
+
 <div class="relative bg-[#050505] selection:bg-white selection:text-black">
   <section class="min-h-screen pt-32 pb-24 px-6 md:px-12">
     <div class="mx-auto max-w-6xl w-full">
