@@ -1,0 +1,54 @@
+/* 1. Основное поле выбора */
+.choices__inner {
+    background-color: #09090b !important; /* Темный фон (zinc-950) */
+    border: 1px solid #27272a !important; /* Граница (zinc-800) */
+    border-radius: 0px !important;        /* Прямые углы */
+    color: #ffffff !important;            /* Белый текст */
+    font-size: 0.875rem !important;       /* Размер текста (text-sm) */
+    min-height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.2s ease;
+}
+
+/* 2. Состояние при клике (фокус) */
+.is-focused .choices__inner, .is-open .choices__inner {
+    border-color: #ffffff !important; /* Белая граница при активации */
+}
+
+/* 3. Выпадающее меню */
+.choices__list--dropdown {
+    background-color: #09090b !important;
+    border: 1px solid #27272a !important;
+    border-radius: 0px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    z-index: 50 !important;
+}
+
+/* 4. Пункты списка */
+.choices__list--dropdown .choices__item {
+    color: #a1a1aa !important; /* Серый текст (zinc-400) */
+    font-size: 0.875rem !important;
+    padding: 10px !important;
+}
+
+/* 5. Активный пункт (при наведении) */
+.choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background-color: #ffffff !important; /* Белый фон */
+    color: #000000 !important;            /* Черный текст */
+}
+
+/* 6. Поле поиска внутри списка */
+.choices__input {
+    background-color: #18181b !important; /* Чуть светлее фон (zinc-900) */
+    color: #ffffff !important;
+    font-size: 0.875rem !important;
+    border-bottom: 1px solid #27272a !important;
+    padding: 12px !important;
+    border-radius: 0px !important;
+}
+
+/* Убираем синюю обводку браузера */
+.choices:focus {
+    outline: none;
+}

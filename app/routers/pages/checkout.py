@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Request
@@ -44,5 +45,6 @@ async def checkout_page(request: Request, session: AsyncSession = Depends(get_as
             "subtotal": (order.subtotal if order else Decimal("0.00")),
             "total": (order.total if order else Decimal("0.00")),
             "currency": (order.currency if order else "EUR"),
+            "paypal_client_id": os.getenv("PAYPAL_CLIENT_ID"),
         },
     )

@@ -28,6 +28,7 @@ from app.routers.pages.info import router as info_page_router
 from app.routers.pages.admin import router as admin_router
 from app.routers.api import mockups
 from app.routers.api.marketing import router as marketing_router
+from app.routers.api.payments_paypal import router as paypal_router
 
 
 
@@ -65,6 +66,7 @@ app.include_router(info_page_router)
 app.include_router(admin_router)
 app.include_router(mockups.router)
 app.include_router(marketing_router)
+app.include_router(paypal_router)
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
 

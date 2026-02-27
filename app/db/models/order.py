@@ -110,6 +110,8 @@ class Order(Base):
     )
     payment_status: Mapped[str] = mapped_column(String(32), default="unpaid", index=True)
 
+    paypal_capture_id: Mapped[str | None] = mapped_column(String(64), default=None, index=True)
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"
