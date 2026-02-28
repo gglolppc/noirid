@@ -155,25 +155,56 @@ function renderPayPalButtons() {
 }
 
 function initCountrySelect() {
-  const countries = [
-    { code: 'RO', name: 'Romania', group: 1 },
-    { code: 'DE', name: 'Germany', group: 1 },
-    { code: 'GB', name: 'United Kingdom', group: 1 },
-    { code: 'MD', name: 'Moldova', group: 2 },
-    { code: 'FR', name: 'France', group: 2 },
-    { code: 'IT', name: 'Italy', group: 2 },
-    { code: 'ES', name: 'Spain', group: 2 },
-    { code: 'AT', name: 'Austria', group: 2 },
-    { code: 'BE', name: 'Belgium', group: 2 },
-    { code: 'NL', name: 'Netherlands', group: 2 },
-    { code: 'CH', name: 'Switzerland', group: 2 },
-    { code: 'US', name: 'United States', group: 3 },
-    { code: 'CA', name: 'Canada', group: 3 },
-    { code: 'AU', name: 'Australia', group: 3 },
-    { code: 'IL', name: 'Israel', group: 3 },
-  ];
+ const countries = [
+  // 🇪🇺 Core EU (Group 1 — основные рынки)
+  { code: 'RO', name: 'Romania', group: 1 },
+  { code: 'DE', name: 'Germany', group: 1 },
+  { code: 'FR', name: 'France', group: 1 },
+  { code: 'IT', name: 'Italy', group: 1 },
+  { code: 'ES', name: 'Spain', group: 1 },
+  { code: 'NL', name: 'Netherlands', group: 1 },
+  { code: 'BE', name: 'Belgium', group: 1 },
+  { code: 'AT', name: 'Austria', group: 1 },
+  { code: 'IE', name: 'Ireland', group: 1 },
+  { code: 'PT', name: 'Portugal', group: 1 },
+  { code: 'SE', name: 'Sweden', group: 1 },
+  { code: 'DK', name: 'Denmark', group: 1 },
+  { code: 'FI', name: 'Finland', group: 1 },
+  { code: 'PL', name: 'Poland', group: 1 },
+  { code: 'CZ', name: 'Czech Republic', group: 1 },
+  { code: 'HU', name: 'Hungary', group: 1 },
+
+  { code: 'GR', name: 'Greece', group: 1 },
+  { code: 'HR', name: 'Croatia', group: 1 },
+  { code: 'SK', name: 'Slovakia', group: 1 },
+  { code: 'SI', name: 'Slovenia', group: 1 },
+  { code: 'BG', name: 'Bulgaria', group: 1 },
+  { code: 'EE', name: 'Estonia', group: 1 },
+  { code: 'LV', name: 'Latvia', group: 1 },
+  { code: 'LT', name: 'Lithuania', group: 1 },
+  { code: 'LU', name: 'Luxembourg', group: 1 },
+
+  // 🇪🇺 Non-EU but Europe (Group 2)
+  { code: 'GB', name: 'United Kingdom', group: 2 },
+  { code: 'CH', name: 'Switzerland', group: 2 },
+  { code: 'NO', name: 'Norway', group: 2 },
+  { code: 'IS', name: 'Iceland', group: 2 },
+  { code: 'LI', name: 'Liechtenstein', group: 2 },
+  { code: 'RS', name: 'Serbia', group: 2 },
+  { code: 'UA', name: 'Ukraine', group: 2 },
+  { code: 'MD', name: 'Moldova', group: 2 },
+  { code: 'AL', name: 'Albania', group: 2 },
+  { code: 'MK', name: 'North Macedonia', group: 2 },
+  { code: 'ME', name: 'Montenegro', group: 2 },
+  { code: 'BA', name: 'Bosnia and Herzegovina', group: 2 },
+
+  // 🌍 Other (Group 3 — вне Европы, но адекватные рынки)
+  { code: 'CA', name: 'Canada', group: 3 },
+  { code: 'AU', name: 'Australia', group: 3 },
+];
 
   const selectEl = document.getElementById('country-select');
+  const autofillSelect = document.getElementById('country-autofill-select');
   if (!selectEl) return;
 
   const sorted = countries.sort((a, b) => {
@@ -181,18 +212,59 @@ function initCountrySelect() {
     return a.name.localeCompare(b.name);
   });
 
+  // === Заполняем ОБА селекта ===
   sorted.forEach(c => {
     const option = new Option(c.name, c.code);
     selectEl.add(option);
+
+    if (autofillSelect) {
+      autofillSelect.add(new Option(c.name, c.code));
+    }
   });
 
-  new Choices(selectEl, {
+  const codeSet = new Set(countries.map(c => c.code));
+
+  // Инициализируем Choices только основной селект
+  const choices = new Choices(selectEl, {
     searchEnabled: true,
     itemSelectText: '',
     shouldSort: false,
     placeholder: true,
     placeholderValue: 'Select shipping country...',
   });
+
+  // === НОВАЯ функция синхронизации (гораздо проще) ===
+  const applyAutofill = () => {
+    if (!autofillSelect) return;
+    const code = (autofillSelect.value || '').toString().trim().toUpperCase();
+
+    if (code && codeSet.has(code)) {
+      selectEl.value = code;
+      choices.setChoiceByValue(code);
+    }
+  };
+
+  // Слушаем события + поллинг (браузер иногда заполняет очень поздно)
+  if (autofillSelect) {
+    autofillSelect.addEventListener('change', applyAutofill);
+    autofillSelect.addEventListener('input', applyAutofill);
+
+    // Поллинг — ловим autofill, который срабатывает до/после загрузки
+    setTimeout(applyAutofill, 100);
+    setTimeout(applyAutofill, 300);
+    setTimeout(applyAutofill, 800);
+    setTimeout(applyAutofill, 1500);
+
+    // Дополнительно при возврате на вкладку и фокусе
+    window.addEventListener('focus', () => setTimeout(applyAutofill, 50));
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) setTimeout(applyAutofill, 50);
+    });
+  }
+
+  // Хак для очень позднего autofill (некоторые версии Chrome/Firefox)
+  const observer = new MutationObserver(applyAutofill);
+  if (autofillSelect) observer.observe(autofillSelect, { attributes: true, attributeFilter: ['value'] });
 }
 
 document.addEventListener('DOMContentLoaded', () => {

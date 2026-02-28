@@ -109,6 +109,7 @@
     }
 
   function hydrateDomRefs() {
+    els.showPreviewBtn = $('showPreviewBtn');
     els.mobileStickyBar = $('mobileStickyBar');
     els.mobilePriceValue = $('mobilePriceValue');
     els.addToCartBtnMobile = $('addToCartBtnMobile');
@@ -158,8 +159,11 @@
     }
 
   function setHint(text) {
-    if (els.helperHint) els.helperHint.textContent = text;
-  }
+      if (els.helperHint) els.helperHint.textContent = text;
+
+      const mobileHint = document.getElementById('helperHintMobile');
+      if (mobileHint) mobileHint.textContent = text;
+    }
 
   function setPreviewLoading(isLoading) {
     if (!els.previewSpinner || !els.previewBadge) return;
@@ -324,8 +328,7 @@
     if (!hash) return true;
 
     const values = Object.values(newP).map(v => String(v || '').trim());
-    const totalLen = values.join('').length;
-    if (totalLen < 2) return true;
+
 
     return false;
   }
@@ -436,22 +439,25 @@
     previewDebounceTimer = setTimeout(() => void doPreview({ force: false }), 900);
   }
 
-  async function doPreview({ force = false } = {}) {
-    if (previewState.isRunning) return;
-    if (!selectedVariant) return;
+     async function doPreview({ force = false } = {}) {
+      if (previewState.isRunning) return;
+      if (!selectedVariant) return;
 
-    const p = collectPersonalization({ requireAll: false });
-    if (!p.ok) return;
+      const p = collectPersonalization({ requireAll: false });
+      if (!p.ok) return;
 
-    if (!force && shouldSkipPreview(p.personalization)) return;
+      if (!force && shouldSkipPreview(p.personalization)) return;
 
-    previewState.isRunning = true;
-    previewState.lastPersonalizationHash = getPersonalizationHash(p.personalization);
+      // ✅ только тут — реально начинаем генерацию
+      els.showPreviewBtn?.classList.add('hidden');
 
-    setPreviewLoading(true);
-    setHint('Generating preview…');
+      previewState.isRunning = true;
+      previewState.lastPersonalizationHash = getPersonalizationHash(p.personalization);
 
-    try {
+      setPreviewLoading(true);
+      setHint('Generating preview…');
+
+      try {
       previewState.abort = new AbortController();
 
       const res = await fetch('/api/mockups/preview', {
@@ -473,7 +479,12 @@
       await setMainImageAnimated(url, { isPreview: true });
       els.previewBadge?.classList.remove('hidden');
       setHint('Preview ready · customize further or add to bag');
-      scrollToPreview();
+
+
+      if (els.showPreviewBtn) {
+         els.showPreviewBtn.classList.remove('hidden');
+      }
+
 
     } catch (e) {
       if (e.name !== 'AbortError') {
@@ -538,6 +549,7 @@ function scrollToPreview() {
       selectedModel = null;
       selectedVariant = null;
       previewState.previewUrl = null;
+      els.showPreviewBtn?.classList.add('hidden');
 
       setHint('Select your model to generate preview');
 
@@ -554,6 +566,7 @@ function scrollToPreview() {
       const uniqueSortedModels = [...new Set(models)].sort(modelCompare);
 
       initCustomSelect('modelCustomSelect', uniqueSortedModels, (model) => {
+        els.showPreviewBtn?.classList.add('hidden');
         selectedModel = model;
         selectedVariant = variants.find(v => v.brand === selectedBrand && v.model === selectedModel);
 
@@ -826,6 +839,13 @@ function scrollToPreview() {
     initGlobalListeners();
 
     setHint('Select device model to generate preview');
+
+
+    if (els.showPreviewBtn) {
+      els.showPreviewBtn.onclick = () => {
+        scrollToPreview();
+      };
+    }
 
     initGallery();
     initBrandModel();

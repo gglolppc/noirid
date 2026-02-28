@@ -117,10 +117,10 @@
 
     <div class="flex items-center gap-6">
       <a href="/cart" id="cart-link" class="relative flex items-center gap-2 text-zinc-300 hover:text-white transition group">
-        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
         </svg>
-        <span id="cart-text" class="hidden sm:inline text-[10px] uppercase tracking-[0.3em] group-hover:text-white">Cart</span>
+        <span id="cart-text" class="sm:inline text-[10px] uppercase tracking-[0.3em] group-hover:text-white"></span>
       </a>
 
       <button id="menu-toggle" class="md:hidden relative z-50 w-8 h-8 flex flex-col items-end justify-center gap-1.5 focus:outline-none group" aria-label="Toggle Menu">
@@ -298,7 +298,7 @@
 
     function updateCartDisplay(summary) {
       if (!summary || !summary.count || summary.count <= 0) {
-        cartText.textContent = "Cart";
+        cartText.textContent = "";
 
         return;
       }

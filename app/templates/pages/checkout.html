@@ -1,173 +1,309 @@
-{% extends "base.html" %}
-{% block title %}Checkout · NOIRID{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Checkout · NOIRID{% endblock %} {%
+block content %}
 <script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=EUR"></script>
 
-<div id="global-loader" class="fixed inset-0 z-[9999] hidden flex items-center justify-center bg-black/60 backdrop-blur-md transition-opacity duration-300">
+<div
+  id="global-loader"
+  class="fixed inset-0 z-[9999] hidden flex items-center justify-center bg-black/60 backdrop-blur-md transition-opacity duration-300"
+>
   <div class="flex flex-col items-center">
     <div class="w-48 h-[2px] bg-zinc-900 overflow-hidden relative">
-      <div class="absolute inset-0 bg-white w-1/2 animate-[loading_1.5s_infinite_ease-in-out]"></div>
+      <div
+        class="absolute inset-0 bg-white w-1/2 animate-[loading_1.5s_infinite_ease-in-out]"
+      ></div>
     </div>
-    <div class="mt-6 text-[10px] uppercase tracking-[0.5em] text-white font-medium animate-pulse">
+    <div
+      class="mt-6 text-[10px] uppercase tracking-[0.5em] text-white font-medium animate-pulse"
+    >
       Processing Order
     </div>
   </div>
 </div>
 
 <style>
-@keyframes loading {
-  0% { transform: translateX(-150%); }
-  50% { transform: translateX(100%); }
-  100% { transform: translateX(250%); }
-}
+  @keyframes loading {
+    0% {
+      transform: translateX(-150%);
+    }
+    50% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(250%);
+    }
+  }
 </style>
 
 <div class="relative bg-[#050505] selection:bg-white selection:text-black">
   <section class="min-h-screen pt-32 pb-24 px-6 md:px-12">
     <div class="mx-auto max-w-6xl w-full">
-
-      <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+      <div
+        class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-8"
+      >
         <div>
-          <div class="text-[10px] uppercase tracking-[0.5em] text-zinc-500 font-medium">Finalize / Order</div>
-          <h1 class="mt-6 text-6xl md:text-8xl font-bold uppercase tracking-[-0.05em] text-white leading-[0.85]">
+          <div
+            class="text-[10px] uppercase tracking-[0.5em] text-zinc-500 font-medium"
+          >
+            Finalize / Order
+          </div>
+          <h1
+            class="mt-6 text-6xl md:text-8xl font-bold uppercase tracking-[-0.05em] text-white leading-[0.85]"
+          >
             Checkout
           </h1>
-          <p class="mt-6 text-sm text-zinc-400 font-light">Direct fulfillment. No account required.</p>
+          <p class="mt-6 text-sm text-zinc-400 font-light">
+            Direct fulfillment. No account required.
+          </p>
         </div>
-        <a href="/cart" class="group text-[10px] uppercase tracking-[0.3em] text-zinc-500 hover:text-white transition flex items-center gap-2">
-          <span class="inline-block transition-transform group-hover:-translate-x-1">←</span> Review bag
+        <a
+          href="/cart"
+          class="group text-[10px] uppercase tracking-[0.3em] text-zinc-500 hover:text-white transition flex items-center gap-2"
+        >
+          <span
+            class="inline-block transition-transform group-hover:-translate-x-1"
+            >←</span
+          >
+          Review bag
         </a>
       </div>
 
-      <div class="mt-12 h-px w-full bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
+      <div
+        class="mt-12 h-px w-full bg-gradient-to-r from-white/20 via-white/5 to-transparent"
+      ></div>
 
       {% if not order or not order.items %}
-        <div class="reveal reveal-delay-1 mt-16 py-24 rounded-[40px] border border-dashed border-white/10 bg-white/[0.02] text-center">
-          <h3 class="text-2xl font-light text-white mb-8">Nothing to finalize.</h3>
-          <a href="/catalog" class="inline-block border border-white/20 px-10 py-4 text-[10px] uppercase tracking-[0.3em] text-white hover:bg-white hover:text-black transition-all">
-            Return to Catalog
-          </a>
-        </div>
+      <div
+        class="reveal reveal-delay-1 mt-16 py-24 rounded-[40px] border border-dashed border-white/10 bg-white/[0.02] text-center"
+      >
+        <h3 class="text-2xl font-light text-white mb-8">
+          Nothing to finalize.
+        </h3>
+        <a
+          href="/catalog"
+          class="inline-block border border-white/20 px-10 py-4 text-[10px] uppercase tracking-[0.3em] text-white hover:bg-white hover:text-black transition-all"
+        >
+          Return to Catalog
+        </a>
+      </div>
       {% else %}
-        <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-
-          <div class="mt-12 lg:mt-20">
-  <form id="checkoutForm" class="space-y-8 max-w-2xl">
-
-    <div class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="group">
-          <label class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2">Full Name</label>
-          <input type="text" name="name" required placeholder="JOHN DOE"
-            class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-l py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold">
-        </div>
-        <div class="group">
-          <label class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2">Email Address</label>
-          <input type="email" name="email" required placeholder="noirid@mail.com"
-            class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-l py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold">
-        </div>
-          <div class="group">
-          <label class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2">Phone Number</label>
-          <input type="tel" name="phone" placeholder="+123 999 999 9"
-            class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-l py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-900 uppercase font-bold">
-        </div>
-      </div>
-    </div>
-
-    <div class="pt-8 space-y-6 border-t border-zinc-900">
-      <div class="group">
-        <label class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2">Shipping Country</label>
-        <select id="country-select" name="country" required></select>
-      </div>
-
-      <div class="group">
-        <label class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2">Street & House Number</label>
-        <input type="text" name="line1" required placeholder="street "
-          class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-2xl py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold">
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
-        <div class="col-span-1 md:col-span-2 group">
-          <label class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2">City</label>
-          <input type="text" name="city" required placeholder="City"
-            class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-2xl py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold">
-        </div>
-        <div class="group">
-          <label class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2">Postal Code</label>
-          <input type="text" name="postal_code" placeholder="MD-2312"
-            class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-2xl py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold">
-        </div>
-      </div>
-    </div>
-
-    <div id="err" class="hidden p-4 bg-red-900/20 border border-red-900 text-red-500 text-xs uppercase tracking-widest"></div>
-
-    <div class="pt-10">
-      <div class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-6 text-center">Express Checkout</div>
-      <div id="paypal-button-container" class="min-h-[50px]"></div>
-    </div>
-  </form>
-</div>
-
-          <div class="relative">
-            <div class="sticky top-32 lg:pl-12">
-              <div class="rounded-[32px] border border-white/10 bg-white/[0.03] p-8 space-y-8">
-                <h2 class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 pb-4 border-b border-white/5">Bag Contents</h2>
-
-                <div class="space-y-6 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-                  {% for it in order.items %}
-                    <div class="flex justify-between gap-4">
-                      <div class="min-w-0">
-                        <div class="text-sm font-medium text-white truncate">{{ it.title_snapshot }}</div>
-                        <div class="text-[9px] uppercase tracking-widest text-zinc-600 mt-1 italic">Quantity: {{ it.qty }}</div>
-                      </div>
-                      <div class="text-sm text-white/80 italic shrink-0">
-                        {{ "%.2f"|format(it.unit_price) }} <span class="text-[10px] text-zinc-600 uppercase">€</span>
-                      </div>
-                    </div>
-                  {% endfor %}
+      <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+        <div class="mt-12 lg:mt-20">
+          <form id="checkoutForm" class="space-y-8 max-w-2xl">
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="group">
+                  <label
+                    class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2"
+                    >Full Name</label
+                  >
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="JOHN DOE"
+                    class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-l py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold"
+                  />
                 </div>
-
-                <div class="pt-6 border-t border-white/10 space-y-4">
-                    <div class="flex justify-between text-sm">
-                      <span class="text-zinc-500 font-light">Subtotal</span>
-                      <span class="text-white font-medium">{{ "%.2f"|format(subtotal) }} €</span>
-                    </div>
-
-                    <div class="flex justify-between text-sm">
-                      <span class="text-zinc-500 font-light">Import VAT / Duties</span>
-                      <span class="text-green-500/80 font-medium">Included*</span>
-                    </div>
-
-                    <div class="flex justify-between items-end">
-                      <span class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-1">Total Amount</span>
-                      <span class="text-3xl font-bold text-white tracking-tight">
-                        {{ "%.2f"|format(total) }} <span class="text-sm font-normal text-zinc-400 uppercase ml-1">€</span>
-                      </span>
-                    </div>
-
-                    <div class="mt-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                      <p class="text-[10px] text-zinc-500 leading-relaxed italic">
-                        *<span class="text-zinc-300">Zero-Tax Guarantee:</span> Noirid covers all EU import taxes. If you're charged by customs, we refund the full amount in 24h.
-                      </p>
-                    </div>
+                <div class="group">
+                  <label
+                    class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2"
+                    >Email Address</label
+                  >
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="noirid@mail.com"
+                    class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-l py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold"
+                  />
                 </div>
-              </div>
-
-              <div class="mt-8 px-4 flex items-center gap-4 text-zinc-600">
-                <div class="w-1.5 h-1.5 rounded-full bg-green-900 animate-pulse"></div>
-                <span class="text-[9px] uppercase tracking-[0.2em] leading-relaxed">
-                  Secured transaction handled by PayPal / NOIRID
-                </span>
+                <div class="group">
+                  <label
+                    class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2"
+                    >Phone Number</label
+                  >
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="+123 999 999 9"
+                    autocomplete="tel"
+                    class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-l py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-900 uppercase font-bold"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
+            <div class="pt-8 space-y-6 border-t border-zinc-900">
+              <div class="group relative">
+  <label class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2">Shipping Country</label>
+
+  <select
+    id="country-autofill-select"
+    name="country_autofill"
+    autocomplete="country"
+    class="absolute inset-0 w-full h-full opacity-[0.01] z-0 pointer-events-none"
+    tabindex="-1"
+  >
+    <option value="" disabled selected>Select country</option>
+  </select>
+
+  <select
+    id="country-select"
+    name="country"
+    required
+    class="relative z-10"
+  ></select>
+</div>
+
+              <div class="group">
+                <label
+                  class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2"
+                  >Street & House Number</label
+                >
+                <input
+                  type="text"
+                  name="line1"
+                  required
+                  placeholder="street "
+                  class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-2xl py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                <div class="col-span-1 md:col-span-2 group">
+                  <label
+                    class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2"
+                    >City</label
+                  >
+                  <input
+                    type="text"
+                    name="city"
+                    required
+                    placeholder="City"
+                    class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-2xl py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold"
+                  />
+                </div>
+                <div class="group">
+                  <label
+                    class="block text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2"
+                    >Postal Code</label
+                  >
+                  <input
+                    type="text"
+                    name="postal_code"
+                    placeholder="MD-2312"
+                    class="w-full bg-transparent border-b-2 border-zinc-800 text-white text-2xl py-3 focus:border-white focus:outline-none transition-colors placeholder:text-zinc-800 uppercase font-bold"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div
+              id="err"
+              class="hidden p-4 bg-red-900/20 border border-red-900 text-red-500 text-xs uppercase tracking-widest"
+            ></div>
+
+            <div class="pt-10">
+              <div
+                class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-6 text-center"
+              >
+                Express Checkout
+              </div>
+              <div id="paypal-button-container" class="min-h-[50px]"></div>
+            </div>
+          </form>
         </div>
-        <script src="/static/js/public/checkout.js"></script>
-      {% endif %}
 
+        <div class="relative">
+          <div class="sticky top-32 lg:pl-12">
+            <div
+              class="rounded-[32px] border border-white/10 bg-white/[0.03] p-8 space-y-8"
+            >
+              <h2
+                class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 pb-4 border-b border-white/5"
+              >
+                Bag Contents
+              </h2>
+
+              <div
+                class="space-y-6 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar"
+              >
+                {% for it in order.items %}
+                <div class="flex justify-between gap-4">
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium text-white truncate">
+                      {{ it.title_snapshot }}
+                    </div>
+                    <div
+                      class="text-[9px] uppercase tracking-widest text-zinc-600 mt-1 italic"
+                    >
+                      Quantity: {{ it.qty }}
+                    </div>
+                  </div>
+                  <div class="text-sm text-white/80 italic shrink-0">
+                    {{ "%.2f"|format(it.unit_price) }}
+                    <span class="text-[10px] text-zinc-600 uppercase">€</span>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+
+              <div class="pt-6 border-t border-white/10 space-y-4">
+                <div class="flex justify-between text-sm">
+                  <span class="text-zinc-500 font-light">Subtotal</span>
+                  <span class="text-white font-medium"
+                    >{{ "%.2f"|format(subtotal) }} €</span
+                  >
+                </div>
+
+                <div class="flex justify-between text-sm">
+                  <span class="text-zinc-500 font-light"
+                    >Import VAT / Duties</span
+                  >
+                  <span class="text-green-500/80 font-medium">Included*</span>
+                </div>
+
+                <div class="flex justify-between items-end">
+                  <span
+                    class="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-1"
+                    >Total Amount</span
+                  >
+                  <span class="text-3xl font-bold text-white tracking-tight">
+                    {{ "%.2f"|format(total) }}
+                    <span
+                      class="text-sm font-normal text-zinc-400 uppercase ml-1"
+                      >€</span
+                    >
+                  </span>
+                </div>
+
+                <div
+                  class="mt-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5"
+                >
+                  <p class="text-[10px] text-zinc-500 leading-relaxed italic">
+                    *<span class="text-zinc-300">Zero-Tax Guarantee:</span>
+                    Noirid covers all EU import taxes. If you're charged by
+                    customs, we refund the full amount in 24h.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 px-4 flex items-center gap-4 text-zinc-600">
+              <div
+                class="w-1.5 h-1.5 rounded-full bg-green-900 animate-pulse"
+              ></div>
+              <span
+                class="text-[9px] uppercase tracking-[0.2em] leading-relaxed"
+              >
+                Secured transaction handled by PayPal / NOIRID
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script src="/static/js/public/checkout.js"></script>
+      {% endif %}
     </div>
   </section>
 </div>
