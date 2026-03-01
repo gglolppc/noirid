@@ -18,10 +18,11 @@ class OrdersRepo:
 
     @staticmethod
     async def list_recent(session: AsyncSession, limit: int = 10, status: str | None = None) -> list[Order]:
-        stmt = select(Order).order_by(Order.created_at.desc()).limit(limit)
+        stmt = select(Order).order_by(Order.created_at.desc()).limit(limit).where(Order.status != "archived")
         stmt = OrdersRepo._apply_status_filter(stmt, status)
         res = await session.execute(stmt)
         return list(res.scalars().all())
+
 
     @staticmethod
     async def list_paginated(
@@ -30,7 +31,7 @@ class OrdersRepo:
         limit: int,
         status: str | None = None,
     ) -> list[Order]:
-        stmt = select(Order).order_by(Order.created_at.desc()).offset(offset).limit(limit)
+        stmt = select(Order).order_by(Order.created_at.desc()).offset(offset).limit(limit).where(Order.status != "archived")
         stmt = OrdersRepo._apply_status_filter(stmt, status)
         res = await session.execute(stmt)
         return list(res.scalars().all())
