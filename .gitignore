@@ -9,3 +9,7 @@ __pycache__/
 app.log
 *.log
 app/static/out
+
+node_modules/
+
+out/

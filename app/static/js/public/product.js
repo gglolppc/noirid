@@ -108,6 +108,34 @@
       }
     }
 
+
+  function initMobileSheetDismiss() {
+      const sheet = document.getElementById('mobileSelectSheet');
+      const content = document.getElementById('sheetContent');
+      if (!sheet || !content) return;
+
+      // клики/тапы внутри контента — не считаем "вне"
+      content.addEventListener('click', (e) => e.stopPropagation());
+      content.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+
+      // клик/тап по затемнению — закрываем
+      sheet.addEventListener('click', (e) => {
+        // важно: закрываем только если нажали именно на фон, а не на детей
+        if (e.target === sheet) closeMobileSheet();
+      });
+
+      sheet.addEventListener('touchstart', (e) => {
+        if (e.target === sheet) closeMobileSheet();
+      }, { passive: true });
+
+      // (по желанию) ESC тоже закрывает
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !sheet.classList.contains('pointer-events-none')) {
+          closeMobileSheet();
+        }
+      });
+    }
+
   function hydrateDomRefs() {
     els.showPreviewBtn = $('showPreviewBtn');
     els.mobileStickyBar = $('mobileStickyBar');
@@ -864,6 +892,7 @@ function scrollToPreview() {
   function init() {
     hydrateDomRefs();
     initGlobalListeners();
+    initMobileSheetDismiss();
 
     setHint('Select device model to generate preview');
 
