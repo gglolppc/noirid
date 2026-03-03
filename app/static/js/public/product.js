@@ -204,35 +204,62 @@
 
   // ===== MODEL SORT (your logic) =====
   function normalizeModelName(s) {
-    return String(s || '').trim().toLowerCase();
+    return String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function parseModel(name) {
+  const t = normalizeModelName(name);
+
+  // --- iPhone ---
+  if (/\biphone\b/.test(t)) {
+    // ловим "iphone 17", "iphone17", "iphone 17 pro max"
+    const m = t.match(/\biphone\s*(\d{1,2})\b/);
+    const num = m ? Number(m[1]) : -1;
+
+    // tier: pro max > pro > plus > base
+    let tier = 1; // base
+    if (/\bpro\s*max\b/.test(t)) tier = 4;
+    else if (/\bpro\b/.test(t)) tier = 3;
+    else if (/\bplus\b/.test(t)) tier = 2;
+
+    return { brand: "iphone", num, tier, norm: t };
   }
 
-  function parseModel(s) {
-    const t = normalizeModelName(s);
+  // --- Samsung S-series ---
+  // ловим "s25", "s 25", "galaxy s25 ultra"
+  const ms = t.match(/\bs\s*(\d{1,2})\b/);
+  if (ms) {
+    const num = Number(ms[1]);
 
-    const numMatch = t.match(/\b(\d{1,2})\b/);
-    const num = numMatch ? Number(numMatch[1]) : -1;
+    // tier: ultra > plus > base
+    let tier = 1; // base
+    if (/\bultra\b/.test(t)) tier = 3;
+    else if (/\bplus\b/.test(t)) tier = 2;
 
-    let tier = 0;
-    if (/\bultra\b/.test(t)) tier = 50;
-    else if (/\bpro\s*max\b/.test(t)) tier = 45;
-    else if (/\bpro\b/.test(t)) tier = 40;
-    else if (/\bplus\b/.test(t)) tier = 30;
-    else if (/\bedge\b/.test(t)) tier = 25;
-    else if (/\bair\b/.test(t)) tier = 20;
-    else tier = 10;
-
-    return { num, tier };
+    return { brand: "samsung", num, tier, norm: t };
   }
 
-  function modelCompare(a, b) {
-    const A = parseModel(a);
-    const B = parseModel(b);
+  // неизвестное — в конец
+  return { brand: "other", num: -1, tier: -1, norm: t };
+}
 
-    if (A.num !== B.num) return B.num - A.num;
-    if (A.tier !== B.tier) return B.tier - A.tier;
-    return normalizeModelName(a).localeCompare(normalizeModelName(b));
-  }
+function modelCompare(a, b) {
+  const A = parseModel(a);
+  const B = parseModel(b);
+
+  // Если список смешанный — держим бренды отдельными группами (мой вкус: iPhone сверху)
+  const brandOrder = { iphone: 2, samsung: 1, other: 0 };
+  if (A.brand !== B.brand) return brandOrder[B.brand] - brandOrder[A.brand];
+
+  // внутри бренда: поколение по убыванию
+  if (A.num !== B.num) return B.num - A.num;
+
+  // затем tier по убыванию
+  if (A.tier !== B.tier) return B.tier - A.tier;
+
+  // и добиваем алфавитом
+  return A.norm.localeCompare(B.norm);
+}
 
   // ===== SELECT UI =====
   function closeAllSelects() {
