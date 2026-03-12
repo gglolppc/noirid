@@ -29,7 +29,7 @@
             <span>Enter catalog</span>
             <span class="transition-transform duration-300 group-hover:translate-x-2">→</span>
           </a>
-          <a href="#texture" class="inline-flex items-center justify-center px-10 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-medium text-zinc-200 border border-white/15 rounded-full hover:bg-white/5 transition">
+          <a href="#scroll-to-texture" class="inline-flex items-center justify-center px-10 py-4 text-[10px] md:text-sm uppercase tracking-[0.4em] font-medium text-zinc-200 border border-white/15 rounded-full hover:bg-white/5 transition">
             See texture
           </a>
         </div>
@@ -87,7 +87,7 @@
     </div>
   </section>
 
-  <section id="texture" class="py-24 px-6 bg-[#030303] border-y border-white/10 relative overflow-hidden">
+  <section id="texture" class="scroll-mt-400 py-24 px-6 bg-[#030303] border-y border-white/10 relative overflow-hidden">
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,_rgba(255,255,255,0.03),transparent_65%)] pointer-events-none"></div>
 
     <div class="mx-auto max-w-7xl w-full grid grid-cols-1 md:grid-cols-12 gap-14 items-center relative z-10">
@@ -145,7 +145,7 @@
       <div class="md:col-span-5 reveal reveal-delay-200">
   <div class="relative w-full aspect-square flex items-center justify-center group">
 
-    <div class="absolute inset-0 z-20 pointer-events-none"
+    <div id="scroll-to-texture" class="absolute inset-0 z-20 pointer-events-none scroll-mt-32"
          style="-webkit-mask-image: url('/static/img/texture.png'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; mask-image: url('/static/img/texture.png'); mask-size: contain; mask-repeat: no-repeat; mask-position: center;">
 
       <div class="absolute inset-0 m-auto w-full h-full bg-gradient-to-br from-white/10 via-white/5 to-transparent animate-slow-pulse"></div>
@@ -295,12 +295,12 @@
   .hero-black-sweep { animation: none; opacity: 0; }
 }
 
-/* уважение к reduce motion */
+
 @media (prefers-reduced-motion: reduce) {
   .hero-black-sweep { animation: none; opacity: 0; }
 }
 
-  /* Анимация пульсации в секции текстур */
+
   @keyframes slow-pulse {
   0%, 100% {
     transform: scale(1);
